@@ -9,7 +9,7 @@
 <title>Iron Log</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #0d0b14;
@@ -29,10 +29,10 @@
   --green: #34d399;
   --blue: #60a5fa;
   --mono: 'DM Mono', monospace;
-  --display: 'Barlow Condensed', sans-serif;
-  --body: 'Barlow', sans-serif;
-  --r: 8px;
-  --r2: 12px;
+  --display: 'Inter', sans-serif;
+  --body: 'Inter', sans-serif;
+  --r: 10px;
+  --r2: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
   --gradient: linear-gradient(135deg, #7c3aed, #db2777);
@@ -80,9 +80,8 @@ html, body {
   color: var(--text3);
   font-family: var(--body);
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition: color 0.15s;
 }
@@ -103,18 +102,17 @@ html, body {
 
 /* ── HEADER ── */
 .page-header {
-  padding: 20px 16px 12px;
+  padding: 20px 16px 14px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 10px;
 }
 .page-title {
   font-family: var(--display);
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 .page-sub {
   font-size: 12px;
@@ -131,7 +129,7 @@ html, body {
   border-radius: var(--r);
   font-family: var(--body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   border: none;
   transition: all 0.15s;
@@ -182,28 +180,26 @@ select option { background: var(--bg3); }
   gap: 6px;
 }
 .input-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text3);
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-family: var(--body);
+  font-weight: 500;
 }
 
 /* ── TAGS ── */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 99px;
+  padding: 2px 7px;
+  border-radius: 6px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
 }
-.tag-muscle { background: rgba(96,165,250,0.12); color: var(--accent-blue); }
-.tag-equipment { background: rgba(167,139,250,0.12); color: var(--accent); }
-.tag-green { background: rgba(52,211,153,0.12); color: var(--green); }
+.tag-muscle { background: rgba(96,165,250,0.1); color: var(--accent-blue); }
+.tag-equipment { background: rgba(167,139,250,0.1); color: var(--accent); }
+.tag-green { background: rgba(52,211,153,0.1); color: var(--green); }
 
 /* ── DIVIDER ── */
 .divider { height: 1px; background: var(--border); margin: 8px 0; }
@@ -236,6 +232,7 @@ select option { background: var(--bg3); }
   backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
+.modal-overlay.elevated { z-index: 300; }
 .modal {
   background: var(--bg2);
   border: 1px solid var(--border2);
@@ -256,7 +253,7 @@ select option { background: var(--bg3); }
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.modal-title { font-family: var(--display); font-size: 20px; font-weight: 700; text-transform: uppercase; }
+.modal-title { font-family: var(--display); font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
 .modal-body { overflow-y: auto; flex: 1; padding: 12px 16px; }
 .modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
 
@@ -294,9 +291,9 @@ select option { background: var(--bg3); }
 }
 #screen-home .session-bar-title {
   font-family: var(--display);
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 #screen-home .session-bar-time {
   font-family: var(--mono);
@@ -324,10 +321,10 @@ select option { background: var(--bg3); }
 }
 .workout-card-title {
   font-family: var(--display);
-  font-size: 17px;
-  font-weight: 700;
-  text-transform: uppercase;
-  line-height: 1.2;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 .workout-card-date {
   font-family: var(--mono);
@@ -393,9 +390,9 @@ select option { background: var(--bg3); }
 }
 .session-name {
   font-family: var(--display);
-  font-size: 20px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   cursor: pointer;
 }
 .session-timer {
@@ -442,10 +439,9 @@ select option { background: var(--bg3); }
 .ex-block-info { flex: 1; min-width: 0; }
 .ex-name {
   font-family: var(--display);
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -479,8 +475,7 @@ select option { background: var(--bg3); }
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
 }
 .sets-header-cell:nth-child(2),
 .sets-header-cell:nth-child(3) { text-align: center; }
@@ -605,9 +600,9 @@ select option { background: var(--bg3); }
 }
 .template-name {
   font-family: var(--display);
-  font-size: 18px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 .template-exercises {
   margin-top: 8px;
@@ -659,13 +654,11 @@ select option { background: var(--bg3); }
 .library-filters::-webkit-scrollbar { display: none; }
 .filter-pill {
   flex-shrink: 0;
-  padding: 5px 10px;
+  padding: 5px 11px;
   border-radius: 99px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--body);
   border: 1px solid var(--border2);
   background: transparent;
   color: var(--text2);
@@ -684,15 +677,17 @@ select option { background: var(--bg3); }
 .parent-group { margin-bottom: 8px; }
 .parent-label {
   font-family: var(--display);
-  font-size: 18px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   padding: 10px 0 6px;
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   user-select: none;
+  color: var(--text2);
+  text-transform: none;
 }
 .parent-label .muscle-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .parent-label .count { font-family: var(--mono); font-size: 11px; color: var(--text3); font-weight: 400; }
@@ -723,10 +718,10 @@ select option { background: var(--bg3); }
 }
 .detail-title {
   font-family: var(--display);
-  font-size: 26px;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 1.1;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 .detail-subtitle { font-size: 14px; color: var(--text3); margin-top: 4px; }
 
@@ -743,18 +738,18 @@ select option { background: var(--bg3); }
   padding: 14px;
 }
 .analytics-label {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-family: var(--body);
+  font-weight: 500;
   margin-bottom: 6px;
 }
 .analytics-value {
   font-family: var(--display);
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 600;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 .analytics-unit { font-size: 14px; color: var(--text2); font-weight: 400; }
 
@@ -767,8 +762,7 @@ select option { background: var(--bg3); }
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   padding: 6px 8px;
   text-align: left;
   border-bottom: 1px solid var(--border);
@@ -800,8 +794,7 @@ select option { background: var(--bg3); }
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   padding: 6px 8px;
   text-align: left;
   border-bottom: 1px solid var(--border);
@@ -824,11 +817,9 @@ select option { background: var(--bg3); }
 }
 .stats-section-title {
   font-family: var(--display);
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
   margin-bottom: 10px;
 }
 
@@ -866,7 +857,7 @@ select option { background: var(--bg3); }
   color: var(--text3);
 }
 .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state-title { font-family: var(--display); font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+.empty-state-title { font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: var(--text2); margin-bottom: 6px; }
 .empty-state-sub { font-size: 14px; line-height: 1.5; }
 
 /* filter select row */
@@ -889,11 +880,9 @@ textarea { resize: none; }
 }
 .section-title {
   font-family: var(--display);
-  font-size: 15px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text3);
 }
 
 /* RM period filter */
@@ -943,10 +932,9 @@ textarea { resize: none; }
 }
 .loading-logo {
   font-family: var(--display);
-  font-size: 40px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
 }
 .loading-logo span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .loading-sub { font-family: var(--mono); font-size: 12px; color: var(--text3); }
@@ -965,7 +953,7 @@ textarea { resize: none; }
 <body>
 
 <div id="loading">
-  <div class="loading-logo">IRON<span>LOG</span></div>
+  <div class="loading-logo">Iron<span>Log</span></div>
   <div class="spinner"></div>
   <div class="loading-sub">Loading your data...</div>
 </div>
@@ -975,9 +963,9 @@ textarea { resize: none; }
   <!-- ══ ACTIVE SESSION OVERLAY ══ -->
   <div id="active-session">
     <div class="session-header">
-      <div id="session-back-btn" style="cursor:pointer;color:var(--text3);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600">
+      <div id="session-back-btn" style="cursor:pointer;color:var(--text3);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        BACK
+        Back
       </div>
       <div id="session-title" class="session-name">Workout</div>
       <div id="session-timer" class="session-timer">0:00</div>
@@ -993,7 +981,7 @@ textarea { resize: none; }
     <!-- ══ HOME ══ -->
     <div id="screen-home" class="screen active">
       <div class="page-header">
-        <div class="page-title">IRON<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">LOG</span></div>
+        <div class="page-title">Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span></div>
         <div class="page-sub" id="home-stats-sub"></div>
       </div>
       <div id="active-banner"></div>
@@ -1015,9 +1003,12 @@ textarea { resize: none; }
 
     <!-- ══ LIBRARY ══ -->
     <div id="screen-library" class="screen">
-      <div class="page-header">
-        <div class="page-title">Library</div>
-        <div class="page-sub" id="lib-count-sub"></div>
+      <div class="page-header" style="justify-content:space-between">
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <div class="page-title">Library</div>
+          <div class="page-sub" id="lib-count-sub"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
       </div>
       <div class="library-search-bar">
         <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
@@ -1041,7 +1032,7 @@ textarea { resize: none; }
       </div>
       <!-- BW Chart -->
       <div class="bw-chart-wrap">
-        <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">Bodyweight</div>
+        <div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Bodyweight</div>
         <div class="bw-chart-container">
           <div id="bw-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
           <div class="bw-chart"><svg id="bw-svg"></svg></div>
@@ -1062,7 +1053,7 @@ textarea { resize: none; }
         <div class="page-sub" id="mobility-date-sub"></div>
       </div>
       <div style="padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Daily Checklist</div>
+        <div style="font-size:12px;color:var(--text3);font-weight:500">Daily checklist</div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm" id="mobility-reset-btn">Reset</button>
           <button class="btn btn-primary btn-sm" id="mobility-add-btn">+ Add</button>
@@ -1112,7 +1103,7 @@ textarea { resize: none; }
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-primary" id="start-empty-btn" style="width:100%">Start Empty Workout</button>
       </div>
-      <div style="margin:16px 0 8px;font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">From Template</div>
+      <div style="margin:16px 0 8px;font-size:12px;color:var(--text3);font-weight:500">From template</div>
       <div id="modal-template-list" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
   </div>
@@ -1123,7 +1114,7 @@ textarea { resize: none; }
   <div class="modal" style="max-height:95vh">
     <div class="modal-header">
       <div class="modal-title" id="pick-ex-title">Add Exercise</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-pick-exercise')">
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeExercisePicker()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -1335,6 +1326,53 @@ textarea { resize: none; }
   </div>
 </div>
 
+<!-- New Parent Exercise Modal -->
+<div class="modal-overlay" id="modal-new-parent">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Exercise</div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-new-parent')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group" style="margin-bottom:12px">
+        <div class="input-label">Exercise Name</div>
+        <input id="np-name" type="text" placeholder="e.g. Chest Supported Row">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="input-group" style="flex:1">
+          <div class="input-label">Primary Muscle</div>
+          <select id="np-primary-muscle">
+            <option value="">Select…</option>
+          </select>
+        </div>
+        <div class="input-group" style="flex:1">
+          <div class="input-label">Movement</div>
+          <select id="np-movement">
+            <option value="">Select…</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group" style="margin-bottom:12px">
+        <div class="input-label">Secondary Muscles <span style="color:var(--text3);font-weight:400">(optional)</span></div>
+        <div id="np-secondary-muscles" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:6px">
+        <div class="input-label" style="margin-bottom:10px">First variant</div>
+        <div class="input-group" style="margin-bottom:10px">
+          <input id="np-variant-name" type="text" placeholder="Variant name, e.g. Barbell">
+        </div>
+        <div class="input-label" style="margin-bottom:6px">Equipment</div>
+        <div id="np-equip-checkboxes" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="np-save-btn" style="width:100%">Create Exercise</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1343,7 +1381,7 @@ textarea { resize: none; }
 // ═══════════════════════════════════════════════════════════════
 
 const DB_NAME = 'ironlog';
-const DB_VER = 2;
+const DB_VER = 3;
 let db;
 
 function openDB() {
@@ -1376,6 +1414,12 @@ function openDB() {
       }
       if (!d.objectStoreNames.contains('custom_variants')) {
         d.createObjectStore('custom_variants', { keyPath: 'id' });
+      }
+      if (!d.objectStoreNames.contains('custom_parents')) {
+        d.createObjectStore('custom_parents', { keyPath: 'id' });
+      }
+      if (!d.objectStoreNames.contains('custom_equipment_types')) {
+        d.createObjectStore('custom_equipment_types', { keyPath: 'id' });
       }
     };
     req.onsuccess = e => { db = e.target.result; res(db); };
@@ -1508,7 +1552,10 @@ function closeModal(id) {
 // Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
-    if (e.target === overlay) closeModal(overlay.id);
+    if (e.target === overlay) {
+      if (overlay.id === 'modal-pick-exercise') closeExercisePicker();
+      else closeModal(overlay.id);
+    }
   });
 });
 
@@ -1570,7 +1617,7 @@ async function openNewWorkoutModal() {
   const list = document.getElementById('modal-template-list');
   list.innerHTML = templates.map(t => `
     <button class="btn btn-secondary" style="width:100%;text-align:left;justify-content:space-between" onclick="startFromTemplate('${t.id}')">
-      <span style="font-family:var(--display);font-size:15px;text-transform:uppercase;letter-spacing:.02em">${escHtml(t.name)}</span>
+      <span style="font-size:14px;font-weight:500">${escHtml(t.name)}</span>
       <span style="font-size:12px;color:var(--text3)">${t.exercises.length} exercises</span>
     </button>`).join('');
   if (templates.length === 0) {
@@ -1880,7 +1927,7 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
              {weight:0, reps:8, completed:false, completedAt:null, rpe:null, restSeconds:null, notes:''}]
     });
     renderActiveSession();
-    closeModal('modal-pick-exercise');
+    closeExercisePicker();
   };
   document.getElementById('pick-ex-title').textContent = 'Add Exercise';
   openExercisePicker();
@@ -1955,7 +2002,7 @@ async function viewWorkoutDetail(sessionId) {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
     return `<div style="margin-bottom:14px">
-      <div style="font-family:var(--display);font-size:15px;font-weight:700;text-transform:uppercase;margin-bottom:6px">${escHtml(name)}</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">${escHtml(name)}</div>
       ${sets.map((s, i) => {
         const ts = s.completedAt ? new Date(s.completedAt).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '';
         const rpe = s.rpe ? ` · RPE ${s.rpe}` : '';
@@ -2197,7 +2244,7 @@ document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
   pendingPickExerciseCallback = (variantId) => {
     tmplExercises.push({variantId, defaultSets: [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]});
     renderTemplateExercises(tmplExercises);
-    closeModal('modal-pick-exercise');
+    closeExercisePicker();
   };
   document.getElementById('pick-ex-title').textContent = 'Add to Template';
   openExercisePicker();
@@ -2236,7 +2283,13 @@ function openExercisePicker() {
   document.getElementById('pick-ex-search').value = '';
   renderPickerFilters();
   renderPickerList('');
-  openModal('modal-pick-exercise');
+  const overlay = document.getElementById('modal-pick-exercise');
+  overlay.classList.add('open', 'elevated');
+}
+
+function closeExercisePicker() {
+  const overlay = document.getElementById('modal-pick-exercise');
+  overlay.classList.remove('open', 'elevated');
 }
 
 function renderPickerFilters() {
@@ -2319,13 +2372,14 @@ function renderLibrary() {
 
   // Equipment dropdown
   const equipSel = document.getElementById('lib-equip-filter');
-  if (equipSel.options.length <= 1) {
-    EXERCISE_LIBRARY.equipment_types.forEach(e => {
-      const opt = document.createElement('option');
-      opt.value = e; opt.textContent = e;
-      equipSel.appendChild(opt);
-    });
-  }
+  const currentEquipVal = equipSel.value;
+  equipSel.innerHTML = '<option value="">All Equipment</option>';
+  EXERCISE_LIBRARY.equipment_types.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    equipSel.appendChild(opt);
+  });
+  if (currentEquipVal) equipSel.value = currentEquipVal;
   const muscleSel = document.getElementById('lib-muscle-filter');
   if (muscleSel.options.length <= 1) {
     EXERCISE_LIBRARY.muscle_groups.forEach(m => {
@@ -2420,12 +2474,12 @@ async function renderBWChart() {
     const changeColor = change <= 0 ? 'var(--green)' : 'var(--red)';
     statsRow.innerHTML = `
       <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Current</div>
-        <div style="font-family:var(--display);font-size:24px;font-weight:800">${latest.weight_lbs} <span style="font-size:13px;font-weight:400;color:var(--text2)">lbs</span></div>
+        <div style="font-size:10px;color:var(--text3)">Current</div>
+        <div style="font-family:var(--display);font-size:22px;font-weight:600">${latest.weight_lbs} <span style="font-size:13px;font-weight:400;color:var(--text2)">lbs</span></div>
       </div>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Change</div>
-        <div style="font-family:var(--display);font-size:24px;font-weight:800;color:${changeColor}">${changeStr}</div>
+        <div style="font-size:10px;color:var(--text3)">Change</div>
+        <div style="font-family:var(--display);font-size:22px;font-weight:600;color:${changeColor}">${changeStr}</div>
       </div>`;
   } else {
     statsRow.innerHTML = `<div style="color:var(--text3);font-size:13px">No data</div>`;
@@ -2523,7 +2577,7 @@ async function renderTopLifts() {
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${data.weight}×${data.reps} · ${date}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--accent)">${Math.round(data.rm)}</div>
+        <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--accent)">${Math.round(data.rm)}</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">EST 1RM</div>
       </div>
     </div>`;
@@ -2785,6 +2839,25 @@ document.getElementById('mobility-delete-btn').addEventListener('click', async (
 // On load, we apply overrides to EXERCISE_LIBRARY data
 
 async function loadVariantOverrides() {
+  // Load custom equipment types first
+  const customEquip = await dbGetAll('custom_equipment_types');
+  customEquip.forEach(ce => {
+    if (!EXERCISE_LIBRARY.equipment_types.includes(ce.id)) {
+      EXERCISE_LIBRARY.equipment_types.push(ce.id);
+    }
+  });
+
+  // Load custom parent exercises
+  const customParents = await dbGetAll('custom_parents');
+  customParents.forEach(cp => {
+    if (!parentMap[cp.id]) {
+      EXERCISE_LIBRARY.parents.push(cp);
+      parentMap[cp.id] = cp;
+      cp.variants.forEach(v => { variantMap[v.id] = {variant: v, parent: cp}; });
+    }
+  });
+
+  // Load variant overrides
   const overrides = await dbGetAll('variant_overrides');
   overrides.forEach(ov => {
     const info = variantMap[ov.id];
@@ -2809,13 +2882,18 @@ let editingVariantParentId = null;
 
 function buildEquipCheckboxes(containerId, selectedEquip) {
   const container = document.getElementById(containerId);
-  container.innerHTML = EXERCISE_LIBRARY.equipment_types.map(e => {
+  const types = EXERCISE_LIBRARY.equipment_types;
+  container.innerHTML = types.map(e => {
     const checked = selectedEquip.includes(e);
     return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:${checked ? 'rgba(167,139,250,0.15)' : 'var(--bg3)'};border:1px solid ${checked ? 'var(--accent)' : 'var(--border)'};border-radius:var(--r);cursor:pointer;font-size:13px;transition:all .15s">
       <input type="checkbox" name="${containerId}-equip" value="${e}" ${checked ? 'checked' : ''} style="accent-color:var(--accent);width:14px;height:14px">
       ${e}
     </label>`;
-  }).join('');
+  }).join('') + `
+    <div id="${containerId}-new-equip-row" style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%">
+      <input id="${containerId}-new-equip-input" type="text" placeholder="+ New type…" style="font-size:12px;padding:5px 8px;border-style:dashed;flex:1;min-width:100px">
+      <button class="btn btn-ghost btn-sm" onclick="addNewEquipType('${containerId}')" style="white-space:nowrap;padding:5px 10px;font-size:12px">Add</button>
+    </div>`;
   // Live highlight on change
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -2831,9 +2909,29 @@ function buildEquipCheckboxes(containerId, selectedEquip) {
   });
 }
 
+async function addNewEquipType(containerId) {
+  const input = document.getElementById(`${containerId}-new-equip-input`);
+  const val = input.value.trim().toLowerCase().replace(/\s+/g, '_');
+  if (!val) return;
+  if (EXERCISE_LIBRARY.equipment_types.includes(val)) {
+    showToast('Type already exists');
+    input.value = '';
+    return;
+  }
+  // Persist and add
+  EXERCISE_LIBRARY.equipment_types.push(val);
+  await dbPut('custom_equipment_types', {id: val, name: val});
+  // Rebuild checkboxes, auto-checking new one
+  const selected = getCheckedEquipment(containerId);
+  selected.push(val);
+  buildEquipCheckboxes(containerId, selected);
+  showToast(`Added "${val}"`);
+}
+
 function getCheckedEquipment(containerId) {
   return [...document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)].map(cb => cb.value);
 }
+
 
 function openVariantEditor(parentId, variantId) {
   editingVariantId = variantId;
@@ -2924,6 +3022,77 @@ document.getElementById('nv-save-btn').addEventListener('click', async () => {
   renderLibrary();
 });
 
+// ── New Parent Exercise ──────────────────────────────────────
+
+function openNewParentModal() {
+  // Populate muscle selects
+  const pmSel = document.getElementById('np-primary-muscle');
+  const mvSel = document.getElementById('np-movement');
+  pmSel.innerHTML = '<option value="">Select…</option>' +
+    EXERCISE_LIBRARY.muscle_groups.map(m => `<option value="${m}">${m}</option>`).join('');
+  mvSel.innerHTML = '<option value="">Select…</option>' +
+    EXERCISE_LIBRARY.movement_patterns.map(m => `<option value="${m}">${m}</option>`).join('');
+
+  // Populate secondary muscles checkboxes
+  const secContainer = document.getElementById('np-secondary-muscles');
+  secContainer.innerHTML = EXERCISE_LIBRARY.muscle_groups.map(m =>
+    `<label style="display:flex;align-items:center;gap:5px;padding:4px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;transition:all .15s">
+      <input type="checkbox" name="np-sec-muscle" value="${m}" style="accent-color:var(--accent);width:12px;height:12px">
+      ${m}
+    </label>`
+  ).join('');
+  secContainer.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const label = cb.closest('label');
+      label.style.background = cb.checked ? 'rgba(167,139,250,0.15)' : 'var(--bg3)';
+      label.style.borderColor = cb.checked ? 'var(--accent)' : 'var(--border)';
+    });
+  });
+
+  // Reset fields
+  document.getElementById('np-name').value = '';
+  document.getElementById('np-variant-name').value = '';
+  buildEquipCheckboxes('np-equip-checkboxes', []);
+
+  openModal('modal-new-parent');
+}
+
+document.getElementById('new-parent-btn').addEventListener('click', openNewParentModal);
+
+document.getElementById('np-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('np-name').value.trim();
+  if (!name) { showToast('Enter an exercise name'); return; }
+  const primary = document.getElementById('np-primary-muscle').value;
+  if (!primary) { showToast('Select a primary muscle'); return; }
+  const movement = document.getElementById('np-movement').value;
+  if (!movement) { showToast('Select a movement pattern'); return; }
+  const secondary = [...document.querySelectorAll('#np-secondary-muscles input[type=checkbox]:checked')].map(cb => cb.value);
+  const variantName = document.getElementById('np-variant-name').value.trim() || name;
+  const equipment = getCheckedEquipment('np-equip-checkboxes');
+
+  const parentId = 'custom_' + name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '_' + Date.now().toString(36);
+  const variantId = parentId + '_v1';
+  const firstVariant = {id: variantId, name: variantName, equipment};
+  const newParent = {
+    id: parentId,
+    name,
+    primary_muscles: [primary],
+    secondary_muscles: secondary,
+    movement_pattern: movement,
+    variants: [firstVariant]
+  };
+
+  EXERCISE_LIBRARY.parents.push(newParent);
+  parentMap[parentId] = newParent;
+  variantMap[variantId] = {variant: firstVariant, parent: newParent};
+
+  await dbPut('custom_parents', newParent);
+
+  closeModal('modal-new-parent');
+  showToast(`"${name}" added`);
+  renderLibrary();
+});
+
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
@@ -2940,6 +3109,8 @@ async function init() {
 }
 
 init().catch(console.error);
+
+
 
 // Register service worker
 if ('serviceWorker' in navigator) {
