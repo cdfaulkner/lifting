@@ -1109,23 +1109,6 @@ textarea { resize: none; }
   </div>
 </div>
 
-<!-- Exercise Picker (add exercise to session/template) -->
-<div class="modal-overlay" id="modal-pick-exercise">
-  <div class="modal" style="max-height:95vh">
-    <div class="modal-header">
-      <div class="modal-title" id="pick-ex-title">Add Exercise</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeExercisePicker()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body" style="padding:8px 16px">
-      <input id="pick-ex-search" type="search" placeholder="Search…" style="margin-bottom:8px" autocomplete="off">
-      <div id="pick-ex-filters" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none"></div>
-      <div id="pick-ex-list" style="display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow-y:auto"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Set Detail Modal (notes, RPE, rest) -->
 <div class="modal-overlay" id="modal-set-detail">
   <div class="modal">
@@ -1369,6 +1352,23 @@ textarea { resize: none; }
     </div>
     <div class="modal-footer">
       <button class="btn btn-primary" id="np-save-btn" style="width:100%">Create Exercise</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exercise Picker — must be last modal in DOM so it renders above all others -->
+<div class="modal-overlay" id="modal-pick-exercise" style="z-index:400">
+  <div class="modal" style="max-height:95vh">
+    <div class="modal-header">
+      <div class="modal-title" id="pick-ex-title">Add Exercise</div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeExercisePicker()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:8px 16px">
+      <input id="pick-ex-search" type="search" placeholder="Search…" style="margin-bottom:8px" autocomplete="off">
+      <div id="pick-ex-filters" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none"></div>
+      <div id="pick-ex-list" style="display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow-y:auto"></div>
     </div>
   </div>
 </div>
