@@ -224,15 +224,25 @@ select option { background: var(--bg3); }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.8);
   z-index: 200;
   display: none;
   align-items: flex-end;
   justify-content: center;
-  backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
-.modal-overlay.elevated { z-index: 300; }
+.modal-overlay.elevated { z-index: 400; }
+
+/* Single shared backdrop */
+#modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+  z-index: 199;
+  display: none;
+  pointer-events: none;
+}
+#modal-backdrop.show { display: block; }
 .modal {
   background: var(--bg2);
   border: 1px solid var(--border2);
@@ -1089,6 +1099,7 @@ textarea { resize: none; }
 </div>
 
 <!-- ══ MODALS ══ -->
+<div id="modal-backdrop"></div>
 
 <!-- New Workout / Pick Template -->
 <div class="modal-overlay" id="modal-new-workout">
@@ -1545,9 +1556,13 @@ function showToast(msg) {
 // ═══════════════════════════════════════════════════════════════
 function openModal(id) {
   document.getElementById(id)?.classList.add('open');
+  document.getElementById('modal-backdrop').classList.add('show');
 }
 function closeModal(id) {
   document.getElementById(id)?.classList.remove('open');
+  // Hide backdrop if no modals are open
+  const anyOpen = document.querySelector('.modal-overlay.open');
+  if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
 // Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -2285,11 +2300,14 @@ function openExercisePicker() {
   renderPickerList('');
   const overlay = document.getElementById('modal-pick-exercise');
   overlay.classList.add('open', 'elevated');
+  document.getElementById('modal-backdrop').classList.add('show');
 }
 
 function closeExercisePicker() {
   const overlay = document.getElementById('modal-pick-exercise');
   overlay.classList.remove('open', 'elevated');
+  const anyOpen = document.querySelector('.modal-overlay.open');
+  if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
 
 function renderPickerFilters() {
