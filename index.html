@@ -199,10 +199,10 @@ select option { background: var(--bg3); }
 }
 .tag-muscle { background: rgba(96,165,250,0.1); color: var(--accent-blue); }
 .tag-equipment { background: rgba(167,139,250,0.1); color: var(--accent); }
-.tag-green { background: rgba(52,211,153,0.1); color: var(--green); }
+
 
 /* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 8px 0; }
+
 
 /* ── BADGE ── */
 .badge {
@@ -469,10 +469,7 @@ select option { background: var(--bg3); }
 }
 
 /* Set rows */
-.sets-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+
 .sets-header {
   display: grid;
   grid-template-columns: 28px 1fr 1fr 36px;
@@ -578,6 +575,52 @@ select option { background: var(--bg3); }
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* ── Superset grouping ── */
+.superset-group {
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.superset-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(167,139,250,0.08);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  gap: 8px;
+}
+.superset-label-text { display: flex; align-items: center; gap: 6px; }
+.superset-connector {
+  height: 1px;
+  background: var(--border);
+  margin: 0 12px;
+  position: relative;
+}
+.superset-connector::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg2);
+  padding: 0 6px;
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.superset-group .ex-block {
+  border: none;
+  border-radius: 0;
+}
   background: var(--bg3);
 }
 .prev-best {
@@ -722,10 +765,7 @@ select option { background: var(--bg3); }
 /* ════════════════════════════════════
    EXERCISE DETAIL / ANALYTICS
 ════════════════════════════════════ */
-.detail-header {
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid var(--border);
-}
+
 .detail-title {
   font-family: var(--display);
   font-size: 20px;
@@ -733,7 +773,7 @@ select option { background: var(--bg3); }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-.detail-subtitle { font-size: 14px; color: var(--text3); margin-top: 4px; }
+
 
 .analytics-grid {
   display: grid;
@@ -822,16 +862,8 @@ select option { background: var(--bg3); }
 /* ════════════════════════════════════
    ANALYTICS / PROGRESS SCREEN
 ════════════════════════════════════ */
-.stats-section {
-  padding: 12px 16px;
-}
-.stats-section-title {
-  font-family: var(--display);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text3);
-  margin-bottom: 10px;
-}
+
+
 
 /* ════════════════════════════════════
    BODYWEIGHT
@@ -847,15 +879,9 @@ select option { background: var(--bg3); }
 }
 .bw-chart { height: 180px; position: relative; }
 .bw-chart svg { width: 100%; height: 100%; overflow: visible; }
-.bw-log-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.bw-log-date { font-family: var(--mono); font-size: 12px; color: var(--text3); width: 80px; flex-shrink: 0; }
-.bw-log-weight { font-family: var(--mono); font-size: 16px; font-weight: 600; }
+
+
+
 
 /* ════════════════════════════════════
    SCROLL / MISC
@@ -958,9 +984,107 @@ textarea { resize: none; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+
+/* ── Rest Timer ── */
+#rest-timer-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  height: 3px;
+  background: var(--gradient);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: none;
+  display: none;
+}
+#rest-timer-toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  z-index: 501;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  white-space: nowrap;
+}
+#rest-timer-toast.show { display: flex; }
+
+/* ── PR badge ── */
+.pr-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-left: 4px;
+}
+
+/* ── Exercise notes cue ── */
+.ex-cue {
+  font-size: 11px;
+  color: var(--accent-blue);
+  padding: 4px 14px 8px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Workout notes ── */
+#session-notes-wrap {
+  padding: 8px 16px 0;
+  flex-shrink: 0;
+}
+#session-notes-input {
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: var(--r);
+  min-height: 0;
+  resize: none;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+#session-notes-input:focus { border-color: var(--accent); color: var(--text); }
+
+/* ── Reorder buttons ── */
+.reorder-btn {
+  width: 28px; height: 28px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.reorder-btn:active { background: var(--bg3); color: var(--text); }
+
+/* ── Volume chart ── */
+
+.volume-chart svg { width: 100%; height: 100%; }
+
+/* ── Swap variant ── */
+#modal-swap-variant .variant-row { cursor: pointer; }
 </style>
 </head>
 <body>
+<div id="rest-timer-bar"></div>
+<div id="rest-timer-toast" onclick="skipRestTimer()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  <span id="rest-timer-label">0:00</span>
+  <span style="font-size:10px;color:var(--text3)">tap to skip</span>
+</div>
+
 
 <div id="loading">
   <div class="loading-logo">Iron<span>Log</span></div>
@@ -980,6 +1104,9 @@ textarea { resize: none; }
       <div id="session-title" class="session-name">Workout</div>
       <div id="session-timer" class="session-timer">0:00</div>
     </div>
+    <div id="session-notes-wrap">
+      <textarea id="session-notes-input" placeholder="Workout notes…" rows="2"></textarea>
+    </div>
     <div id="session-body" class="session-body"></div>
     <div class="session-footer">
       <button class="btn btn-secondary btn-sm" id="session-add-ex-btn" style="flex:1">+ Add Exercise</button>
@@ -997,7 +1124,13 @@ textarea { resize: none; }
       <div id="active-banner"></div>
       <div class="section-row">
         <div class="section-title">Recent Workouts</div>
-        <button class="btn btn-primary btn-sm" id="new-workout-btn">+ New</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" id="export-claude-btn" title="Export for Claude">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Share
+          </button>
+          <button class="btn btn-primary btn-sm" id="new-workout-btn">+ New</button>
+        </div>
       </div>
       <div id="recent-workouts" class="workout-list"></div>
     </div>
@@ -1177,6 +1310,9 @@ textarea { resize: none; }
       </button>
     </div>
     <div class="modal-body" id="ex-detail-body" style="padding:0"></div>
+    <div class="modal-footer" id="ex-detail-footer" style="display:none">
+      <button class="btn btn-secondary" id="ex-repeat-btn" style="width:100%">Repeat this workout</button>
+    </div>
   </div>
 </div>
 
@@ -1367,6 +1503,97 @@ textarea { resize: none; }
   </div>
 </div>
 
+<!-- Superset Modal -->
+<div class="modal-overlay" id="modal-superset">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="superset-modal-title">Superset</div>
+        <div id="superset-modal-sub" style="font-size:12px;color:var(--text3);margin-top:2px"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-superset')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="superset-current-group" style="margin-bottom:12px;display:none">
+        <div class="input-label" style="margin-bottom:8px">In this superset</div>
+        <div id="superset-group-list" style="display:flex;flex-direction:column;gap:4px"></div>
+        <button class="btn btn-danger btn-sm" id="superset-unlink-btn" style="width:100%;margin-top:10px">Remove from superset</button>
+      </div>
+      <div id="superset-link-section">
+        <div class="input-label" style="margin-bottom:8px">Pair with…</div>
+        <div id="superset-ex-list" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Swap Variant Modal -->
+<div class="modal-overlay" id="modal-swap-variant">
+  <div class="modal" style="max-height:90vh">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Swap Variant</div>
+        <div id="swap-variant-parent-name" style="font-size:12px;color:var(--text3)"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-swap-variant')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:8px 16px">
+      <div id="swap-variant-list" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Exercise Notes Modal -->
+<div class="modal-overlay" id="modal-ex-notes">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Exercise Notes</div>
+        <div id="ex-notes-modal-sub" style="font-size:12px;color:var(--text3)"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-ex-notes')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="input-label" style="margin-bottom:6px">Cues &amp; reminders</div>
+      <textarea id="ex-notes-input" rows="4" placeholder="e.g. Retract scapula, drive elbows down, pause at chest"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="ex-notes-save-btn" style="width:100%">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export for Claude Modal -->
+<div class="modal-overlay" id="modal-export-claude">
+  <div class="modal" style="max-height:85vh">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Export for Claude</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Paste this into any Claude chat</div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-export-claude')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:12px 16px">
+      <textarea id="export-claude-text" rows="14" readonly
+        style="font-size:12px;font-family:var(--mono);line-height:1.5;background:var(--bg3);border:1px solid var(--border);color:var(--text2);resize:none;cursor:text"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="export-copy-btn" style="width:100%">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy to clipboard
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Exercise Picker — must be last modal in DOM so it renders above all others -->
 <div class="modal-overlay" id="modal-pick-exercise" style="z-index:400">
   <div class="modal" style="max-height:95vh">
@@ -1392,7 +1619,7 @@ textarea { resize: none; }
 // ═══════════════════════════════════════════════════════════════
 
 const DB_NAME = 'ironlog';
-const DB_VER = 3;
+const DB_VER = 4;
 let db;
 
 function openDB() {
@@ -1431,6 +1658,12 @@ function openDB() {
       }
       if (!d.objectStoreNames.contains('custom_equipment_types')) {
         d.createObjectStore('custom_equipment_types', { keyPath: 'id' });
+      }
+      if (!d.objectStoreNames.contains('exercise_notes')) {
+        d.createObjectStore('exercise_notes', { keyPath: 'variantId' });
+      }
+      if (!d.objectStoreNames.contains('pr_records')) {
+        d.createObjectStore('pr_records', { keyPath: 'variantId' });
       }
     };
     req.onsuccess = e => { db = e.target.result; res(db); };
@@ -1497,6 +1730,15 @@ EXERCISE_LIBRARY.parents.forEach(p => {
   });
 });
 
+
+// ── Convenience: resolve variantId to {parent, variant, displayName} ──
+function getVariantInfo(variantId) {
+  const info = variantMap[variantId];
+  if (!info) return { parent: null, variant: null, displayName: variantId };
+  const displayName = `${info.parent.name}${info.variant.name ? ' — ' + info.variant.name : ''}`;
+  return { parent: info.parent, variant: info.variant, displayName };
+}
+
 function getVariantDisplayName(variantId) {
   const info = variantMap[variantId];
   if (!info) return variantId;
@@ -1518,6 +1760,13 @@ let sessionStartEpoch = null;
 let editingTemplateId = null;
 let pendingPickExerciseCallback = null;
 let editingSetContext = null; // {sessionExIndex, setIndex}
+
+
+// ── Convenience: get sessions sorted newest-first ──
+async function getSortedSessions() {
+  const sessions = await getSortedSessions();
+  return sessions;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
@@ -1578,8 +1827,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 // HOME SCREEN
 // ═══════════════════════════════════════════════════════════════
 async function renderHome() {
-  const sessions = await dbGetAll('sessions');
-  sessions.sort((a,b) => b.startTime - a.startTime);
+  const sessions = await getSortedSessions();
 
   const sub = document.getElementById('home-stats-sub');
   sub.textContent = `${sessions.length} sessions logged`;
@@ -1596,7 +1844,7 @@ async function renderHome() {
     return;
   }
 
-  list.innerHTML = recent.map(s => {
+  const cards = recent.map(s => {
     const date = new Date(s.startTime);
     const dateStr = date.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     const dur = s.durationMinutes ? `${s.durationMinutes}m` : '';
@@ -1608,6 +1856,19 @@ async function renderHome() {
     }).join('');
     const more = s.exercises.length > 4 ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">+${s.exercises.length - 4} more</div>` : '';
 
+    return {s, dateStr, dur, totalSets, exList, more};
+  });
+
+  // Load bodyweights for session dates
+  const bwMap = {};
+  await Promise.all(cards.map(async ({s}) => {
+    const d = new Date(s.startTime).toISOString().split('T')[0];
+    const bw = await dbGet('bodyweight', d);
+    if (bw) bwMap[s.id] = bw.weight_lbs;
+  }));
+
+  list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
+    const bwHtml = bwMap[s.id] ? `<div class="workout-meta-item"><span class="workout-meta-val">${bwMap[s.id]}</span> lbs</div>` : '';
     return `<div class="workout-card" onclick="viewWorkoutDetail('${s.id}')">
       <div class="workout-card-header">
         <div class="workout-card-title">${escHtml(s.title)}</div>
@@ -1618,6 +1879,7 @@ async function renderHome() {
         ${dur ? `<div class="workout-meta-item"><span class="workout-meta-val">${dur}</span></div>` : ''}
         <div class="workout-meta-item"><span class="workout-meta-val">${totalSets}</span> sets</div>
         <div class="workout-meta-item"><span class="workout-meta-val">${s.exercises.length}</span> exercises</div>
+        ${bwHtml}
       </div>
     </div>`;
   }).join('');
@@ -1663,8 +1925,8 @@ async function startFromTemplate(templateId) {
 }
 
 async function getLastSetsForVariant(variantId) {
-  const sessions = await dbGetAll('sessions');
-  const sorted = sessions.sort((a,b) => b.startTime - a.startTime);
+  const sessions = await getSortedSessions();
+  const sorted = sessions;
   for (const s of sorted) {
     const ex = s.exercises.find(e => e.variantId === variantId);
     if (ex && ex.sets.some(st => st.completed)) {
@@ -1723,14 +1985,35 @@ function renderActiveSession() {
   document.getElementById('session-title').textContent = activeSession.title;
 
   const body = document.getElementById('session-body');
-  body.innerHTML = activeSession.exercises.map((ex, exIdx) => {
+  const exercises = activeSession.exercises;
+  const rendered = new Set();
+  const items = [];
+
+  const ssColors = ['#a78bfa','#f472b6','#60a5fa','#34d399','#fb923c'];
+  const ssColorMap = {};
+  let ssColorIdx = 0;
+
+  exercises.forEach((ex, idx) => {
+    if (rendered.has(idx)) return;
+    if (!ex.supersetId) {
+      items.push({type:'solo', idx});
+      rendered.add(idx);
+    } else {
+      const groupIndices = exercises.map((e,i) => e.supersetId === ex.supersetId ? i : -1).filter(i => i >= 0);
+      groupIndices.forEach(i => rendered.add(i));
+      if (!ssColorMap[ex.supersetId]) {
+        ssColorMap[ex.supersetId] = ssColors[ssColorIdx % ssColors.length];
+        ssColorIdx++;
+      }
+      items.push({type:'superset', indices: groupIndices, id: ex.supersetId, color: ssColorMap[ex.supersetId]});
+    }
+  });
+
+  function renderExBlock(exIdx) {
+    const ex = exercises[exIdx];
     const info = variantMap[ex.variantId];
     const parentName = info ? info.parent.name : ex.variantId;
     const variantName = info ? info.variant.name : '';
-
-    const completedCount = ex.sets.filter(s => s.completed).length;
-    const totalCount = ex.sets.length;
-
     const setsHtml = `
       <div class="sets-header">
         <div class="sets-header-cell">#</div>
@@ -1740,14 +2023,34 @@ function renderActiveSession() {
       </div>
       ${ex.sets.map((set, si) => renderSetRow(exIdx, si, set)).join('')}
     `;
-
+    const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
+    const hasNote = !!exerciseNotes[ex.variantId];
+    const cueHtml = hasNote ? `<div class="ex-cue">${escHtml(exerciseNotes[ex.variantId])}</div>` : '';
+    const totalEx = exercises.length;
     return `<div class="ex-block" id="ex-block-${exIdx}">
       <div class="ex-block-header">
+        <div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;flex-shrink:0">
+          <button class="reorder-btn" onclick="moveExercise(${exIdx},-1)" ${exIdx===0?'disabled style="opacity:0.3"':''}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="reorder-btn" onclick="moveExercise(${exIdx},1)" ${exIdx===totalEx-1?'disabled style="opacity:0.3"':''}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
         <div class="ex-block-info">
           <div class="ex-name">${escHtml(parentName)}</div>
           <div class="ex-variant">${escHtml(variantName)}</div>
         </div>
         <div class="ex-block-actions">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openSupersetModal(${exIdx})" title="Superset" style="${ssActive}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openSwapVariantModal(${exIdx})" title="Swap variant">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openExNotesModal('${ex.variantId}')" title="Notes" style="${hasNote?'color:var(--accent-blue)':''}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
           <button class="btn btn-ghost btn-sm btn-icon" onclick="showExerciseAnalyticsFromSession('${ex.variantId}')" title="History">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </button>
@@ -1756,17 +2059,32 @@ function renderActiveSession() {
           </button>
         </div>
       </div>
+      ${cueHtml}
       ${setsHtml}
       <div class="ex-block-footer">
         <div class="prev-best" id="prev-best-${exIdx}">loading…</div>
         <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${exIdx})">+ Set</button>
       </div>
     </div>`;
+  }
+
+  body.innerHTML = items.map(item => {
+    if (item.type === 'solo') return renderExBlock(item.idx);
+    const blocksHtml = item.indices.map((idx, i) =>
+      (i > 0 ? `<div class="superset-connector" data-label="then"></div>` : '') + renderExBlock(idx)
+    ).join('');
+    return `<div class="superset-group" style="border-left-color:${item.color}">
+      <div class="superset-label">
+        <div class="superset-label-text">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          Superset · ${item.indices.length} exercises
+        </div>
+      </div>
+      ${blocksHtml}
+    </div>`;
   }).join('');
 
-  // Load prev bests async
   activeSession.exercises.forEach((ex, idx) => loadPrevBest(ex.variantId, idx));
-
   attachSetInputListeners();
 }
 
@@ -1835,10 +2153,25 @@ function toggleSetComplete(exIdx, si) {
     row.classList.add('completed');
     btn.classList.add('done');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+    // Start rest timer
+    startRestTimer(restTimerDuration);
+    // Check for PR async
+    const variantId = activeSession.exercises[exIdx].variantId;
+    checkForPR(variantId, set.weight, set.reps).then(isPR => {
+      if (isPR) {
+        showToast('🏆 New PR!');
+        // Add PR badge to set row
+        const numEl = row.querySelector('.set-num');
+        if (numEl && !numEl.querySelector('.pr-badge')) {
+          numEl.insertAdjacentHTML('afterend', '<span class="pr-badge">🏆</span>');
+        }
+      }
+    });
   } else {
     row.classList.remove('completed');
     btn.classList.remove('done');
     btn.innerHTML = '';
+    skipRestTimer();
   }
 }
 
@@ -1866,11 +2199,119 @@ function removeExFromSession(exIdx) {
   renderActiveSession();
 }
 
-async function loadPrevBest(variantId, idx) {
+// ── Superset logic ───────────────────────────────────────────
+
+let supersetTargetIdx = null;
+
+function openSupersetModal(exIdx) {
+  supersetTargetIdx = exIdx;
+  const ex = activeSession.exercises[exIdx];
+  const info = variantMap[ex.variantId];
+  const name = info ? info.parent.name : ex.variantId;
+
+  document.getElementById('superset-modal-title').textContent = 'Superset';
+  document.getElementById('superset-modal-sub').textContent = name;
+
+  // Show current group if in a superset
+  const currentGroup = document.getElementById('superset-current-group');
+  const groupList = document.getElementById('superset-group-list');
+  if (ex.supersetId) {
+    currentGroup.style.display = '';
+    const members = activeSession.exercises
+      .map((e,i) => ({e,i}))
+      .filter(({e}) => e.supersetId === ex.supersetId);
+    groupList.innerHTML = members.map(({e,i}) => {
+      const mInfo = variantMap[e.variantId];
+      const mName = mInfo ? mInfo.parent.name : e.variantId;
+      return `<div style="padding:8px 10px;background:var(--bg3);border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
+        ${escHtml(mName)}${i === exIdx ? ' <span style="font-size:11px;color:var(--text3)">(this)</span>' : ''}
+      </div>`;
+    }).join('');
+  } else {
+    currentGroup.style.display = 'none';
+  }
+
+  // Show other exercises to pair with (not already in same group, not self)
+  const linkSection = document.getElementById('superset-link-section');
+  const exList = document.getElementById('superset-ex-list');
+  const others = activeSession.exercises
+    .map((e,i) => ({e,i}))
+    .filter(({e,i}) => i !== exIdx && e.supersetId !== ex.supersetId);
+
+  if (others.length === 0) {
+    linkSection.style.display = 'none';
+  } else {
+    linkSection.style.display = '';
+    document.querySelector('#superset-link-section .input-label').textContent =
+      ex.supersetId ? 'Add to this superset…' : 'Pair with…';
+    exList.innerHTML = others.map(({e,i}) => {
+      const mInfo = variantMap[e.variantId];
+      const mName = mInfo ? mInfo.parent.name : e.variantId;
+      const mVariant = mInfo ? mInfo.variant.name : '';
+      const alreadyInOtherGroup = e.supersetId && e.supersetId !== ex.supersetId;
+      return `<div onclick="linkSuperset(${i})"
+        style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${escHtml(mName)}</div>
+          ${mVariant ? `<div style="font-size:11px;color:var(--text3)">${escHtml(mVariant)}</div>` : ''}
+          ${alreadyInOtherGroup ? `<div style="font-size:11px;color:var(--accent-pink)">in another superset</div>` : ''}
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </div>`;
+    }).join('');
+  }
+
+  openModal('modal-superset');
+}
+
+function linkSuperset(otherIdx) {
+  if (supersetTargetIdx === null || !activeSession) return;
+  const exA = activeSession.exercises[supersetTargetIdx];
+  const exB = activeSession.exercises[otherIdx];
+
+  // Determine the superset ID to use
+  const ssId = exA.supersetId || exB.supersetId || ('ss_' + Date.now().toString(36));
+
+  // If exB was in a different superset, migrate its whole group
+  if (exB.supersetId && exB.supersetId !== ssId) {
+    const oldId = exB.supersetId;
+    activeSession.exercises.forEach(e => { if (e.supersetId === oldId) e.supersetId = ssId; });
+  }
+
+  exA.supersetId = ssId;
+  exB.supersetId = ssId;
+
+  closeModal('modal-superset');
+  renderActiveSession();
+  showToast('Superset created');
+}
+
+document.getElementById('superset-unlink-btn').addEventListener('click', () => {
+  if (supersetTargetIdx === null || !activeSession) return;
+  const ex = activeSession.exercises[supersetTargetIdx];
+  if (!ex.supersetId) return;
+
+  const ssId = ex.supersetId;
+  const members = activeSession.exercises.filter(e => e.supersetId === ssId);
+
+  // Remove just this exercise from the group
+  ex.supersetId = null;
+
+  // If only 1 left in group, dissolve the group
+  const remaining = activeSession.exercises.filter(e => e.supersetId === ssId);
+  if (remaining.length <= 1) remaining.forEach(e => e.supersetId = null);
+
+  closeModal('modal-superset');
+  renderActiveSession();
+  showToast('Removed from superset');
+});
+
+
   const el = document.getElementById(`prev-best-${idx}`);
   if (!el) return;
-  const sessions = await dbGetAll('sessions');
-  const sorted = sessions.sort((a,b) => b.startTime - a.startTime);
+  const sessions = await getSortedSessions();
+  const sorted = sessions;
   for (const s of sorted) {
     const ex = s.exercises.find(e => e.variantId === variantId);
     if (ex) {
@@ -1975,13 +2416,16 @@ function renderActiveBanner() {
 document.getElementById('session-finish-btn').addEventListener('click', async () => {
   if (!activeSession) return;
   clearInterval(sessionTimerInterval);
+  skipRestTimer();
   activeSession.endTime = Date.now();
   activeSession.durationMinutes = Math.round((activeSession.endTime - activeSession.startTime) / 60000);
+  activeSession.notes = document.getElementById('session-notes-input').value.trim();
 
   await dbPut('sessions', activeSession);
   activeSession = null;
   document.getElementById('active-session').classList.remove('open');
   document.getElementById('active-banner').innerHTML = '';
+  document.getElementById('session-notes-input').value = '';
   showToast('Workout saved!');
   renderHome();
 });
@@ -2004,28 +2448,60 @@ function showExerciseAnalyticsFromSession(variantId) {
 // VIEW WORKOUT DETAIL
 // ═══════════════════════════════════════════════════════════════
 async function viewWorkoutDetail(sessionId) {
-  // For now, open exercise analytics for first exercise or show a summary
   const session = await dbGet('sessions', sessionId);
   if (!session) return;
-  // Show a quick workout detail in the exercise detail modal
-  const body = document.getElementById('ex-detail-body');
-  const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
-  document.getElementById('ex-detail-name').textContent = session.title;
-  document.getElementById('ex-detail-sub').textContent = `${date} · ${session.durationMinutes || '?'}m`;
 
-  body.innerHTML = `<div style="padding:12px 16px">` + session.exercises.map(ex => {
+  // Look up bodyweight for that day
+  const sessionDate = new Date(session.startTime).toISOString().split('T')[0];
+  const bwEntry = await dbGet('bodyweight', sessionDate);
+  const bwStr = bwEntry ? ` · ${bwEntry.weight_lbs} lbs` : '';
+
+  const body = document.getElementById('ex-detail-body');
+  const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+  document.getElementById('ex-detail-name').textContent = session.title;
+  document.getElementById('ex-detail-sub').textContent = `${date} · ${session.durationMinutes || '?'}m${bwStr}`;
+
+  // Show repeat button
+  repeatWorkoutSessionId = sessionId;
+  document.getElementById('ex-detail-footer').style.display = '';
+
+  const notesHtml = session.notes
+    ? `<div style="padding:10px 16px 0;font-size:13px;color:var(--text2);font-style:italic;border-top:1px solid var(--border)">${escHtml(session.notes)}</div>`
+    : '';
+
+  const totalSets = session.exercises.reduce((n, ex) => n + ex.sets.filter(s => s.completed).length, 0);
+  const totalVol = session.exercises.reduce((n, ex) =>
+    n + ex.sets.filter(s => s.completed).reduce((v, s) => v + (s.weight||0)*(s.reps||0), 0), 0);
+
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--border)">
+      <div style="padding:12px 14px;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Exercises</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:600">${session.exercises.length}</div>
+      </div>
+      <div style="padding:12px 14px;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Sets</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:600">${totalSets}</div>
+      </div>
+      <div style="padding:12px 14px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Volume</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:600">${totalVol > 0 ? Math.round(totalVol/1000)+'k' : '—'}</div>
+      </div>
+    </div>
+    ${notesHtml}
+    <div style="padding:12px 16px">
+    ` + session.exercises.map(ex => {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
     return `<div style="margin-bottom:14px">
       <div style="font-size:14px;font-weight:500;margin-bottom:6px">${escHtml(name)}</div>
       ${sets.map((s, i) => {
-        const ts = s.completedAt ? new Date(s.completedAt).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '';
-        const rpe = s.rpe ? ` · RPE ${s.rpe}` : '';
-        const notes = s.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(s.notes)}</div>` : '';
-        return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
-          <div style="font-family:var(--mono);font-size:13px">${i+1}. ${s.weight}lbs × ${s.reps}${rpe}</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">${ts}</div>
-        </div>${notes}`;
+        const rpe = s.rpe ? ` <span style="color:var(--text3)">@${s.rpe}</span>` : '';
+        const notes = s.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;padding-left:8px">${escHtml(s.notes)}</div>` : '';
+        return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:13px">${i+1}. ${s.weight} × ${s.reps}${rpe}</div>
+          ${notes}
+        </div>`;
       }).join('')}
       ${sets.length === 0 ? '<div style="font-size:12px;color:var(--text3)">No sets completed</div>' : ''}
     </div>`;
@@ -2064,8 +2540,6 @@ async function showExerciseAnalytics(variantId) {
     if (ex) ex.sets.filter(st => st.weight && st.reps).forEach(st => allSets.push({...st, sessionDate: Date.now(), sessionTitle: activeSession.title}));
   }
 
-  // 1RM (Epley): w * (1 + reps/30)
-  function epley1RM(w, r) { return r === 1 ? w : w * (1 + r / 30); }
   const topRM = allSets.reduce((best, s) => Math.max(best, epley1RM(s.weight, s.reps)), 0);
   const maxWeight = allSets.reduce((best, s) => Math.max(best, s.weight), 0);
 
@@ -2099,6 +2573,22 @@ async function showExerciseAnalytics(variantId) {
   });
   const progressData = Object.entries(progressByDate).sort((a,b) => a[0]-b[0]).slice(-30);
 
+  // Volume per session (sets * reps * weight)
+  const volumeByDate = {};
+  sessions.forEach(s => {
+    const ex = s.exercises.find(e => e.variantId === variantId);
+    if (ex) {
+      const vol = ex.sets.filter(st => st.completed && st.weight && st.reps)
+        .reduce((sum, st) => sum + st.weight * st.reps, 0);
+      if (vol > 0) volumeByDate[s.startTime] = vol;
+    }
+  });
+  const volumeData = Object.entries(volumeByDate).sort((a,b) => a[0]-b[0]).slice(-30);
+  const totalSetCount = allSets.length;
+
+  // Hide repeat button in analytics context
+  document.getElementById('ex-detail-footer').style.display = 'none';
+
   const body = document.getElementById('ex-detail-body');
   body.innerHTML = `
     <div class="analytics-grid">
@@ -2110,12 +2600,26 @@ async function showExerciseAnalytics(variantId) {
         <div class="analytics-label">Max Weight</div>
         <div class="analytics-value">${maxWeight > 0 ? maxWeight : '—'} <span class="analytics-unit">lbs</span></div>
       </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Total Sets</div>
+        <div class="analytics-value">${totalSetCount || '—'}</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Sessions</div>
+        <div class="analytics-value">${historyEntries.length || '—'}</div>
+      </div>
     </div>
 
     ${progressData.length >= 2 ? `
     <div class="analytics-card-wide">
       <div class="analytics-label" style="margin-bottom:8px">Max Weight Over Time</div>
       <div class="mini-chart">${renderSparkline(progressData.map(d => d[1]))}</div>
+    </div>` : ''}
+
+    ${volumeData.length >= 2 ? `
+    <div class="analytics-card-wide">
+      <div class="analytics-label" style="margin-bottom:8px">Volume Over Time (lbs)</div>
+      <div class="mini-chart">${renderSparkline(volumeData.map(d => d[1]))}</div>
     </div>` : ''}
 
     <div class="analytics-card-wide" style="padding:14px 0">
@@ -3114,9 +3618,389 @@ document.getElementById('np-save-btn').addEventListener('click', async () => {
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// REST TIMER
+// ═══════════════════════════════════════════════════════════════
+let restTimerInterval = null;
+let restTimerRemaining = 0;
+let restTimerDuration = 90; // default 90s, configurable
+
+function startRestTimer(seconds) {
+  clearInterval(restTimerInterval);
+  restTimerRemaining = seconds || restTimerDuration;
+  const bar = document.getElementById('rest-timer-bar');
+  const toast = document.getElementById('rest-timer-toast');
+  const label = document.getElementById('rest-timer-label');
+  bar.style.display = 'block';
+  toast.classList.add('show');
+  // Animate bar
+  bar.style.transition = 'none';
+  bar.style.transform = 'scaleX(1)';
+  // Slight delay so transition kicks in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      bar.style.transition = `transform ${restTimerRemaining}s linear`;
+      bar.style.transform = 'scaleX(0)';
+    });
+  });
+
+  function tick() {
+    restTimerRemaining--;
+    const m = Math.floor(restTimerRemaining / 60);
+    const s = restTimerRemaining % 60;
+    label.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if (restTimerRemaining <= 0) {
+      clearInterval(restTimerInterval);
+      pingRestTimer();
+      setTimeout(hideRestTimer, 2000);
+    }
+  }
+  tick();
+  restTimerInterval = setInterval(tick, 1000);
+}
+
+function skipRestTimer() {
+  clearInterval(restTimerInterval);
+  hideRestTimer();
+}
+
+function hideRestTimer() {
+  document.getElementById('rest-timer-bar').style.display = 'none';
+  document.getElementById('rest-timer-toast').classList.remove('show');
+}
+
+function pingRestTimer() {
+  // Web Audio API beep
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.15, 0.3].forEach(t => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.12);
+      osc.start(ctx.currentTime + t);
+      osc.stop(ctx.currentTime + t + 0.15);
+    });
+  } catch(e) {}
+  document.getElementById('rest-timer-label').textContent = 'Go!';
+  document.getElementById('rest-timer-toast').style.color = 'var(--green)';
+  setTimeout(() => {
+    document.getElementById('rest-timer-toast').style.color = '';
+  }, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PR DETECTION
+// ═══════════════════════════════════════════════════════════════
+let prRecords = {}; // variantId -> {weight, e1rm, reps}
+
+async function loadPRRecords() {
+  const records = await dbGetAll('pr_records');
+  prRecords = {};
+  records.forEach(r => { prRecords[r.variantId] = r; });
+}
+
+function epley1RM(w, r) { return r === 1 ? w : w * (1 + r / 30); }
+
+async function checkForPR(variantId, weight, reps) {
+  if (!weight || !reps) return false;
+  const e1rm = epley1RM(weight, reps);
+  const existing = prRecords[variantId];
+  let isPR = false;
+
+  if (!existing || e1rm > existing.e1rm || weight > existing.weight) {
+    isPR = true;
+    prRecords[variantId] = { variantId, weight, reps, e1rm, date: Date.now() };
+    await dbPut('pr_records', prRecords[variantId]);
+  }
+  return isPR;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXERCISE NOTES / CUES
+// ═══════════════════════════════════════════════════════════════
+let exerciseNotes = {}; // variantId -> string
+let editingExNotesVariantId = null;
+
+async function loadExerciseNotes() {
+  const notes = await dbGetAll('exercise_notes');
+  exerciseNotes = {};
+  notes.forEach(n => { exerciseNotes[n.variantId] = n.note; });
+}
+
+function openExNotesModal(variantId) {
+  editingExNotesVariantId = variantId;
+  const info = variantMap[variantId];
+  document.getElementById('ex-notes-modal-sub').textContent = info ? info.variant.name : variantId;
+  document.getElementById('ex-notes-input').value = exerciseNotes[variantId] || '';
+  openModal('modal-ex-notes');
+}
+
+document.getElementById('ex-notes-save-btn').addEventListener('click', async () => {
+  const note = document.getElementById('ex-notes-input').value.trim();
+  if (editingExNotesVariantId) {
+    if (note) {
+      exerciseNotes[editingExNotesVariantId] = note;
+      await dbPut('exercise_notes', { variantId: editingExNotesVariantId, note });
+    } else {
+      delete exerciseNotes[editingExNotesVariantId];
+      await dbDelete('exercise_notes', editingExNotesVariantId);
+    }
+  }
+  closeModal('modal-ex-notes');
+  renderActiveSession();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// SWAP VARIANT
+// ═══════════════════════════════════════════════════════════════
+let swapVariantExIdx = null;
+
+function openSwapVariantModal(exIdx) {
+  swapVariantExIdx = exIdx;
+  const ex = activeSession.exercises[exIdx];
+  const info = variantMap[ex.variantId];
+  if (!info) return;
+
+  document.getElementById('swap-variant-parent-name').textContent = info.parent.name;
+  const variants = info.parent.variants.filter(v => v.id !== ex.variantId);
+  const list = document.getElementById('swap-variant-list');
+  list.innerHTML = variants.map(v => `
+    <div class="variant-row" onclick="swapVariant('${v.id}')">
+      <div class="variant-row-left">
+        <div class="variant-name">${escHtml(v.name)}</div>
+        <div class="variant-equip-tags">${(v.equipment||[]).map(e => `<span class="tag tag-equipment">${e}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+
+  if (variants.length === 0) {
+    list.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No other variants available</div>';
+  }
+  openModal('modal-swap-variant');
+}
+
+function swapVariant(newVariantId) {
+  if (swapVariantExIdx === null || !activeSession) return;
+  activeSession.exercises[swapVariantExIdx].variantId = newVariantId;
+  closeModal('modal-swap-variant');
+  renderActiveSession();
+  showToast('Variant swapped');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REORDER EXERCISES
+// ═══════════════════════════════════════════════════════════════
+function moveExercise(exIdx, direction) {
+  if (!activeSession) return;
+  const exs = activeSession.exercises;
+  const newIdx = exIdx + direction;
+  if (newIdx < 0 || newIdx >= exs.length) return;
+  [exs[exIdx], exs[newIdx]] = [exs[newIdx], exs[exIdx]];
+  renderActiveSession();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPEAT WORKOUT
+// ═══════════════════════════════════════════════════════════════
+let repeatWorkoutSessionId = null;
+
+document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
+  if (!repeatWorkoutSessionId) return;
+  const session = await dbGet('sessions', repeatWorkoutSessionId);
+  if (!session) return;
+
+  closeModal('modal-exercise-detail');
+
+  // Build fresh exercises from the session, clearing set completion
+  const exercises = session.exercises.map(ex => ({
+    variantId: ex.variantId,
+    supersetId: ex.supersetId || null,
+    sets: ex.sets.map(s => ({
+      weight: s.weight || 0,
+      reps: s.reps || 0,
+      completed: false,
+      completedAt: null,
+      rpe: null,
+      restSeconds: null,
+      notes: ''
+    }))
+  }));
+
+  activeSession = {
+    id: uid(),
+    title: session.title,
+    startTime: Date.now(),
+    notes: '',
+    exercises
+  };
+
+  sessionStartEpoch = activeSession.startTime;
+  document.getElementById('active-session').classList.add('open');
+  document.getElementById('session-notes-input').value = '';
+  clearInterval(sessionTimerInterval);
+  sessionTimerInterval = setInterval(updateTimer, 1000);
+  renderActiveSession();
+  showToast('Repeating workout');
+});
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT FOR CLAUDE
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('export-claude-btn').addEventListener('click', async () => {
+  const text = await buildClaudeExport();
+  document.getElementById('export-claude-text').value = text;
+  openModal('modal-export-claude');
+});
+
+document.getElementById('export-copy-btn').addEventListener('click', () => {
+  const text = document.getElementById('export-claude-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('export-copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy to clipboard`;
+      btn.style.background = '';
+    }, 2000);
+  });
+});
+
+async function buildClaudeExport() {
+  const sessions = await getSortedSessions();
+  const bwEntries = await dbGetAll('bodyweight');
+  bwEntries.sort((a,b) => a.date.localeCompare(b.date));
+  const latestBW = bwEntries.length ? bwEntries[bwEntries.length - 1] : null;
+
+  const lines = [];
+  const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+  lines.push(`# IronLog Training Summary`);
+  lines.push(`Generated: ${today}`);
+  if (latestBW) lines.push(`Bodyweight: ${latestBW.weight_lbs} lbs (${latestBW.date})`);
+  lines.push('');
+
+  // ── Recent workouts (last 8) ──
+  lines.push(`## Recent Workouts`);
+  lines.push('');
+
+  const recent = sessions.slice(0, 8);
+  for (const s of recent) {
+    const date = new Date(s.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    const dur = s.durationMinutes ? ` · ${s.durationMinutes}m` : '';
+    const bwDate = new Date(s.startTime).toISOString().split('T')[0];
+    const bw = bwEntries.find(e => e.date === bwDate);
+    const bwStr = bw ? ` · ${bw.weight_lbs} lbs` : '';
+    lines.push(`### ${s.title} — ${date}${dur}${bwStr}`);
+    if (s.notes) lines.push(`*${s.notes}*`);
+
+    for (const ex of s.exercises) {
+      const { displayName } = getVariantInfo(ex.variantId);
+      const completedSets = ex.sets.filter(st => st.completed && (st.weight || st.reps));
+      if (completedSets.length === 0) continue;
+
+      // Format sets: group identical weight×reps as "3×8 @ 185"
+      const setStrs = [];
+      let i = 0;
+      while (i < completedSets.length) {
+        const s = completedSets[i];
+        let count = 1;
+        while (i + count < completedSets.length &&
+               completedSets[i + count].weight === s.weight &&
+               completedSets[i + count].reps === s.reps) count++;
+        const rpeStr = s.rpe ? ` @RPE${s.rpe}` : '';
+        if (s.weight) {
+          setStrs.push(count > 1 ? `${count}×${s.reps} @ ${s.weight}lbs${rpeStr}` : `${s.weight}×${s.reps}${rpeStr}`);
+        } else {
+          setStrs.push(count > 1 ? `${count}×${s.reps}${rpeStr}` : `${s.reps} reps${rpeStr}`);
+        }
+        i += count;
+      }
+
+      // Check for PR on this session
+      const sessionE1rm = completedSets.reduce((best, st) => Math.max(best, epley1RM(st.weight||0, st.reps||0)), 0);
+      const prEntry = prRecords[ex.variantId];
+      const isPR = prEntry && Math.abs(prEntry.e1rm - sessionE1rm) < 0.5 && new Date(prEntry.date).toDateString() === new Date(s.startTime).toDateString();
+
+      lines.push(`- **${displayName}**: ${setStrs.join(', ')}${isPR ? ' 🏆' : ''}`);
+    }
+    lines.push('');
+  }
+
+  // ── Top lifts ──
+  lines.push(`## Top Lifts (Est. 1RM)`);
+  lines.push('');
+  const allVariants = Object.keys(prRecords);
+  if (allVariants.length === 0) {
+    lines.push('No lift records yet.');
+  } else {
+    const sorted = allVariants
+      .map(vid => ({ vid, ...prRecords[vid] }))
+      .sort((a,b) => b.e1rm - a.e1rm)
+      .slice(0, 12);
+    for (const r of sorted) {
+      const { displayName } = getVariantInfo(r.vid);
+      const date = r.date ? new Date(r.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'}) : '';
+      lines.push(`- **${displayName}**: ~${Math.round(r.e1rm)} lbs (${r.weight}×${r.reps}${date ? ', ' + date : ''})`);
+    }
+  }
+  lines.push('');
+
+  // ── Volume trend (last 4 weeks by muscle group) ──
+  lines.push(`## Volume — Last 4 Weeks by Muscle`);
+  lines.push('');
+  const cutoff4w = Date.now() - 28 * 86400000;
+  const last4w = sessions.filter(s => s.startTime >= cutoff4w);
+  const muscleVol = {};
+  EXERCISE_LIBRARY.muscle_groups.forEach(m => { muscleVol[m] = {sets: 0, vol: 0}; });
+  last4w.forEach(s => {
+    s.exercises.forEach(ex => {
+      const info = variantMap[ex.variantId];
+      if (!info) return;
+      const done = ex.sets.filter(st => st.completed);
+      const vol = done.reduce((sum, st) => sum + (st.weight||0)*(st.reps||0), 0);
+      [...info.parent.primary_muscles, ...info.parent.secondary_muscles].forEach(m => {
+        if (muscleVol[m]) { muscleVol[m].sets += done.length; muscleVol[m].vol += vol; }
+      });
+    });
+  });
+  const muscleLines = EXERCISE_LIBRARY.muscle_groups
+    .map(m => ({ m, ...muscleVol[m] }))
+    .filter(x => x.sets > 0)
+    .sort((a,b) => b.sets - a.sets);
+  if (muscleLines.length === 0) {
+    lines.push('No data in last 4 weeks.');
+  } else {
+    muscleLines.forEach(x => {
+      lines.push(`- **${x.m}**: ${x.sets} sets, ${Math.round(x.vol/1000)}k lbs volume`);
+    });
+  }
+  lines.push('');
+
+  // ── Templates ──
+  const templates = await dbGetAll('templates');
+  if (templates.length > 0) {
+    lines.push(`## Templates`);
+    lines.push('');
+    templates.forEach(t => {
+      const exNames = t.exercises.map(e => getVariantInfo(e.variantId).displayName).join(', ');
+      lines.push(`- **${t.name}**: ${exNames}`);
+    });
+    lines.push('');
+  }
+
+  lines.push(`---`);
+  lines.push(`*Paste this into Claude and ask: "Based on my recent training, help me plan today's workout."*`);
+
+  return lines.join('\n');
+}
+
 async function init() {
   await openDB();
   await loadVariantOverrides();
+  await loadPRRecords();
+  await loadExerciseNotes();
   await seedBWData();
   await seedDefaultTemplates();
 
@@ -3127,6 +4011,8 @@ async function init() {
 }
 
 init().catch(console.error);
+
+
 
 
 

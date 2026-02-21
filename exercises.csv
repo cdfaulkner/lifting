@@ -1,0 +1,279 @@
+parent_id,parent_name,primary_muscles,secondary_muscles,movement_pattern,variant_id,variant_name,equipment
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_flat,Flat (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_incline,Incline (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_decline,Decline (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_close_grip,Close Grip (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_pause,Pause (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_bands,With Bands (Barbell),barbell|band
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_barbell_guillotine,Guillotine (Barbell),barbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_flat,Flat (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_incline,Incline (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_decline,Decline (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_single_arm,Single Arm (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_cable,Cable,cable
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_isometric,Isometric (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_incline_squeeze,Incline Squeeze Press (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_dumbbell_hex,Hex Press (Dumbbell),dumbbell
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_landmine_crush,Crush Press (Landmine),landmine
+bench_press,Bench Press,chest,triceps|shoulders,push,bench_plate_loaded,Plate-Loaded Machine,machine|plate
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_dumbbell_flat,Flat (Dumbbell),dumbbell
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_dumbbell_incline,Incline (Dumbbell),dumbbell
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_dumbbell_decline,Decline (Dumbbell),dumbbell
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_cable_crossover,Cable Crossover,cable
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_cable_low,Low Cable Crossover,cable
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_cable_seated,Seated Cable,cable
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_machine_pec_deck,Pec Deck Machine,machine
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_machine,Machine,machine
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_band_flat,Flat (Band),band
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_band_incline,Incline (Band),band
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_band_decline,Decline (Band),band
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_dumbbell_partial_bottom,Partial Bottom Range (Dumbbell),dumbbell
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_cable_single_arm,Single Arm Cable,cable
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_judd,Judd Flies,cable
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_butterfly_ext,Butterfly Extensions,machine
+chest_fly,Chest Fly,chest,shoulders,isolation,fly_dumbbell_incline_crush,Incline Crush Press (Dumbbell),dumbbell
+push_up,Push Up,chest,triceps|shoulders,push,pushup_bodyweight,Bodyweight,bodyweight
+push_up,Push Up,chest,triceps|shoulders,push,pushup_weighted,Weighted,bodyweight|plate
+push_up,Push Up,chest,triceps|shoulders,push,pushup_band,Band,band
+push_up,Push Up,chest,triceps|shoulders,push,pushup_clap,Clap,bodyweight
+push_up,Push Up,chest,triceps|shoulders,push,pushup_inclined_close_grip,Incline Close Grip,bodyweight
+dip,Dip,chest,triceps|shoulders,push,dip_chest_bodyweight,Chest Dip (Bodyweight),bodyweight
+dip,Dip,chest,triceps|shoulders,push,dip_chest_weighted,Chest Dip (Weighted),bodyweight
+dip,Dip,chest,triceps|shoulders,push,dip_bench,Bench Dip,bodyweight
+dip,Dip,chest,triceps|shoulders,push,dip_ring,Ring Dip,suspension
+dip,Dip,chest,triceps|shoulders,push,dip_triceps_machine,Machine,machine
+dip,Dip,chest,triceps|shoulders,push,dip_triceps_bar,Triceps Dip (Bar),bodyweight
+pull_up,Pull Up / Chin Up,back,biceps,pull,pullup_bodyweight,Pull Up (Bodyweight),bodyweight
+pull_up,Pull Up / Chin Up,back,biceps,pull,pullup_weighted,Pull Up (Weighted),bodyweight
+pull_up,Pull Up / Chin Up,back,biceps,pull,chinup_bodyweight,Chin Up (Bodyweight),bodyweight
+pull_up,Pull Up / Chin Up,back,biceps,pull,chinup_weighted,Chin Up (Weighted),bodyweight
+pull_up,Pull Up / Chin Up,back,biceps,pull,pullup_pelican,Pelican Curl,bodyweight
+lat_pulldown,Lat Pulldown,back,biceps,pull,pulldown_cable_wide,Wide Grip (Cable),cable
+lat_pulldown,Lat Pulldown,back,biceps,pull,pulldown_cable_close,Close Grip (Cable),cable
+lat_pulldown,Lat Pulldown,back,biceps,pull,pulldown_cable_single_arm,Single Arm (Cable),cable
+lat_pulldown,Lat Pulldown,back,biceps,pull,pulldown_cable_reverse_grip,Reverse Grip (Cable),cable
+lat_pulldown,Lat Pulldown,back,biceps,pull,pulldown_plate_loaded,Plate-Loaded Machine,machine|plate
+row,Row,back,biceps|shoulders,pull,row_barbell_bent_over,Bent Over (Barbell),barbell
+row,Row,back,biceps|shoulders,pull,row_barbell_chest_supported,Chest Supported (Barbell),barbell
+row,Row,back,biceps|shoulders,pull,row_dumbbell_single_arm,Single Arm (Dumbbell),dumbbell
+row,Row,back,biceps|shoulders,pull,row_dumbbell_bent_over,Bent Over (Dumbbell),dumbbell
+row,Row,back,biceps|shoulders,pull,row_dumbbell_chest_supported_incline,Chest Supported Incline (Dumbbell),dumbbell
+row,Row,back,biceps|shoulders,pull,row_cable_bar,Seated Cable (Bar Grip),cable
+row,Row,back,biceps|shoulders,pull,row_cable_v_grip,Seated Cable (V Grip),cable
+row,Row,back,biceps|shoulders,pull,row_cable_single_arm,Single Arm Cable,cable
+row,Row,back,biceps|shoulders,pull,row_cable_high,High Cable Row,cable
+row,Row,back,biceps|shoulders,pull,row_tbar,T-Bar,barbell
+row,Row,back,biceps|shoulders,pull,row_landmine_tbar,T-Bar (Landmine),landmine
+row,Row,back,biceps|shoulders,pull,row_landmine_single_arm,Single Arm (Landmine),landmine
+row,Row,back,biceps|shoulders,pull,row_machine_seated,Seated Machine,machine
+row,Row,back,biceps|shoulders,pull,row_machine_iso_lateral,Iso-Lateral Machine,machine
+row,Row,back,biceps|shoulders,pull,row_machine_high_plate,High Row (Plate-Loaded),machine|plate
+row,Row,back,biceps|shoulders,pull,row_machine_high,High Row Machine,machine
+row,Row,back,biceps|shoulders,pull,row_plate_single_arm,Single Arm Plate,plate
+row,Row,back,biceps|shoulders,pull,row_inverted,Inverted Row (Bodyweight),bodyweight
+row,Row,back,biceps|shoulders,pull,row_inverted_weighted,Inverted Row (Weighted),bodyweight
+row,Row,back,biceps|shoulders,pull,row_suspension_single_arm,Single Arm Suspension,suspension
+row,Row,back,biceps|shoulders,pull,row_voltra,Voltra Row,voltra
+row,Row,back,biceps|shoulders,pull,row_fa,FA Row,bodyweight
+row,Row,back,biceps|shoulders,pull,row_landmine_combo,Row+Press (Landmine),landmine
+straight_arm_pulldown,Straight Arm Pulldown,back,,pull,sal_cable,Cable,cable
+straight_arm_pulldown,Straight Arm Pulldown,back,,pull,sal_cable_iso_lateral,Iso-Lateral Cable,cable
+straight_arm_pulldown,Straight Arm Pulldown,back,,pull,sal_rope,Rope,cable
+pullover,Pullover,back,chest,pull,pullover_dumbbell,Dumbbell,dumbbell
+pullover,Pullover,back,chest,pull,pullover_barbell,Barbell,barbell
+pullover,Pullover,back,chest,pull,pullover_machine,Machine,machine
+back_extension,Back Extension,hamstrings|glutes,back,hinge,back_ext_weighted,Weighted (Freakathlete),bodyweight
+back_extension,Back Extension,hamstrings|glutes,back,hinge,back_ext_single_leg,Single Leg (Freakathlete),bodyweight
+back_extension,Back Extension,hamstrings|glutes,back,hinge,back_ext_iso_hold,Iso Hold (Freakathlete),bodyweight
+back_extension,Back Extension,hamstrings|glutes,back,hinge,back_ext_single_leg_iso,Single Leg Iso Hold (Freakathlete),bodyweight
+back_extension,Back Extension,hamstrings|glutes,back,hinge,back_ext_reverse_hyper,Reverse Hyperextension,bodyweight
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_barbell_standing,Standing (Barbell),barbell
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_barbell_seated,Seated (Barbell),barbell
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_dumbbell_standing,Standing (Dumbbell),dumbbell
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_dumbbell_seated,Seated (Dumbbell),dumbbell
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_cable,Cable,cable
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_machine,Machine,machine
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_landmine_kneeling,Kneeling (Landmine),landmine
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_landmine_single,Single Arm (Landmine),landmine
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_landmine_standing,Standing (Landmine),landmine
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_landmine_jammer,Jammer (Landmine),landmine
+overhead_press,Overhead Press,shoulders,triceps,push,ohp_dumbbell_arnold,Arnold Press (Dumbbell),dumbbell
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_dumbbell,Dumbbell,dumbbell
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_dumbbell_seated,Seated (Dumbbell),dumbbell
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_cable,Cable,cable
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_cable_single_arm,Single Arm Cable,cable
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_machine,Machine,machine
+lateral_raise,Lateral Raise,shoulders,,isolation,lat_raise_band,Band,band
+lateral_raise,Lateral Raise,shoulders,,isolation,front_raise_barbell,Front Raise (Barbell),barbell
+lateral_raise,Lateral Raise,shoulders,,isolation,front_raise_dumbbell,Front Raise (Dumbbell),dumbbell
+lateral_raise,Lateral Raise,shoulders,,isolation,front_raise_plate,Front Raise (Plate),plate
+face_pull,Face Pull,shoulders,back,pull,face_pull_cable,Cable,cable
+face_pull,Face Pull,shoulders,back,pull,face_pull_band,Band,band
+upright_row,Upright Row,shoulders,biceps,pull,upright_row_barbell,Barbell,barbell
+upright_row,Upright Row,shoulders,biceps,pull,upright_row_dumbbell,Dumbbell,dumbbell
+upright_row,Upright Row,shoulders,biceps,pull,upright_row_cable,Cable,cable
+upright_row,Upright Row,shoulders,biceps,pull,upright_row_dumbbell_single,Single Arm Dumbbell,dumbbell
+upright_row,Upright Row,shoulders,biceps,pull,upright_row_staggered_db_high_pull,Staggered High Pull (Dumbbell),dumbbell
+rear_delt_fly,Rear Delt Fly,shoulders,back,isolation,rear_delt_cable,Cable,cable
+rear_delt_fly,Rear Delt Fly,shoulders,back,isolation,rear_delt_dumbbell_chest_supported,Chest Supported (Dumbbell),dumbbell
+rear_delt_fly,Rear Delt Fly,shoulders,back,isolation,rear_delt_dumbbell,Dumbbell,dumbbell
+rear_delt_fly,Rear Delt Fly,shoulders,back,isolation,rear_delt_machine,Machine,machine
+rear_delt_fly,Rear Delt Fly,shoulders,back,isolation,rear_delt_band,Band,band
+shrug,Shrug,shoulders,,isolation,shrug_barbell,Barbell,barbell
+shrug,Shrug,shoulders,,isolation,shrug_dumbbell,Dumbbell,dumbbell
+shrug,Shrug,shoulders,,isolation,shrug_cable,Cable,cable
+shrug,Shrug,shoulders,,isolation,shrug_trap_bar,Trap Bar,trap_bar
+shrug,Shrug,shoulders,,isolation,shrug_smith,Smith Machine,machine
+shoulder_rotation,Shoulder Rotation,shoulders,,isolation,shoulder_w_band,W Rotation (Band),band
+shoulder_rotation,Shoulder Rotation,shoulders,,isolation,band_pullaparts,Pullaparts (Band),band
+shoulder_rotation,Shoulder Rotation,shoulders,,isolation,sunrise_raises,Sunrise Raises,dumbbell
+shoulder_rotation,Shoulder Rotation,shoulders,,isolation,clock_raises,Clock Raises,dumbbell
+shoulder_rotation,Shoulder Rotation,shoulders,,isolation,jesus_raises,Jesus Raises,dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell,Dumbbell,dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_incline_seated,Incline Seated (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_concentration,Concentration (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_spider,Spider (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_barbell,Barbell,barbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_barbell_ez,EZ Bar,barbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_barbell_preacher,Preacher (Barbell),barbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_barbell_spider,Spider (Barbell),barbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_cable,Cable,cable
+bicep_curl,Bicep Curl,biceps,,isolation,curl_cable_rope,Rope (Cable),cable
+bicep_curl,Bicep Curl,biceps,,isolation,curl_cable_high,High Cable (Bar),cable
+bicep_curl,Bicep Curl,biceps,,isolation,curl_cable_single_arm,Single Arm (Cable),cable
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_hammer,Hammer (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_cable_hammer,Hammer (Cable),cable
+bicep_curl,Bicep Curl,biceps,,isolation,curl_machine,Machine,machine
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_preacher,Preacher (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_dumbbell_zottman,Zottman (Dumbbell),dumbbell
+bicep_curl,Bicep Curl,biceps,,isolation,curl_suspension,Suspension Curl,suspension
+bicep_curl,Bicep Curl,biceps,,isolation,curl_plate,Plate Curl,plate
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_dumbbell_overhead,Overhead (Dumbbell),dumbbell
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_barbell_overhead,Overhead (Barbell),barbell
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_cable_overhead,Overhead (Cable),cable
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_cable_overhead_single,Overhead Single Arm (Cable),cable
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_cable_handle,Cable Handle,cable
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_cable_handleless,Cable Handleless,cable
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_machine,Machine,machine
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_band,Band,band
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_suspension_ring,Ring Extension,suspension
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_suspension,Suspension Extension,suspension
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_plate,Plate Extension,plate
+tricep_extension,Tricep Extension,triceps,,isolation,tri_ext_dumbbell_single,Single Arm (Dumbbell),dumbbell
+tricep_pushdown,Tricep Pushdown,triceps,,isolation,tri_push_cable_bar,Bar (Cable),cable
+tricep_pushdown,Tricep Pushdown,triceps,,isolation,tri_push_cable_rope,Rope (Cable),cable
+tricep_pushdown,Tricep Pushdown,triceps,,isolation,tri_push_cable_reverse,Reverse Grip (Cable),cable
+tricep_pushdown,Tricep Pushdown,triceps,,isolation,tri_push_cable_single,Single Arm (Cable),cable
+tricep_pushdown,Tricep Pushdown,triceps,,isolation,tri_push_cable_single_handle,Single Arm Handle (Cable),cable
+skullcrusher,Skullcrusher,triceps,,isolation,skull_barbell,Barbell,barbell
+skullcrusher,Skullcrusher,triceps,,isolation,skull_dumbbell,Dumbbell,dumbbell
+skullcrusher,Skullcrusher,triceps,,isolation,skull_cambered,Cambered Close Grip,barbell
+tricep_kickback,Tricep Kickback,triceps,,isolation,kickback_dumbbell,Dumbbell,dumbbell
+tricep_kickback,Tricep Kickback,triceps,,isolation,kickback_cable,Cable,cable
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_back,Back Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_front,Front Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_overhead,Overhead Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_pause,Pause Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_zercher,Zercher Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_cossack,Cossack Squat (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_clean,Squat Clean (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_barbell_thruster,Thruster (Barbell),barbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_landmine,Landmine Squat,landmine
+squat,Squat,quads,glutes|hamstrings,squat,squat_landmine_hack,Landmine Hack Squat,landmine
+squat,Squat,quads,glutes|hamstrings,squat,squat_dumbbell_goblet,Goblet (Dumbbell),dumbbell
+squat,Squat,quads,glutes|hamstrings,squat,squat_kettlebell_goblet,Goblet (Kettlebell),kettlebell
+squat,Squat,quads,glutes|hamstrings,squat,squat_cable_goblet,Goblet (Cable),cable
+squat,Squat,quads,glutes|hamstrings,squat,squat_sissy,Sissy Squat (Weighted),plate
+squat,Squat,quads,glutes|hamstrings,squat,squat_sissy_cable,Sissy Squat (Cable),cable
+squat,Squat,quads,glutes|hamstrings,squat,squat_sissy_banded,Sissy Squat (Band),band
+squat,Squat,quads,glutes|hamstrings,squat,squat_spanish,Spanish Squat,band
+squat,Squat,quads,glutes|hamstrings,squat,squat_belt,Belt Squat,machine
+squat,Squat,quads,glutes|hamstrings,squat,squat_belt_cable,Belt Squat (Cable),cable
+squat,Squat,quads,glutes|hamstrings,squat,squat_box_pistol,Box Pistol Squat,bodyweight
+hack_squat,Hack Squat,quads,glutes,squat,hack_squat_barbell,Barbell,barbell
+hack_squat,Hack Squat,quads,glutes,squat,hack_squat_machine,Machine,machine
+leg_press,Leg Press,quads,glutes|hamstrings,squat,leg_press_machine,Machine,machine
+leg_press,Leg Press,quads,glutes|hamstrings,squat,leg_press_machine_horizontal,Horizontal Machine,machine
+leg_press,Leg Press,quads,glutes|hamstrings,squat,leg_press_single_leg,Single Leg Machine,machine
+leg_press,Leg Press,quads,glutes|hamstrings,squat,leg_press_calf,Calf Press on Leg Press,machine
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,split_squat_barbell,Split Squat (Barbell),barbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,split_squat_dumbbell,Split Squat (Dumbbell),dumbbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,split_squat_stationary,Stationary Lunge,bodyweight
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,bulgarian_split_squat_bodyweight,Bulgarian Split Squat (Bodyweight),bodyweight
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,bulgarian_split_squat_barbell,Bulgarian Split Squat (Barbell),barbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,bulgarian_goblet,Goblet Bulgarian Split Squat,dumbbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,lunge_dumbbell,Lunge (Dumbbell),dumbbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,lunge_barbell,Lunge (Barbell),barbell
+split_squat,Split Squat / Lunge,quads,glutes|hamstrings,squat,step_up_dumbbell,Step Up (Dumbbell),dumbbell
+leg_extension,Leg Extension,quads,,isolation,leg_ext_machine,Machine,machine
+leg_extension,Leg Extension,quads,,isolation,leg_ext_plate_loaded,Plate-Loaded,machine|plate
+leg_extension,Leg Extension,quads,,isolation,leg_ext_machine_iso,Iso Machine,machine
+leg_extension,Leg Extension,quads,,isolation,leg_ext_reverse_nordic,Reverse Nordic,bodyweight
+deadlift,Deadlift,hamstrings|glutes,back|quads,hinge,deadlift_barbell,Conventional (Barbell),barbell
+deadlift,Deadlift,hamstrings|glutes,back|quads,hinge,deadlift_trap_bar,Trap Bar,trap_bar
+deadlift,Deadlift,hamstrings|glutes,back|quads,hinge,deadlift_landmine,Landmine Deadlift,landmine
+deadlift,Deadlift,hamstrings|glutes,back|quads,hinge,deadlift_jefferson_curl,Jefferson Curl (Barbell),barbell
+deadlift,Deadlift,hamstrings|glutes,back|quads,hinge,deadlift_trap_bar_jump,Trap Bar Jump,trap_bar
+romanian_deadlift,Romanian Deadlift,hamstrings|glutes,back,hinge,rdl_barbell,Barbell,barbell
+romanian_deadlift,Romanian Deadlift,hamstrings|glutes,back,hinge,rdl_dumbbell,Dumbbell,dumbbell
+romanian_deadlift,Romanian Deadlift,hamstrings|glutes,back,hinge,rdl_dumbbell_single_leg,Single Leg (Dumbbell),dumbbell
+romanian_deadlift,Romanian Deadlift,hamstrings|glutes,back,hinge,rdl_dumbbell_kneeling_single,Kneeling Single Leg (Dumbbell),dumbbell
+romanian_deadlift,Romanian Deadlift,hamstrings|glutes,back,hinge,rdl_voltra,Voltra RDL,voltra
+good_morning,Good Morning,hamstrings,back|glutes,hinge,good_morning_barbell,Barbell,barbell
+good_morning,Good Morning,hamstrings,back|glutes,hinge,good_morning_band,Band,band
+leg_curl,Leg Curl,hamstrings,,isolation,leg_curl_plate_loaded,Plate-Loaded,machine|plate
+leg_curl,Leg Curl,hamstrings,,isolation,leg_curl_machine_lying,Lying Machine,machine
+leg_curl,Leg Curl,hamstrings,,isolation,leg_curl_machine_iso,Iso Machine,machine
+leg_curl,Leg Curl,hamstrings,,isolation,ghd_leg_curl,GHR / Nordic Hamstring Curl (Freakathlete),bodyweight
+leg_curl,Leg Curl,hamstrings,,isolation,nordic_hamstring,Nordic Hamstring Curl,bodyweight
+leg_curl,Leg Curl,hamstrings,,isolation,nordic_inclined,Inclined Nordic Curl (Freakathlete),bodyweight
+leg_curl,Leg Curl,hamstrings,,isolation,voltra_ham_curl,Standing Ham Curl (Voltra),voltra
+hip_thrust,Hip Thrust,glutes,hamstrings,hinge,hip_thrust_barbell,Barbell,barbell
+hip_thrust,Hip Thrust,glutes,hamstrings,hinge,hip_thrust_machine,Machine,machine
+calf_raise,Calf Raise,calves,,isolation,calf_seated,Seated Machine,machine
+calf_raise,Calf Raise,calves,,isolation,calf_dumbbell_seated,Seated (Dumbbell),dumbbell
+calf_raise,Calf Raise,calves,,isolation,calf_barbell_seated,Seated (Barbell),barbell
+calf_raise,Calf Raise,calves,,isolation,calf_machine_press,Machine Press,machine
+calf_raise,Calf Raise,calves,,isolation,calf_standing_machine,Standing Machine,machine
+calf_raise,Calf Raise,calves,,isolation,calf_landmine,Landmine Calf Raise,landmine
+calf_raise,Calf Raise,calves,,isolation,calf_hanging_landmine,Hanging Landmine Calf Raise,landmine
+calf_raise,Calf Raise,calves,,isolation,calf_barbell_standing_single,Single Leg Standing (Barbell),barbell
+calf_raise,Calf Raise,calves,,isolation,calf_belt,Belt Calf Raise,machine
+calf_raise,Calf Raise,calves,,isolation,calf_hanging_cable,Hanging Cable Calf Raise,cable
+calf_raise,Calf Raise,calves,,isolation,calf_hanging_barbell,Hanging Barbell Calf Raise,barbell
+crunch,Crunch,core,,core,crunch_cable,Cable Crunch,cable
+crunch,Crunch,core,,core,crunch_machine,Machine,machine
+crunch,Crunch,core,,core,crunch_bench,Bench Crunch,bodyweight
+crunch,Crunch,core,,core,crunch_db,Dumbbell Crunch,dumbbell
+crunch,Crunch,core,,core,crunch_band,Band Crunch,band
+crunch,Crunch,core,,core,crunch_weighted,Weighted Crunch,plate
+crunch,Crunch,core,,core,crunch_ghd,GHD Crunch (Freakathlete),bodyweight
+crunch,Crunch,core,,core,crunch_suspension,Suspension Crunch,suspension
+crunch,Crunch,core,,core,crunch_decline_weighted,Decline Weighted,bodyweight|plate
+leg_raise,Leg Raise / Knee Raise,core,,core,knee_raise_parallel,Knee Raise (Parallel Bars),bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,hanging_leg_raise,Hanging Leg Raise,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,hanging_knee_raise,Hanging Knee Raise,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,leg_raise_decline_bench,Decline Bench Leg Lifts,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,captains_chair,Captain's Chair,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,ghd_leg_lift,GHD Leg Lift (Freakathlete),bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,lying_leg_raise,Lying Leg Raise,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,v_up,V Up,bodyweight
+leg_raise,Leg Raise / Knee Raise,core,,core,jackknife_suspension,Jackknife (Suspension),suspension
+ab_wheel,Ab Wheel / Rollout,core,,core,ab_wheel,Ab Wheel,bodyweight
+plank,Plank,core,,core,plank_standard,Standard,bodyweight
+plank,Plank,core,,core,plank_side,Side Plank,bodyweight
+plank,Plank,core,,core,plank_hollow_rock,Hollow Rock,bodyweight
+plank,Plank,core,,core,plank_bird_dog,Bird Dog,bodyweight
+plank,Plank,core,,core,plank_mountain_climber,Mountain Climber,bodyweight
+plank,Plank,core,,core,plank_v_up_weighted,Weighted V-Ups,plate
+pallof_press,Pallof Press / Anti-Rotation,core,,core,pallof_band,Band,band
+pallof_press,Pallof Press / Anti-Rotation,core,,core,pallof_cable,Cable,cable
+pallof_press,Pallof Press / Anti-Rotation,core,,core,pallof_twist_press,Twist + Press,cable|band
+pallof_press,Pallof Press / Anti-Rotation,core,,core,cable_twist_up_down,Cable Twist (Up to Down),cable
+pallof_press,Pallof Press / Anti-Rotation,core,,core,kneeling_landmine_rotation,Kneeling Rotation (Landmine),landmine
+pallof_press,Pallof Press / Anti-Rotation,core,,core,russian_twist_weighted,Weighted Russian Twist,plate
+side_bend,Side Bend / QL,core,,core,side_bend_dumbbell,Dumbbell,dumbbell
+side_bend,Side Bend / QL,core,,core,side_crunch_cable,Side Crunch (Cable),cable
+side_bend,Side Bend / QL,core,,core,weighted_ql_bend,Weighted QL Bend,dumbbell
+farmers_carry,Farmer's Carry,core|forearms,shoulders,carry,farmers_carry_dumbbell,Dumbbell,dumbbell
+rowing_machine,Rowing Machine,back,quads|core,pull,rowing_machine_cardio,Rowing Machine,machine
