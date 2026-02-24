@@ -2881,6 +2881,7 @@ document.getElementById('superset-unlink-btn').addEventListener('click', () => {
 });
 
 
+async function loadPrevBest(variantId, idx) {
   const el = document.getElementById(`prev-best-${idx}`);
   if (!el) return;
   const sessions = await getSortedSessions();
