@@ -758,6 +758,82 @@ select option { background: var(--bg3); }
   transition: all 0.15s;
 }
 .variant-row:active { background: var(--bg3); }
+
+/* ── HIERARCHICAL PICKER ── */
+.picker-steps { display: flex; gap: 4px; margin-bottom: 12px; }
+.picker-step {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; font-family: var(--mono); color: var(--text3);
+}
+.picker-step.active { color: var(--accent); font-weight: 600; }
+.picker-step.done { color: var(--green); }
+.picker-step-arrow { color: var(--text3); font-size: 10px; }
+.picker-step-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600;
+  background: var(--bg3); color: var(--text3); border: 1px solid var(--border);
+}
+.picker-step.active .picker-step-num { background: var(--accent); color: #fff; border-color: var(--accent); }
+.picker-step.done .picker-step-num { background: var(--green); color: #fff; border-color: var(--green); }
+
+.picker-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; max-height: 55vh; overflow-y: auto;
+}
+.picker-grid.single-col { grid-template-columns: 1fr; }
+.picker-option {
+  padding: 12px 14px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r); cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.picker-option:active { background: var(--bg4); }
+.picker-option.selected { border-color: var(--accent); background: rgba(167,139,250,0.1); }
+.picker-option-name { font-size: 14px; font-weight: 500; }
+.picker-option-sub { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+.picker-section-label {
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  margin: 10px 0 6px; font-family: var(--body);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+
+.picker-modifier-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r); margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
+}
+.picker-modifier-row.active { border-color: var(--accent); background: rgba(167,139,250,0.1); }
+.picker-modifier-check {
+  width: 20px; height: 20px; border-radius: 4px;
+  border: 2px solid var(--border2); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.picker-modifier-row.active .picker-modifier-check {
+  background: var(--accent); border-color: var(--accent);
+}
+.picker-modifier-label { font-size: 14px; font-weight: 500; flex: 1; }
+
+.picker-preview {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 12px 14px; margin-top: 10px;
+}
+.picker-preview-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.picker-preview-name { font-size: 16px; font-weight: 600; font-family: var(--display); }
+.picker-name-edit {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  border-radius: var(--r); color: var(--text); font-family: var(--display);
+  font-size: 15px; font-weight: 500; padding: 8px 10px; margin-top: 6px;
+}
+
+.picker-back-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: var(--text3); cursor: pointer;
+  padding: 4px 0; margin-bottom: 8px; background: none; border: none;
+  font-family: var(--body); font-weight: 500;
+}
+.picker-back-btn:active { color: var(--text2); }
 .variant-row-left { display: flex; flex-direction: column; gap: 3px; }
 .variant-name { font-size: 14px; font-weight: 500; }
 .variant-equip-tags { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -1604,9 +1680,20 @@ textarea { resize: none; }
       </button>
     </div>
     <div class="modal-body" style="padding:8px 16px">
-      <input id="pick-ex-search" type="search" placeholder="Search…" style="margin-bottom:8px" autocomplete="off">
+      <input id="pick-ex-search" type="search" placeholder="Search exercises…" style="margin-bottom:8px" autocomplete="off">
       <div id="pick-ex-filters" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none"></div>
+      <!-- Step indicator -->
+      <div id="pick-ex-steps" class="picker-steps" style="display:none"></div>
+      <!-- Back button for sub-steps -->
+      <button id="pick-ex-back" class="picker-back-btn" style="display:none" onclick="pickerGoBack()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <!-- Main content area -->
       <div id="pick-ex-list" style="display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow-y:auto"></div>
+    </div>
+    <div id="pick-ex-footer" class="modal-footer" style="display:none">
+      <button class="btn btn-primary" id="pick-ex-confirm" style="width:100%">Add Exercise</button>
     </div>
   </div>
 </div>
@@ -1747,6 +1834,492 @@ function getVariantDisplayName(variantId) {
 function getParentForVariant(variantId) {
   return variantMap[variantId]?.parent;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// NEW HIERARCHICAL EXERCISE TAXONOMY
+// ═══════════════════════════════════════════════════════════════
+// Each "lift" defines: resistance types, main variants (angle/grip/stance),
+// and which modifier flags are available.
+// The picker flow: Main Lift → Resistance → Main Variant → Modifiers → Confirm
+
+const EXERCISE_HIERARCHY = [
+  // ── CHEST ──
+  { id:"chest_press", name:"Chest Press", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
+    variants:["Flat","Incline","Decline"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"chest_fly", name:"Chest Fly", pattern:"isolation", muscles:["chest"], sec:["shoulders"],
+    resistances:["Dumbbell","Voltra"],
+    variants:["Flat","Incline","Decline"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"push_up", name:"Push Up", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
+    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  { id:"dip", name:"Dip", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
+    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  // ── BACK ──
+  { id:"pull_up", name:"Pull Up", pattern:"pull", muscles:["back"], sec:["biceps"],
+    resistances:["BW+"], variants:["Supinated","Pronated","Neutral","Ring"],
+    mods:{bands:true,unilateral:false,other:true} },
+  { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
+    resistances:["Voltra"], variants:["Wide","Narrow","Neutral"],
+    mods:{bands:false,unilateral:true,other:true} },
+  { id:"row", name:"Row", pattern:"pull", muscles:["back"], sec:["biceps","shoulders"],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
+    variants:["Wide","Narrow","Neutral"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+  { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
+    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
+    mods:{bands:false,unilateral:true,other:true} },
+  { id:"straight_arm_pulldown", name:"Pulldown", pattern:"pull", muscles:["back"], sec:[],
+    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+  { id:"back_extension", name:"Back Extension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+  { id:"reverse_hyper", name:"Reverse Hyperextension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+  // ── SHOULDERS ──
+  { id:"overhead_press", name:"Overhead Press", pattern:"push", muscles:["shoulders"], sec:["triceps"],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
+    variants:["Seated","Standing","Kneeling"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"shoulder_raise", name:"Shoulder Raise", pattern:"isolation", muscles:["shoulders"], sec:[],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Plate"],
+    variants:["Seated","Standing"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"face_pull", name:"Face Pull", pattern:"pull", muscles:["shoulders"], sec:["back"],
+    resistances:["Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+  { id:"upright_row", name:"Upright Row", pattern:"pull", muscles:["shoulders"], sec:["biceps"],
+    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"rear_delt_fly", name:"Rear Delt Fly", pattern:"isolation", muscles:["shoulders"], sec:["back"],
+    resistances:["Dumbbell","Voltra"], variants:[],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"shrug", name:"Shrug", pattern:"isolation", muscles:["shoulders"], sec:[],
+    resistances:["Barbell","Dumbbell","Voltra","Trap Bar"], variants:[],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"shoulder_rotation", name:"Shoulder Rotation", pattern:"isolation", muscles:["shoulders"], sec:[],
+    resistances:["Dumbbell","Voltra"], variants:[],
+    mods:{bands:true,unilateral:false,other:true} },
+  // ── ARMS ──
+  { id:"bicep_curl", name:"Bicep Curl", pattern:"isolation", muscles:["biceps"], sec:[],
+    resistances:["Barbell","Dumbbell","Voltra","Plate"],
+    variants:["Standing","Seated","Incline","Preacher"],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
+    resistances:["Barbell","Dumbbell","Voltra"],
+    variants:["Seated","Standing","Flat","Incline"],
+    mods:{bands:true,unilateral:true,other:true} },
+  // ── LEGS ──
+  { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
+    variants:["Back","Front","Zercher","Goblet","Hack","Sissy","Harness","Belt","Cossack"],
+    mods:{bands:true,unilateral:false,other:true} },
+  { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
+    resistances:["Barbell","Dumbbell","Goblet"],
+    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up"],
+    mods:{bands:true,unilateral:false,other:true} },
+  { id:"leg_extension", name:"Leg Extension", pattern:"isolation", muscles:["quads"], sec:[],
+    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"deadlift", name:"Deadlift", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back","quads"],
+    resistances:["Barbell","Dumbbell","Trap Bar"], variants:[],
+    mods:{bands:true,unilateral:false,other:true} },
+  { id:"rdl", name:"RDL", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
+    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
+    mods:{bands:true,unilateral:true,other:true} },
+  { id:"good_morning", name:"Good Morning", pattern:"hinge", muscles:["hamstrings"], sec:["back","glutes"],
+    resistances:["Barbell","Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+  { id:"jefferson_curl", name:"Jefferson Curl", pattern:"hinge", muscles:["hamstrings"], sec:["back"],
+    resistances:["Barbell","Dumbbell","Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+  { id:"ghr", name:"GHR", pattern:"isolation", muscles:["hamstrings"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  { id:"nordic_curl", name:"Nordic Curl", pattern:"isolation", muscles:["hamstrings"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  { id:"ham_curl", name:"Ham Curl", pattern:"isolation", muscles:["hamstrings"], sec:[],
+    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"hip_thrust", name:"Hip Thrust", pattern:"hinge", muscles:["glutes"], sec:["hamstrings"],
+    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
+    mods:{bands:true,unilateral:false,other:true} },
+  { id:"reverse_nordic", name:"Reverse Nordic", pattern:"isolation", muscles:["quads"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  { id:"calf_raise", name:"Calf Raise", pattern:"isolation", muscles:["calves"], sec:[],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt"],
+    variants:["Seated","Standing"], mods:{bands:true,unilateral:true,other:true} },
+  // ── CORE ──
+  { id:"crunch", name:"Crunch", pattern:"core", muscles:["core"], sec:[],
+    resistances:["Voltra","BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"leg_raise", name:"Leg Raise / Knee Raise", pattern:"core", muscles:["core"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"ab_wheel", name:"Ab Wheel / Rollout", pattern:"core", muscles:["core"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"plank", name:"Plank", pattern:"core", muscles:["core"], sec:[],
+    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  { id:"pallof_press", name:"Pallof Press / Anti-Rotation", pattern:"core", muscles:["core"], sec:[],
+    resistances:["Voltra"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+  { id:"side_bend", name:"Side Bend / QL", pattern:"core", muscles:["core"], sec:[],
+    resistances:["Dumbbell","Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+  // ── OTHER ──
+  { id:"farmers_carry", name:"Farmer's Carry", pattern:"carry", muscles:["core","forearms"], sec:["shoulders"],
+    resistances:["Dumbbell","Trap Bar"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+  { id:"rowing_machine", name:"Rowing Machine", pattern:"pull", muscles:["back"], sec:["quads","core"],
+    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} }
+];
+
+// Build hierarchy lookup
+const hierarchyMap = {};
+EXERCISE_HIERARCHY.forEach(h => { hierarchyMap[h.id] = h; });
+
+// Resistance type abbreviation map for display names
+const RES_ABBREV = {
+  "Barbell":"BB","Dumbbell":"DB","Voltra":"Voltra","Landmine":"LM",
+  "BW+":"BW+","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt","Goblet":"Goblet","Cable":"Cable"
+};
+
+// ── Generate a deterministic variant ID from picker selections ──
+function buildVariantId(parentId, resistance, mainVariant, mods) {
+  let parts = [parentId];
+  parts.push(resistance.toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  if (mainVariant) parts.push(mainVariant.toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  if (mods.bands) parts.push('bands');
+  if (mods.unilateral) parts.push('uni');
+  if (mods.other) parts.push(mods.other.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,20));
+  return parts.join('__');
+}
+
+// ── Generate display name from picker selections ──
+function buildExerciseName(parentName, resAbbrev, mainVariant, mods) {
+  let parts = [];
+  if (mainVariant) parts.push(mainVariant);
+  parts.push(resAbbrev);
+  parts.push(parentName);
+  let name = parts.join(' ');
+  const modParts = [];
+  if (mods.bands) modParts.push('Bands');
+  if (mods.unilateral) modParts.push('Unilateral');
+  if (mods.other) modParts.push(mods.other);
+  if (modParts.length > 0) name += ' (' + modParts.join(', ') + ')';
+  return name;
+}
+
+// ── Legacy variant ID → new hierarchy mapping ──
+// Maps old variantId to {parentId, resistance, variant, mods:{bands,unilateral,other}}
+const LEGACY_VARIANT_MAP = {
+  "bench_barbell_flat":{p:"chest_press",r:"Barbell",v:"Flat"},
+  "bench_barbell_incline":{p:"chest_press",r:"Barbell",v:"Incline"},
+  "bench_barbell_decline":{p:"chest_press",r:"Barbell",v:"Decline"},
+  "bench_barbell_close_grip":{p:"chest_press",r:"Barbell",v:"Flat",o:"Close Grip"},
+  "bench_barbell_pause":{p:"chest_press",r:"Barbell",v:"Flat",o:"Pause"},
+  "bench_barbell_bands":{p:"chest_press",r:"Barbell",v:"Flat",b:1},
+  "bench_barbell_guillotine":{p:"chest_press",r:"Barbell",v:"Flat",o:"Guillotine"},
+  "bench_dumbbell_flat":{p:"chest_press",r:"Dumbbell",v:"Flat"},
+  "bench_dumbbell_incline":{p:"chest_press",r:"Dumbbell",v:"Incline"},
+  "bench_dumbbell_decline":{p:"chest_press",r:"Dumbbell",v:"Decline"},
+  "bench_dumbbell_single_arm":{p:"chest_press",r:"Dumbbell",v:"Flat",u:1},
+  "bench_cable":{p:"chest_press",r:"Voltra",v:"Flat"},
+  "bench_dumbbell_isometric":{p:"chest_press",r:"Dumbbell",v:"Flat",o:"Isometric"},
+  "bench_dumbbell_incline_squeeze":{p:"chest_press",r:"Dumbbell",v:"Incline",o:"Squeeze"},
+  "bench_dumbbell_hex":{p:"chest_press",r:"Dumbbell",v:"Flat",o:"Hex Press"},
+  "bench_landmine_crush":{p:"chest_press",r:"Landmine",v:"Flat",o:"Crush Press"},
+  "bench_plate_loaded":{p:"chest_press",r:"Voltra",v:"Flat",o:"Plate-Loaded"},
+  "fly_dumbbell_flat":{p:"chest_fly",r:"Dumbbell",v:"Flat"},
+  "fly_dumbbell_incline":{p:"chest_fly",r:"Dumbbell",v:"Incline"},
+  "fly_dumbbell_decline":{p:"chest_fly",r:"Dumbbell",v:"Decline"},
+  "fly_cable_crossover":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Crossover"},
+  "fly_cable_low":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Low Crossover"},
+  "fly_cable_seated":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Seated"},
+  "fly_machine_pec_deck":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Pec Deck"},
+  "fly_machine":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Machine"},
+  "fly_band_flat":{p:"chest_fly",r:"Dumbbell",v:"Flat",b:1,o:"Band"},
+  "fly_band_incline":{p:"chest_fly",r:"Dumbbell",v:"Incline",b:1,o:"Band"},
+  "fly_band_decline":{p:"chest_fly",r:"Dumbbell",v:"Decline",b:1,o:"Band"},
+  "fly_dumbbell_partial_bottom":{p:"chest_fly",r:"Dumbbell",v:"Flat",o:"Partial Bottom"},
+  "fly_cable_single_arm":{p:"chest_fly",r:"Voltra",v:"Flat",u:1},
+  "fly_judd":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Judd"},
+  "fly_butterfly_ext":{p:"chest_fly",r:"Voltra",v:"Flat",o:"Butterfly Ext"},
+  "fly_dumbbell_incline_crush":{p:"chest_fly",r:"Dumbbell",v:"Incline",o:"Crush"},
+  "pushup_bodyweight":{p:"push_up",r:"BW+"},
+  "pushup_weighted":{p:"push_up",r:"BW+",o:"Weighted"},
+  "pushup_band":{p:"push_up",r:"BW+",b:1},
+  "pushup_clap":{p:"push_up",r:"BW+",o:"Clap"},
+  "pushup_inclined_close_grip":{p:"push_up",r:"BW+",o:"Incline Close Grip"},
+  "dip_chest_bodyweight":{p:"dip",r:"BW+",o:"Chest"},
+  "dip_chest_weighted":{p:"dip",r:"BW+",o:"Chest Weighted"},
+  "dip_bench":{p:"dip",r:"BW+",o:"Bench"},
+  "dip_ring":{p:"dip",r:"BW+",o:"Ring"},
+  "dip_triceps_machine":{p:"dip",r:"BW+",o:"Machine"},
+  "dip_triceps_bar":{p:"dip",r:"BW+",o:"Triceps Bar"},
+  "pullup_bodyweight":{p:"pull_up",r:"BW+",v:"Pronated"},
+  "pullup_weighted":{p:"pull_up",r:"BW+",v:"Pronated",o:"Weighted"},
+  "chinup_bodyweight":{p:"pull_up",r:"BW+",v:"Supinated"},
+  "chinup_weighted":{p:"pull_up",r:"BW+",v:"Supinated",o:"Weighted"},
+  "pullup_pelican":{p:"pull_up",r:"BW+",v:"Supinated",o:"Pelican Curl"},
+  "pulldown_cable_wide":{p:"lat_pulldown",r:"Voltra",v:"Wide"},
+  "pulldown_cable_close":{p:"lat_pulldown",r:"Voltra",v:"Narrow"},
+  "pulldown_cable_single_arm":{p:"lat_pulldown",r:"Voltra",v:"Neutral",u:1},
+  "pulldown_cable_reverse_grip":{p:"lat_pulldown",r:"Voltra",v:"Neutral",o:"Reverse Grip"},
+  "pulldown_plate_loaded":{p:"lat_pulldown",r:"Voltra",v:"Neutral",o:"Plate-Loaded"},
+  "row_barbell_bent_over":{p:"row",r:"Barbell",v:"Neutral",o:"Bent Over"},
+  "row_barbell_chest_supported":{p:"row",r:"Barbell",v:"Neutral",o:"Chest Supported"},
+  "row_dumbbell_single_arm":{p:"row",r:"Dumbbell",v:"Neutral",u:1},
+  "row_dumbbell_bent_over":{p:"row",r:"Dumbbell",v:"Neutral",o:"Bent Over"},
+  "row_dumbbell_chest_supported_incline":{p:"row",r:"Dumbbell",v:"Neutral",o:"Chest Supported Incline"},
+  "row_cable_bar":{p:"row",r:"Voltra",v:"Wide",o:"Seated Bar"},
+  "row_cable_v_grip":{p:"row",r:"Voltra",v:"Narrow",o:"Seated V"},
+  "row_cable_single_arm":{p:"row",r:"Voltra",v:"Neutral",u:1},
+  "row_cable_high":{p:"row",r:"Voltra",v:"Wide",o:"High"},
+  "row_tbar":{p:"row",r:"Barbell",v:"Narrow",o:"T-Bar"},
+  "row_landmine_tbar":{p:"row",r:"Landmine",v:"Narrow",o:"T-Bar"},
+  "row_landmine_single_arm":{p:"row",r:"Landmine",v:"Neutral",u:1},
+  "row_machine_seated":{p:"row",r:"Voltra",v:"Neutral",o:"Seated Machine"},
+  "row_machine_iso_lateral":{p:"row",r:"Voltra",v:"Neutral",o:"Iso-Lateral"},
+  "row_machine_high_plate":{p:"row",r:"Voltra",v:"Wide",o:"High Row Plate"},
+  "row_machine_high":{p:"row",r:"Voltra",v:"Wide",o:"High Row Machine"},
+  "row_plate_single_arm":{p:"row",r:"Dumbbell",v:"Neutral",u:1,o:"Plate"},
+  "row_inverted":{p:"suspension_row",r:"BW+",o:"Inverted"},
+  "row_inverted_weighted":{p:"suspension_row",r:"BW+",o:"Inverted Weighted"},
+  "row_suspension_single_arm":{p:"suspension_row",r:"BW+",u:1},
+  "row_voltra":{p:"row",r:"Voltra",v:"Neutral"},
+  "row_fa":{p:"suspension_row",r:"BW+",o:"FA Row"},
+  "row_landmine_combo":{p:"row",r:"Landmine",v:"Neutral",o:"Row+Press"},
+  "sal_cable":{p:"straight_arm_pulldown",r:"Voltra"},
+  "sal_cable_iso_lateral":{p:"straight_arm_pulldown",r:"Voltra",u:1,o:"Iso-Lateral"},
+  "sal_rope":{p:"straight_arm_pulldown",r:"Voltra",o:"Rope"},
+  "pullover_dumbbell":{p:"pullover",r:"Dumbbell"},
+  "pullover_barbell":{p:"pullover",r:"Barbell"},
+  "pullover_machine":{p:"pullover",r:"Voltra",o:"Machine"},
+  "back_ext_weighted":{p:"back_extension",r:"BW+",o:"Weighted FA"},
+  "back_ext_single_leg":{p:"back_extension",r:"BW+",u:1,o:"FA"},
+  "back_ext_iso_hold":{p:"back_extension",r:"BW+",o:"Iso Hold FA"},
+  "back_ext_single_leg_iso":{p:"back_extension",r:"BW+",u:1,o:"Iso Hold FA"},
+  "back_ext_reverse_hyper":{p:"reverse_hyper",r:"BW+"},
+  "ohp_barbell_standing":{p:"overhead_press",r:"Barbell",v:"Standing"},
+  "ohp_barbell_seated":{p:"overhead_press",r:"Barbell",v:"Seated"},
+  "ohp_dumbbell_standing":{p:"overhead_press",r:"Dumbbell",v:"Standing"},
+  "ohp_dumbbell_seated":{p:"overhead_press",r:"Dumbbell",v:"Seated"},
+  "ohp_cable":{p:"overhead_press",r:"Voltra",v:"Standing"},
+  "ohp_machine":{p:"overhead_press",r:"Voltra",v:"Seated",o:"Machine"},
+  "ohp_landmine_kneeling":{p:"overhead_press",r:"Landmine",v:"Kneeling"},
+  "ohp_landmine_single":{p:"overhead_press",r:"Landmine",v:"Standing",u:1},
+  "ohp_landmine_standing":{p:"overhead_press",r:"Landmine",v:"Standing"},
+  "ohp_landmine_jammer":{p:"overhead_press",r:"Landmine",v:"Standing",o:"Jammer"},
+  "ohp_dumbbell_arnold":{p:"overhead_press",r:"Dumbbell",v:"Seated",o:"Arnold"},
+  "lat_raise_dumbbell":{p:"shoulder_raise",r:"Dumbbell",v:"Standing",o:"Lateral"},
+  "lat_raise_dumbbell_seated":{p:"shoulder_raise",r:"Dumbbell",v:"Seated",o:"Lateral"},
+  "lat_raise_cable":{p:"shoulder_raise",r:"Voltra",v:"Standing",o:"Lateral"},
+  "lat_raise_cable_single_arm":{p:"shoulder_raise",r:"Voltra",v:"Standing",u:1,o:"Lateral"},
+  "lat_raise_machine":{p:"shoulder_raise",r:"Voltra",v:"Seated",o:"Lateral Machine"},
+  "lat_raise_band":{p:"shoulder_raise",r:"Dumbbell",v:"Standing",b:1,o:"Lateral Band"},
+  "front_raise_barbell":{p:"shoulder_raise",r:"Barbell",v:"Standing",o:"Front"},
+  "front_raise_dumbbell":{p:"shoulder_raise",r:"Dumbbell",v:"Standing",o:"Front"},
+  "front_raise_plate":{p:"shoulder_raise",r:"Plate",v:"Standing",o:"Front"},
+  "face_pull_cable":{p:"face_pull",r:"Voltra"},
+  "face_pull_band":{p:"face_pull",r:"Voltra",b:1,o:"Band"},
+  "upright_row_barbell":{p:"upright_row",r:"Barbell"},
+  "upright_row_dumbbell":{p:"upright_row",r:"Dumbbell"},
+  "upright_row_cable":{p:"upright_row",r:"Voltra"},
+  "upright_row_dumbbell_single":{p:"upright_row",r:"Dumbbell",u:1},
+  "upright_row_staggered_db_high_pull":{p:"upright_row",r:"Dumbbell",o:"Staggered High Pull"},
+  "rear_delt_cable":{p:"rear_delt_fly",r:"Voltra"},
+  "rear_delt_dumbbell_chest_supported":{p:"rear_delt_fly",r:"Dumbbell",o:"Chest Supported"},
+  "rear_delt_dumbbell":{p:"rear_delt_fly",r:"Dumbbell"},
+  "rear_delt_machine":{p:"rear_delt_fly",r:"Voltra",o:"Machine"},
+  "rear_delt_band":{p:"rear_delt_fly",r:"Dumbbell",b:1,o:"Band"},
+  "shrug_barbell":{p:"shrug",r:"Barbell"},
+  "shrug_dumbbell":{p:"shrug",r:"Dumbbell"},
+  "shrug_cable":{p:"shrug",r:"Voltra"},
+  "shrug_trap_bar":{p:"shrug",r:"Trap Bar"},
+  "shrug_smith":{p:"shrug",r:"Voltra",o:"Smith Machine"},
+  "shoulder_w_band":{p:"shoulder_rotation",r:"Dumbbell",o:"W Rotation Band"},
+  "band_pullaparts":{p:"shoulder_rotation",r:"Dumbbell",o:"Pullaparts Band"},
+  "sunrise_raises":{p:"shoulder_rotation",r:"Dumbbell",o:"Sunrise"},
+  "clock_raises":{p:"shoulder_rotation",r:"Dumbbell",o:"Clock"},
+  "jesus_raises":{p:"shoulder_rotation",r:"Dumbbell",o:"Jesus"},
+  "curl_dumbbell":{p:"bicep_curl",r:"Dumbbell",v:"Standing"},
+  "curl_dumbbell_incline_seated":{p:"bicep_curl",r:"Dumbbell",v:"Incline"},
+  "curl_dumbbell_concentration":{p:"bicep_curl",r:"Dumbbell",v:"Seated",o:"Concentration"},
+  "curl_dumbbell_spider":{p:"bicep_curl",r:"Dumbbell",v:"Incline",o:"Spider"},
+  "curl_barbell":{p:"bicep_curl",r:"Barbell",v:"Standing"},
+  "curl_barbell_ez":{p:"bicep_curl",r:"Barbell",v:"Standing",o:"EZ Bar"},
+  "curl_barbell_preacher":{p:"bicep_curl",r:"Barbell",v:"Preacher"},
+  "curl_barbell_spider":{p:"bicep_curl",r:"Barbell",v:"Incline",o:"Spider"},
+  "curl_cable":{p:"bicep_curl",r:"Voltra",v:"Standing"},
+  "curl_cable_rope":{p:"bicep_curl",r:"Voltra",v:"Standing",o:"Rope"},
+  "curl_cable_high":{p:"bicep_curl",r:"Voltra",v:"Standing",o:"High Cable"},
+  "curl_cable_single_arm":{p:"bicep_curl",r:"Voltra",v:"Standing",u:1},
+  "curl_dumbbell_hammer":{p:"bicep_curl",r:"Dumbbell",v:"Standing",o:"Hammer"},
+  "curl_cable_hammer":{p:"bicep_curl",r:"Voltra",v:"Standing",o:"Hammer"},
+  "curl_machine":{p:"bicep_curl",r:"Voltra",v:"Seated",o:"Machine"},
+  "curl_dumbbell_preacher":{p:"bicep_curl",r:"Dumbbell",v:"Preacher"},
+  "curl_dumbbell_zottman":{p:"bicep_curl",r:"Dumbbell",v:"Standing",o:"Zottman"},
+  "curl_suspension":{p:"bicep_curl",r:"Voltra",v:"Standing",o:"Suspension"},
+  "curl_plate":{p:"bicep_curl",r:"Plate",v:"Standing"},
+  "tri_ext_dumbbell_overhead":{p:"tricep_extension",r:"Dumbbell",v:"Standing",o:"Overhead"},
+  "tri_ext_barbell_overhead":{p:"tricep_extension",r:"Barbell",v:"Standing",o:"Overhead"},
+  "tri_ext_cable_overhead":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Overhead"},
+  "tri_ext_cable_overhead_single":{p:"tricep_extension",r:"Voltra",v:"Standing",u:1,o:"Overhead"},
+  "tri_ext_cable_handle":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Handle"},
+  "tri_ext_cable_handleless":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Handleless"},
+  "tri_ext_machine":{p:"tricep_extension",r:"Voltra",v:"Seated",o:"Machine"},
+  "tri_ext_band":{p:"tricep_extension",r:"Dumbbell",v:"Standing",b:1,o:"Band"},
+  "tri_ext_suspension_ring":{p:"tricep_extension",r:"Voltra",v:"Flat",o:"Ring"},
+  "tri_ext_suspension":{p:"tricep_extension",r:"Voltra",v:"Flat",o:"Suspension"},
+  "tri_ext_plate":{p:"tricep_extension",r:"Dumbbell",v:"Flat",o:"Plate"},
+  "tri_ext_dumbbell_single":{p:"tricep_extension",r:"Dumbbell",v:"Standing",u:1},
+  "tri_push_cable_bar":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Pushdown Bar"},
+  "tri_push_cable_rope":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Pushdown Rope"},
+  "tri_push_cable_reverse":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Pushdown Reverse"},
+  "tri_push_cable_single":{p:"tricep_extension",r:"Voltra",v:"Standing",u:1,o:"Pushdown"},
+  "tri_push_cable_single_handle":{p:"tricep_extension",r:"Voltra",v:"Standing",u:1,o:"Pushdown Handle"},
+  "skull_barbell":{p:"tricep_extension",r:"Barbell",v:"Flat",o:"Skullcrusher"},
+  "skull_dumbbell":{p:"tricep_extension",r:"Dumbbell",v:"Flat",o:"Skullcrusher"},
+  "skull_cambered":{p:"tricep_extension",r:"Barbell",v:"Flat",o:"Cambered Skullcrusher"},
+  "kickback_dumbbell":{p:"tricep_extension",r:"Dumbbell",v:"Standing",o:"Kickback"},
+  "kickback_cable":{p:"tricep_extension",r:"Voltra",v:"Standing",o:"Kickback"},
+  "squat_barbell_back":{p:"squat",r:"Barbell",v:"Back"},
+  "squat_barbell_front":{p:"squat",r:"Barbell",v:"Front"},
+  "squat_barbell_overhead":{p:"squat",r:"Barbell",v:"Front",o:"Overhead"},
+  "squat_barbell_pause":{p:"squat",r:"Barbell",v:"Back",o:"Pause"},
+  "squat_barbell_zercher":{p:"squat",r:"Barbell",v:"Zercher"},
+  "squat_barbell_cossack":{p:"squat",r:"Barbell",v:"Cossack"},
+  "squat_barbell_clean":{p:"squat",r:"Barbell",v:"Front",o:"Clean"},
+  "squat_barbell_thruster":{p:"squat",r:"Barbell",v:"Front",o:"Thruster"},
+  "squat_landmine":{p:"squat",r:"Landmine",v:"Goblet"},
+  "squat_landmine_hack":{p:"squat",r:"Landmine",v:"Hack"},
+  "squat_dumbbell_goblet":{p:"squat",r:"Dumbbell",v:"Goblet"},
+  "squat_kettlebell_goblet":{p:"squat",r:"Dumbbell",v:"Goblet",o:"Kettlebell"},
+  "squat_cable_goblet":{p:"squat",r:"Voltra",v:"Goblet"},
+  "squat_sissy":{p:"squat",r:"Dumbbell",v:"Sissy",o:"Weighted"},
+  "squat_sissy_cable":{p:"squat",r:"Voltra",v:"Sissy"},
+  "squat_sissy_banded":{p:"squat",r:"Dumbbell",v:"Sissy",b:1},
+  "squat_spanish":{p:"squat",r:"Dumbbell",v:"Cossack",b:1,o:"Spanish"},
+  "squat_belt":{p:"squat",r:"Barbell",v:"Belt"},
+  "squat_belt_cable":{p:"squat",r:"Voltra",v:"Belt"},
+  "squat_box_pistol":{p:"squat",r:"Dumbbell",v:"Cossack",o:"Box Pistol"},
+  "hack_squat_barbell":{p:"squat",r:"Barbell",v:"Hack"},
+  "hack_squat_machine":{p:"squat",r:"Voltra",v:"Hack",o:"Machine"},
+  "leg_press_machine":{p:"squat",r:"Voltra",v:"Hack",o:"Leg Press"},
+  "leg_press_machine_horizontal":{p:"squat",r:"Voltra",v:"Hack",o:"Leg Press Horizontal"},
+  "leg_press_single_leg":{p:"squat",r:"Voltra",v:"Hack",o:"Leg Press Single Leg"},
+  "leg_press_calf":{p:"calf_raise",r:"Voltra",v:"Seated",o:"Leg Press"},
+  "split_squat_barbell":{p:"lunge",r:"Barbell",v:"Stationary"},
+  "split_squat_dumbbell":{p:"lunge",r:"Dumbbell",v:"Stationary"},
+  "split_squat_stationary":{p:"lunge",r:"Dumbbell",v:"Stationary",o:"BW"},
+  "bulgarian_split_squat_bodyweight":{p:"lunge",r:"Dumbbell",v:"BSS",o:"BW"},
+  "bulgarian_split_squat_barbell":{p:"lunge",r:"Barbell",v:"BSS"},
+  "bulgarian_goblet":{p:"lunge",r:"Goblet",v:"BSS"},
+  "lunge_dumbbell":{p:"lunge",r:"Dumbbell",v:"Walking"},
+  "lunge_barbell":{p:"lunge",r:"Barbell",v:"Walking"},
+  "step_up_dumbbell":{p:"lunge",r:"Dumbbell",v:"Step-Up"},
+  "leg_ext_machine":{p:"leg_extension",r:"Voltra",o:"Machine"},
+  "leg_ext_plate_loaded":{p:"leg_extension",r:"Voltra",o:"Plate-Loaded"},
+  "leg_ext_machine_iso":{p:"leg_extension",r:"Voltra",o:"Iso Machine"},
+  "leg_ext_reverse_nordic":{p:"reverse_nordic",r:"BW+"},
+  "deadlift_barbell":{p:"deadlift",r:"Barbell"},
+  "deadlift_trap_bar":{p:"deadlift",r:"Trap Bar"},
+  "deadlift_landmine":{p:"deadlift",r:"Barbell",o:"Landmine"},
+  "deadlift_jefferson_curl":{p:"jefferson_curl",r:"Barbell"},
+  "deadlift_trap_bar_jump":{p:"deadlift",r:"Trap Bar",o:"Jump"},
+  "rdl_barbell":{p:"rdl",r:"Barbell"},
+  "rdl_dumbbell":{p:"rdl",r:"Dumbbell"},
+  "rdl_dumbbell_single_leg":{p:"rdl",r:"Dumbbell",u:1},
+  "rdl_dumbbell_kneeling_single":{p:"rdl",r:"Dumbbell",u:1,o:"Kneeling"},
+  "rdl_voltra":{p:"rdl",r:"Voltra"},
+  "good_morning_barbell":{p:"good_morning",r:"Barbell"},
+  "good_morning_band":{p:"good_morning",r:"Barbell",b:1,o:"Band"},
+  "leg_curl_plate_loaded":{p:"ham_curl",r:"Voltra",o:"Plate-Loaded"},
+  "leg_curl_machine_lying":{p:"ham_curl",r:"Voltra",o:"Lying Machine"},
+  "leg_curl_machine_iso":{p:"ham_curl",r:"Voltra",o:"Iso Machine"},
+  "ghd_leg_curl":{p:"ghr",r:"BW+",o:"FA"},
+  "nordic_hamstring":{p:"nordic_curl",r:"BW+"},
+  "nordic_inclined":{p:"nordic_curl",r:"BW+",o:"Inclined FA"},
+  "voltra_ham_curl":{p:"ham_curl",r:"Voltra",o:"Standing"},
+  "hip_thrust_barbell":{p:"hip_thrust",r:"Barbell"},
+  "hip_thrust_machine":{p:"hip_thrust",r:"Voltra",o:"Machine"},
+  "calf_seated":{p:"calf_raise",r:"Voltra",v:"Seated",o:"Machine"},
+  "calf_dumbbell_seated":{p:"calf_raise",r:"Dumbbell",v:"Seated"},
+  "calf_barbell_seated":{p:"calf_raise",r:"Barbell",v:"Seated"},
+  "calf_machine_press":{p:"calf_raise",r:"Voltra",v:"Seated",o:"Machine Press"},
+  "calf_standing_machine":{p:"calf_raise",r:"Voltra",v:"Standing",o:"Machine"},
+  "calf_landmine":{p:"calf_raise",r:"Landmine",v:"Standing"},
+  "calf_hanging_landmine":{p:"calf_raise",r:"Landmine",v:"Standing",o:"Hanging"},
+  "calf_barbell_standing_single":{p:"calf_raise",r:"Barbell",v:"Standing",u:1},
+  "calf_belt":{p:"calf_raise",r:"Belt",v:"Standing"},
+  "calf_hanging_cable":{p:"calf_raise",r:"Voltra",v:"Standing",o:"Hanging Cable"},
+  "calf_hanging_barbell":{p:"calf_raise",r:"Barbell",v:"Standing",o:"Hanging"},
+  "crunch_cable":{p:"crunch",r:"Voltra",o:"Cable"},
+  "crunch_machine":{p:"crunch",r:"Voltra",o:"Machine"},
+  "crunch_bench":{p:"crunch",r:"BW+",o:"Bench"},
+  "crunch_db":{p:"crunch",r:"BW+",o:"Dumbbell"},
+  "crunch_band":{p:"crunch",r:"BW+",o:"Band"},
+  "crunch_weighted":{p:"crunch",r:"BW+",o:"Weighted"},
+  "crunch_ghd":{p:"crunch",r:"BW+",o:"GHD FA"},
+  "crunch_suspension":{p:"crunch",r:"BW+",o:"Suspension"},
+  "crunch_decline_weighted":{p:"crunch",r:"BW+",o:"Decline Weighted"},
+  "knee_raise_parallel":{p:"leg_raise",r:"BW+",o:"Knee Raise Parallel"},
+  "hanging_leg_raise":{p:"leg_raise",r:"BW+",o:"Hanging"},
+  "hanging_knee_raise":{p:"leg_raise",r:"BW+",o:"Hanging Knee"},
+  "leg_raise_decline_bench":{p:"leg_raise",r:"BW+",o:"Decline Bench"},
+  "captains_chair":{p:"leg_raise",r:"BW+",o:"Captain's Chair"},
+  "ghd_leg_lift":{p:"leg_raise",r:"BW+",o:"GHD FA"},
+  "lying_leg_raise":{p:"leg_raise",r:"BW+",o:"Lying"},
+  "v_up":{p:"leg_raise",r:"BW+",o:"V Up"},
+  "jackknife_suspension":{p:"leg_raise",r:"BW+",o:"Jackknife Suspension"},
+  "ab_wheel":{p:"ab_wheel",r:"BW+"},
+  "plank_standard":{p:"plank",r:"BW+",o:"Standard"},
+  "plank_side":{p:"plank",r:"BW+",o:"Side"},
+  "plank_hollow_rock":{p:"plank",r:"BW+",o:"Hollow Rock"},
+  "plank_bird_dog":{p:"plank",r:"BW+",o:"Bird Dog"},
+  "plank_mountain_climber":{p:"plank",r:"BW+",o:"Mountain Climber"},
+  "plank_v_up_weighted":{p:"plank",r:"BW+",o:"Weighted V-Ups"},
+  "pallof_band":{p:"pallof_press",r:"Voltra",b:1,o:"Band"},
+  "pallof_cable":{p:"pallof_press",r:"Voltra"},
+  "pallof_twist_press":{p:"pallof_press",r:"Voltra",o:"Twist Press"},
+  "cable_twist_up_down":{p:"pallof_press",r:"Voltra",o:"Cable Twist"},
+  "kneeling_landmine_rotation":{p:"pallof_press",r:"Voltra",o:"Kneeling LM Rotation"},
+  "russian_twist_weighted":{p:"pallof_press",r:"Voltra",o:"Russian Twist"},
+  "side_bend_dumbbell":{p:"side_bend",r:"Dumbbell"},
+  "side_crunch_cable":{p:"side_bend",r:"Voltra",o:"Side Crunch"},
+  "weighted_ql_bend":{p:"side_bend",r:"Dumbbell",o:"QL Bend"},
+  "farmers_carry_dumbbell":{p:"farmers_carry",r:"Dumbbell"},
+  "rowing_machine_cardio":{p:"rowing_machine",r:"Voltra"}
+};
+
+// Build a reverse map: new variant ID → old legacy variant ID
+// This lets us preserve history when the same combo was previously logged under the old ID
+const legacyReverseMap = {}; // newVariantId → oldVariantId
+Object.entries(LEGACY_VARIANT_MAP).forEach(([oldId, spec]) => {
+  const mods = { bands: !!spec.b, unilateral: !!spec.u, other: spec.o || '' };
+  const newId = buildVariantId(spec.p, spec.r, spec.v || '', mods);
+  legacyReverseMap[newId] = oldId;
+});
+
+// Resolve a variant ID: if it's a legacy ID, return it directly.
+// If it's a new-style ID, check if there's a legacy equivalent.
+function resolveVariantId(parentId, resistance, mainVariant, mods) {
+  const newId = buildVariantId(parentId, resistance, mainVariant, mods);
+  return legacyReverseMap[newId] || newId;
+}
+
+// Get a display name for any variantId (legacy or new)
+function getHierarchicalDisplayName(variantId) {
+  const legacy = LEGACY_VARIANT_MAP[variantId];
+  if (legacy) {
+    const h = hierarchyMap[legacy.p];
+    if (h) {
+      const abbrev = RES_ABBREV[legacy.r] || legacy.r;
+      const mods = { bands: !!legacy.b, unilateral: !!legacy.u, other: legacy.o || '' };
+      return buildExerciseName(h.name, abbrev, legacy.v || '', mods);
+    }
+  }
+  // Try parsing new-style ID
+  const parts = variantId.split('__');
+  const h = hierarchyMap[parts[0]];
+  if (h) {
+    // Rebuild from parts
+    return getVariantDisplayName(variantId); // fallback to existing
+  }
+  return getVariantDisplayName(variantId);
+}
 </script>
 
 <script>
@@ -1764,8 +2337,8 @@ let editingSetContext = null; // {sessionExIndex, setIndex}
 
 // ── Convenience: get sessions sorted newest-first ──
 async function getSortedSessions() {
-  const sessions = await getSortedSessions();
-  return sessions;
+  const sessions = await dbGetAll('sessions');
+  return sessions.sort((a, b) => b.startTime - a.startTime);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2799,9 +3372,15 @@ let pickerMuscleFilter = '';
 
 function openExercisePicker() {
   pickerMuscleFilter = '';
+  pickerState = { step: 'lift', liftId: null, resistance: null, variant: null, mods: {bands:false,unilateral:false,other:''}, customName: '' };
   document.getElementById('pick-ex-search').value = '';
+  document.getElementById('pick-ex-search').style.display = '';
+  document.getElementById('pick-ex-filters').style.display = '';
+  document.getElementById('pick-ex-steps').style.display = 'none';
+  document.getElementById('pick-ex-back').style.display = 'none';
+  document.getElementById('pick-ex-footer').style.display = 'none';
   renderPickerFilters();
-  renderPickerList('');
+  renderPickerStep();
   const overlay = document.getElementById('modal-pick-exercise');
   overlay.classList.add('open', 'elevated');
   document.getElementById('modal-backdrop').classList.add('show');
@@ -2813,6 +3392,8 @@ function closeExercisePicker() {
   const anyOpen = document.querySelector('.modal-overlay.open');
   if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
+
+let pickerState = { step: 'lift', liftId: null, resistance: null, variant: null, mods: {bands:false,unilateral:false,other:''}, customName: '' };
 
 function renderPickerFilters() {
   const container = document.getElementById('pick-ex-filters');
@@ -2827,43 +3408,306 @@ function renderPickerFilters() {
 function setPickerMuscle(m) {
   pickerMuscleFilter = m;
   renderPickerFilters();
-  renderPickerList(document.getElementById('pick-ex-search').value);
+  renderPickerStep();
 }
 
 document.getElementById('pick-ex-search').addEventListener('input', e => {
-  renderPickerList(e.target.value);
+  renderPickerStep();
 });
 
-function renderPickerList(query) {
-  const q = query.toLowerCase().trim();
+function renderPickerStep() {
+  const step = pickerState.step;
   const list = document.getElementById('pick-ex-list');
-  const results = [];
+  const stepsEl = document.getElementById('pick-ex-steps');
+  const backBtn = document.getElementById('pick-ex-back');
+  const searchEl = document.getElementById('pick-ex-search');
+  const filtersEl = document.getElementById('pick-ex-filters');
+  const footerEl = document.getElementById('pick-ex-footer');
 
-  EXERCISE_LIBRARY.parents.forEach(parent => {
-    if (pickerMuscleFilter && !parent.primary_muscles.includes(pickerMuscleFilter) && !parent.secondary_muscles.includes(pickerMuscleFilter)) return;
-    parent.variants.forEach(v => {
-      const fullName = `${parent.name} ${v.name}`.toLowerCase();
-      if (q && !fullName.includes(q)) return;
-      results.push({parent, variant: v});
-    });
+  if (step === 'lift') {
+    // Step 1: Pick a main lift
+    stepsEl.style.display = 'none';
+    backBtn.style.display = 'none';
+    searchEl.style.display = '';
+    filtersEl.style.display = '';
+    footerEl.style.display = 'none';
+    renderPickerLiftList();
+  } else {
+    searchEl.style.display = 'none';
+    filtersEl.style.display = 'none';
+    stepsEl.style.display = 'flex';
+    backBtn.style.display = '';
+    renderStepIndicator();
+
+    if (step === 'resistance') renderPickerResistance();
+    else if (step === 'variant') renderPickerVariant();
+    else if (step === 'modifiers') renderPickerModifiers();
+  }
+}
+
+function renderStepIndicator() {
+  const el = document.getElementById('pick-ex-steps');
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  const hasVariants = h.variants.length > 0;
+  const steps = [
+    { label: h.name, key: 'lift' },
+    { label: 'Type', key: 'resistance' },
+  ];
+  if (hasVariants) steps.push({ label: 'Variant', key: 'variant' });
+  steps.push({ label: 'Modifiers', key: 'modifiers' });
+
+  const currentIdx = steps.findIndex(s => s.key === pickerState.step);
+  el.innerHTML = steps.map((s, i) => {
+    const cls = i < currentIdx ? 'done' : (i === currentIdx ? 'active' : '');
+    const arrow = i > 0 ? '<span class="picker-step-arrow">›</span>' : '';
+    return `${arrow}<div class="picker-step ${cls}">
+      <span class="picker-step-num">${i < currentIdx ? '✓' : i+1}</span>
+      <span>${escHtml(s.label)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderPickerLiftList() {
+  const q = (document.getElementById('pick-ex-search').value || '').toLowerCase().trim();
+  const list = document.getElementById('pick-ex-list');
+
+  // Group lifts by movement pattern
+  const groups = {};
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','carry'];
+
+  EXERCISE_HIERARCHY.forEach(h => {
+    if (pickerMuscleFilter) {
+      if (!h.muscles.includes(pickerMuscleFilter) && !(h.sec||[]).includes(pickerMuscleFilter)) return;
+    }
+    if (q && !h.name.toLowerCase().includes(q)) return;
+    const pat = h.pattern;
+    if (!groups[pat]) groups[pat] = [];
+    groups[pat].push(h);
   });
 
-  if (results.length === 0) {
-    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3)">No exercises found</div>`;
+  if (Object.keys(groups).length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">No exercises found</div>';
     return;
   }
 
-  list.innerHTML = results.slice(0, 80).map(({parent, variant}) => `
-    <div class="variant-row" onclick="pickExercise('${variant.id}')">
-      <div class="variant-row-left">
-        <div class="variant-name">${escHtml(parent.name)} <span style="color:var(--text3)">— ${escHtml(variant.name)}</span></div>
-        <div class="variant-equip-tags">
-          ${variant.equipment.map(e => `<span class="tag tag-equipment">${e}</span>`).join('')}
+  let html = '';
+  patternOrder.forEach(pat => {
+    if (!groups[pat]) return;
+    html += `<div class="picker-section-label">${pat}</div>`;
+    groups[pat].forEach(h => {
+      const muscleTags = h.muscles.map(m => `<span class="tag tag-muscle">${m}</span>`).join('');
+      const resTags = h.resistances.map(r => `<span class="tag tag-equipment">${RES_ABBREV[r]||r}</span>`).join(' ');
+      html += `<div class="variant-row" onclick="pickerSelectLift('${h.id}')">
+        <div class="variant-row-left">
+          <div class="variant-name">${escHtml(h.name)}</div>
+          <div class="variant-equip-tags">${muscleTags} ${resTags}</div>
         </div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>`).join('');
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    });
+  });
+  list.innerHTML = html;
 }
+
+function pickerSelectLift(liftId) {
+  const h = hierarchyMap[liftId];
+  if (!h) return;
+  pickerState.liftId = liftId;
+  pickerState.resistance = null;
+  pickerState.variant = null;
+  pickerState.mods = {bands:false,unilateral:false,other:''};
+  pickerState.customName = '';
+
+  if (h.resistances.length === 1) {
+    // Auto-select single resistance
+    pickerState.resistance = h.resistances[0];
+    if (h.variants.length > 0) {
+      pickerState.step = 'variant';
+    } else {
+      pickerState.step = 'modifiers';
+    }
+  } else {
+    pickerState.step = 'resistance';
+  }
+  renderPickerStep();
+}
+
+function renderPickerResistance() {
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  const list = document.getElementById('pick-ex-list');
+
+  list.innerHTML = `<div class="picker-section-label">Select Resistance Type</div>
+    <div class="picker-grid">${h.resistances.map(r => `
+      <div class="picker-option" onclick="pickerSelectResistance('${r}')">
+        <div class="picker-option-name">${escHtml(r)}</div>
+        <div class="picker-option-sub">${RES_ABBREV[r] || r}</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function pickerSelectResistance(r) {
+  pickerState.resistance = r;
+  const h = hierarchyMap[pickerState.liftId];
+  if (h && h.variants.length > 0) {
+    pickerState.step = 'variant';
+  } else {
+    pickerState.step = 'modifiers';
+  }
+  renderPickerStep();
+}
+
+function renderPickerVariant() {
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  const list = document.getElementById('pick-ex-list');
+
+  list.innerHTML = `<div class="picker-section-label">Select Variant</div>
+    <div class="picker-grid">${h.variants.map(v => `
+      <div class="picker-option" onclick="pickerSelectVariant('${v}')">
+        <div class="picker-option-name">${escHtml(v)}</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function pickerSelectVariant(v) {
+  pickerState.variant = v;
+  pickerState.step = 'modifiers';
+  renderPickerStep();
+}
+
+function renderPickerModifiers() {
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  const list = document.getElementById('pick-ex-list');
+  const footerEl = document.getElementById('pick-ex-footer');
+  footerEl.style.display = '';
+
+  // Build preview name
+  const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
+  const previewName = buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+
+  let modsHtml = '<div class="picker-section-label">Modifiers (optional)</div>';
+
+  if (h.mods.bands) {
+    modsHtml += `<div class="picker-modifier-row ${pickerState.mods.bands ? 'active' : ''}" onclick="pickerToggleMod('bands')">
+      <div class="picker-modifier-check">${pickerState.mods.bands ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+      <div class="picker-modifier-label">Bands</div>
+    </div>`;
+  }
+  if (h.mods.unilateral) {
+    modsHtml += `<div class="picker-modifier-row ${pickerState.mods.unilateral ? 'active' : ''}" onclick="pickerToggleMod('unilateral')">
+      <div class="picker-modifier-check">${pickerState.mods.unilateral ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+      <div class="picker-modifier-label">Unilateral</div>
+    </div>`;
+  }
+  if (h.mods.other) {
+    modsHtml += `<div style="margin-top:6px">
+      <div class="input-label" style="margin-bottom:4px">Other</div>
+      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Pause, Machine…" value="${escHtml(pickerState.mods.other)}" oninput="pickerState.mods.other=this.value;updatePickerPreview()">
+    </div>`;
+  }
+
+  modsHtml += `<div class="picker-preview" id="picker-preview">
+    <div class="picker-preview-label">Exercise name</div>
+    <div class="picker-preview-name" id="picker-preview-name">${escHtml(previewName)}</div>
+    <input class="picker-name-edit" id="picker-custom-name" type="text"
+      placeholder="${escHtml(previewName)}" value="${escHtml(pickerState.customName)}"
+      oninput="pickerState.customName=this.value">
+    <div style="font-size:11px;color:var(--text3);margin-top:4px">Leave blank to use auto-generated name</div>
+  </div>`;
+
+  list.innerHTML = modsHtml;
+}
+
+function pickerToggleMod(mod) {
+  pickerState.mods[mod] = !pickerState.mods[mod];
+  renderPickerModifiers();
+}
+
+function updatePickerPreview() {
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
+  const name = buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+  const el = document.getElementById('picker-preview-name');
+  if (el) el.textContent = name;
+  const input = document.getElementById('picker-custom-name');
+  if (input) input.placeholder = name;
+}
+
+function pickerGoBack() {
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) { pickerState.step = 'lift'; renderPickerStep(); return; }
+  const hasVariants = h.variants.length > 0;
+  const hasMultiRes = h.resistances.length > 1;
+
+  if (pickerState.step === 'modifiers') {
+    if (hasVariants) pickerState.step = 'variant';
+    else if (hasMultiRes) pickerState.step = 'resistance';
+    else pickerState.step = 'lift';
+  } else if (pickerState.step === 'variant') {
+    if (hasMultiRes) pickerState.step = 'resistance';
+    else pickerState.step = 'lift';
+  } else if (pickerState.step === 'resistance') {
+    pickerState.step = 'lift';
+  } else {
+    pickerState.step = 'lift';
+  }
+  renderPickerStep();
+}
+
+// Confirm selection
+document.getElementById('pick-ex-confirm').addEventListener('click', () => {
+  if (!pickerState.liftId || !pickerState.resistance) return;
+  const h = hierarchyMap[pickerState.liftId];
+  if (!h) return;
+  if (h.variants.length > 0 && !pickerState.variant) return;
+
+  // Resolve to a variant ID (prefer legacy if exists)
+  const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, pickerState.variant || '', pickerState.mods);
+
+  // Check if this variant exists in variantMap, if not create it
+  if (!variantMap[variantId]) {
+    const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
+    const displayName = pickerState.customName.trim() || buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+    
+    // Find or create parent in old library
+    let parent = parentMap[pickerState.liftId] || parentMap['hierarchy_' + pickerState.liftId];
+    if (!parent) {
+      parent = {
+        id: 'hierarchy_' + pickerState.liftId,
+        name: h.name,
+        primary_muscles: h.muscles,
+        secondary_muscles: h.sec || [],
+        movement_pattern: h.pattern,
+        variants: []
+      };
+      EXERCISE_LIBRARY.parents.push(parent);
+      parentMap[parent.id] = parent;
+    }
+
+    const newVariant = { id: variantId, name: displayName, equipment: [pickerState.resistance.toLowerCase().replace(/[^a-z0-9+]/g,'_')] };
+    parent.variants.push(newVariant);
+    variantMap[variantId] = { variant: newVariant, parent };
+
+    // Persist
+    dbPut('custom_variants', { id: variantId, parentId: parent.id, name: displayName, equipment: newVariant.equipment });
+  } else if (pickerState.customName.trim()) {
+    // User provided custom name, save as override
+    const info = variantMap[variantId];
+    if (info) {
+      info.variant.name = pickerState.customName.trim();
+      dbPut('variant_overrides', { id: variantId, name: pickerState.customName.trim(), equipment: info.variant.equipment });
+    }
+  }
+
+  if (pendingPickExerciseCallback) {
+    pendingPickExerciseCallback(variantId);
+    pendingPickExerciseCallback = null;
+  }
+});
 
 function pickExercise(variantId) {
   if (pendingPickExerciseCallback) {
