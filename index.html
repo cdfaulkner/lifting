@@ -1852,16 +1852,20 @@ function idbGetAll(store, indexName, query) {
 }
 
 function dbGet(store, key) {
-  return SUPABASE_STORES.has(store) ? sbGet(store, key) : idbGet(store, key);
+  if (!SUPABASE_STORES.has(store)) return idbGet(store, key);
+  return sbGet(store, key).catch(() => idbGet(store, key));
 }
 function dbPut(store, val) {
-  return SUPABASE_STORES.has(store) ? sbPut(store, val) : idbPut(store, val);
+  if (!SUPABASE_STORES.has(store)) return idbPut(store, val);
+  return sbPut(store, val).catch(() => idbPut(store, val));
 }
 function dbDelete(store, key) {
-  return SUPABASE_STORES.has(store) ? sbDelete(store, key) : idbDelete(store, key);
+  if (!SUPABASE_STORES.has(store)) return idbDelete(store, key);
+  return sbDelete(store, key).catch(() => idbDelete(store, key));
 }
 function dbGetAll(store, indexName, query) {
-  return SUPABASE_STORES.has(store) ? sbGetAll(store) : idbGetAll(store, indexName, query);
+  if (!SUPABASE_STORES.has(store)) return idbGetAll(store, indexName, query);
+  return sbGetAll(store).catch(() => idbGetAll(store, indexName, query));
 }
 
 function uid() {
@@ -5087,12 +5091,14 @@ async function migrateToSupabase() {
 
 async function init() {
   await openDB();
-  await migrateToSupabase();
-  await loadVariantOverrides();
-  await loadPRRecords();
-  await loadExerciseNotes();
-  await seedBWData();
-  await seedDefaultTemplates();
+  migrateToSupabase().catch(e => console.warn('Migration skipped:', e));
+  await Promise.allSettled([
+    loadVariantOverrides(),
+    loadPRRecords(),
+    loadExerciseNotes(),
+  ]);
+  await seedBWData().catch(e => console.warn('seedBW skipped:', e));
+  await seedDefaultTemplates().catch(e => console.warn('seedTemplates skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
@@ -5100,7 +5106,13 @@ async function init() {
   renderHome();
 }
 
-init().catch(console.error);
+init().catch(e => {
+  console.error('Init failed:', e);
+  // Show app anyway so user isn't stuck on loading screen
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  renderHome();
+});
 
 
 
