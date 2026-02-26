@@ -649,13 +649,14 @@ select option { background: var(--bg3); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
 .template-name {
   font-family: var(--display);
   font-size: 15px;
   font-weight: 500;
   letter-spacing: -0.01em;
+  flex: 1;
 }
 .template-exercises {
   margin-top: 8px;
@@ -2752,14 +2753,18 @@ function renderSetRow(exIdx, si, set) {
 
 function attachSetInputListeners() {
   document.querySelectorAll('.set-cell-input').forEach(input => {
-    input.addEventListener('change', e => {
+    // Use 'input' event for real-time saving — 'change' only fires on blur which is unreliable on mobile
+    const saveVal = e => {
       const exIdx = parseInt(e.target.dataset.ex);
       const si = parseInt(e.target.dataset.set);
       const field = e.target.dataset.field;
-      const val = parseFloat(e.target.value) || 0;
       if (!activeSession) return;
+      const raw = e.target.value;
+      const val = field === 'reps' ? (parseInt(raw) || 0) : (parseFloat(raw) || 0);
       activeSession.exercises[exIdx].sets[si][field] = val;
-    });
+    };
+    input.addEventListener('input', saveVal);
+    input.addEventListener('change', saveVal);
     // Long press on set row -> open detail
     input.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -3326,6 +3331,8 @@ function renderSparkline(values) {
 // ═══════════════════════════════════════════════════════════════
 // TEMPLATES
 // ═══════════════════════════════════════════════════════════════
+let templateOrder = []; // ordered list of template IDs
+
 async function renderTemplates() {
   const templates = await dbGetAll('templates');
   const list = document.getElementById('template-list');
@@ -3337,9 +3344,20 @@ async function renderTemplates() {
     </div>`;
     return;
   }
-  list.innerHTML = templates.map(t => `
-    <div class="template-card">
+
+  // Apply saved order, append any new templates at end
+  const savedOrder = JSON.parse(localStorage.getItem('tmpl_order') || '[]');
+  const orderedIds = [...savedOrder.filter(id => templates.find(t => t.id === id)),
+                     ...templates.filter(t => !savedOrder.includes(t.id)).map(t => t.id)];
+  templateOrder = orderedIds;
+  const ordered = orderedIds.map(id => templates.find(t => t.id === id)).filter(Boolean);
+
+  list.innerHTML = ordered.map((t, idx) => `
+    <div class="template-card" data-tid="${t.id}" data-idx="${idx}">
       <div class="template-card-header">
+        <div class="tmpl-drag-handle" title="Drag to reorder" style="cursor:grab;color:var(--text3);padding:4px 6px 4px 0;flex-shrink:0;touch-action:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
+        </div>
         <div class="template-name">${escHtml(t.name)}</div>
         <button class="btn btn-ghost btn-sm btn-icon" onclick="openTemplateEditor('${t.id}')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -3353,6 +3371,104 @@ async function renderTemplates() {
         <button class="btn btn-primary btn-sm" onclick="startFromTemplate('${t.id}')">Start Workout</button>
       </div>
     </div>`).join('');
+
+  initTemplateDrag();
+}
+
+function saveTemplateOrder() {
+  localStorage.setItem('tmpl_order', JSON.stringify(templateOrder));
+}
+
+function initTemplateDrag() {
+  const list = document.getElementById('template-list');
+  const cards = [...list.querySelectorAll('.template-card')];
+  let dragging = null, startY = 0, startIdx = 0, origTranslate = 0;
+  let cardHeights = [];
+  let placeholder = null;
+
+  function getIdx(el) { return parseInt(el.dataset.idx); }
+
+  function onPointerDown(e) {
+    const handle = e.target.closest('.tmpl-drag-handle');
+    if (!handle) return;
+    const card = e.target.closest('.template-card');
+    if (!card) return;
+    e.preventDefault();
+
+    dragging = card;
+    startY = e.clientY ?? e.touches?.[0]?.clientY;
+    startIdx = getIdx(card);
+    cardHeights = [...list.querySelectorAll('.template-card')].map(c => c.getBoundingClientRect().height + 10);
+
+    // Create placeholder
+    placeholder = document.createElement('div');
+    placeholder.style.cssText = `height:${card.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:14px;flex-shrink:0`;
+    card.after(placeholder);
+
+    card.style.cssText += `;position:fixed;z-index:999;width:${card.offsetWidth}px;left:${card.getBoundingClientRect().left}px;top:${card.getBoundingClientRect().top}px;opacity:0.95;box-shadow:0 8px 30px rgba(0,0,0,0.4);pointer-events:none;transform:scale(1.02)`;
+    origTranslate = card.getBoundingClientRect().top;
+
+    document.addEventListener('pointermove', onPointerMove, {passive:false});
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('touchmove', e=>e.preventDefault(), {passive:false,once:false});
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    const y = e.clientY ?? e.touches?.[0]?.clientY;
+    const dy = y - startY;
+    dragging.style.top = (origTranslate + dy) + 'px';
+
+    // Find insertion point
+    const siblings = [...list.querySelectorAll('.template-card')];
+    const midY = dragging.getBoundingClientRect().top + dragging.offsetHeight / 2;
+
+    for (const sib of siblings) {
+      if (sib === dragging) continue;
+      const rect = sib.getBoundingClientRect();
+      if (midY < rect.top + rect.height / 2) {
+        sib.before(placeholder);
+        return;
+      }
+    }
+    list.appendChild(placeholder);
+  }
+
+  function onPointerUp() {
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    if (!dragging) return;
+
+    // Restore card style
+    dragging.style.cssText = dragging.style.cssText
+      .replace(/position:fixed[^;]*;/g,'')
+      .replace(/z-index:\d+;/g,'')
+      .replace(/width:[^;]+;/g,'')
+      .replace(/left:[^;]+;/g,'')
+      .replace(/top:[^;]+;/g,'')
+      .replace(/opacity:[^;]+;/g,'')
+      .replace(/box-shadow:[^;]+;/g,'')
+      .replace(/pointer-events:[^;]+;/g,'')
+      .replace(/transform:[^;]+;/g,'');
+
+    placeholder.replaceWith(dragging);
+    placeholder = null;
+
+    // Rebuild order from DOM
+    const newOrder = [...list.querySelectorAll('.template-card')].map(c => c.dataset.tid);
+    if (JSON.stringify(newOrder) !== JSON.stringify(templateOrder)) {
+      templateOrder = newOrder;
+      saveTemplateOrder();
+    }
+
+    dragging = null;
+  }
+
+  // Attach to handles
+  list.querySelectorAll('.tmpl-drag-handle').forEach(h => {
+    h.addEventListener('pointerdown', onPointerDown);
+  });
 }
 
 document.getElementById('new-template-btn').addEventListener('click', () => openTemplateEditor(null));
@@ -3381,14 +3497,30 @@ let tmplExercises = [];
 function renderTemplateExercises(exercises) {
   tmplExercises = exercises ? [...exercises] : [];
   const list = document.getElementById('tmpl-exercises-list');
+  const n = tmplExercises.length;
   list.innerHTML = tmplExercises.map((ex, i) => `
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+        <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
       <div style="flex:1;font-size:13px">${escHtml(getVariantDisplayName(ex.variantId))}</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(ex.defaultSets||[]).length} sets</div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="removeTemplateEx(${i})">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>`).join('');
+}
+
+function moveTmplEx(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= tmplExercises.length) return;
+  [tmplExercises[i], tmplExercises[j]] = [tmplExercises[j], tmplExercises[i]];
+  renderTemplateExercises(tmplExercises);
 }
 
 function removeTemplateEx(i) {
