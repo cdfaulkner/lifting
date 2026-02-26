@@ -472,8 +472,8 @@ select option { background: var(--bg3); }
 
 .sets-header {
   display: grid;
-  grid-template-columns: 28px 1fr 1fr 36px;
-  padding: 6px 14px;
+  grid-template-columns: 36px 1fr 1fr 52px;
+  padding: 6px 10px;
   background: var(--bg3);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -483,63 +483,68 @@ select option { background: var(--bg3); }
   font-size: 10px;
   color: var(--text3);
   letter-spacing: 0.04em;
+  text-align: center;
 }
-.sets-header-cell:nth-child(2),
-.sets-header-cell:nth-child(3) { text-align: center; }
-.sets-header-cell:nth-child(4) { text-align: center; }
+.sets-header-cell:first-child { text-align: left; padding-left: 10px; }
 
 .set-row {
   display: grid;
-  grid-template-columns: 28px 1fr 1fr 36px;
-  align-items: center;
-  padding: 0 14px;
+  grid-template-columns: 36px 1fr 1fr 52px;
+  align-items: stretch;
   border-bottom: 1px solid var(--border);
-  min-height: 44px;
+  min-height: 52px;
   transition: background 0.15s;
 }
 .set-row:last-child { border-bottom: none; }
-.set-row.completed { background: rgba(167,139,250,0.05); }
+.set-row.completed { background: rgba(167,139,250,0.06); }
 .set-row.completed .set-num { color: var(--accent); }
 
 .set-num {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--text3);
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
 }
 
-/* Inline editable cells */
+/* Inline editable cells — large Hevy-style tap targets */
 .set-cell-input {
   background: transparent;
   border: none;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   text-align: center;
-  padding: 8px 4px;
+  padding: 0 6px;
   width: 100%;
-  border-radius: var(--r);
-  transition: background 0.15s;
+  height: 100%;
+  min-height: 52px;
+  border-radius: 0;
   -webkit-appearance: none;
+  transition: background 0.12s;
+  cursor: text;
 }
 .set-cell-input:focus {
-  background: var(--bg4);
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  background: rgba(167,139,250,0.12);
+  outline: none;
   color: var(--text);
 }
+.set-cell-input::placeholder { color: var(--text3); font-size: 16px; }
 .set-row.completed .set-cell-input { color: var(--text2); }
 
 .set-check {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 8px;
 }
 .check-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   border: 2px solid var(--border2);
   background: transparent;
   cursor: pointer;
@@ -549,12 +554,12 @@ select option { background: var(--bg3); }
   transition: all 0.15s;
   flex-shrink: 0;
 }
-.check-btn:active { transform: scale(0.9); }
+.check-btn:active { transform: scale(0.88); }
 .check-btn.done {
   background: var(--gradient);
   border-color: transparent;
 }
-.check-btn svg { width: 14px; height: 14px; }
+.check-btn svg { width: 16px; height: 16px; }
 
 /* Detail expand */
 .set-detail {
@@ -2728,17 +2733,20 @@ function renderActiveSession() {
 function renderSetRow(exIdx, si, set) {
   const w = set.weight || '';
   const r = set.reps || '';
-  return `<div class="set-row ${set.completed ? 'completed' : ''}" id="set-row-${exIdx}-${si}">
-    <div class="set-num">${si + 1}</div>
-    <input class="set-cell-input" type="number" step="0.5" value="${w}" placeholder="—"
+  // Show warmup (W) label for first set if not completed, numbered otherwise
+  const setLabel = si === 0 && !set.completed ? 'W' : String(si + 1);
+  const labelColor = si === 0 && !set.completed ? 'color:var(--accent-pink)' : '';
+  return `<div class="set-row ${set.completed ? 'completed' : ''}" id="set-row-${exIdx}-${si}" onclick="focusSetRow(event, ${exIdx}, ${si})">
+    <div class="set-num" style="${labelColor}">${setLabel}</div>
+    <input class="set-cell-input" type="number" step="0.5" value="${w}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="weight"
       inputmode="decimal">
-    <input class="set-cell-input" type="number" value="${r}" placeholder="—"
+    <input class="set-cell-input" type="number" value="${r}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="reps"
       inputmode="numeric">
     <div class="set-check">
       <button class="check-btn ${set.completed ? 'done' : ''}"
-        onclick="toggleSetComplete(${exIdx}, ${si})"
+        onclick="event.stopPropagation(); toggleSetComplete(${exIdx}, ${si})"
         id="check-${exIdx}-${si}">
         ${set.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
       </button>
@@ -2749,6 +2757,24 @@ function renderSetRow(exIdx, si, set) {
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openSetDetailModal(${exIdx},${si})">Notes / RPE / Rest…</button>
     </div>
   </div>`;
+}
+
+function focusSetRow(e, exIdx, si) {
+  // If tapped on or near the weight column, focus weight; reps column focuses reps
+  const row = document.getElementById('set-row-' + exIdx + '-' + si);
+  if (!row) return;
+  const rect = row.getBoundingClientRect();
+  const relX = e.clientX - rect.left;
+  const midX = rect.width / 2;
+  const wInput = document.querySelector('input[data-ex="' + exIdx + '"][data-set="' + si + '"][data-field="weight"]');
+  const rInput = document.querySelector('input[data-ex="' + exIdx + '"][data-set="' + si + '"][data-field="reps"]');
+  // Only focus if the click wasn't directly on an input or check button
+  if (e.target.tagName === 'INPUT' || e.target.closest('.set-check')) return;
+  if (relX < midX) {
+    wInput && wInput.focus();
+  } else {
+    rInput && rInput.focus();
+  }
 }
 
 function attachSetInputListeners() {
