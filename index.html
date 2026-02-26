@@ -2556,17 +2556,38 @@ document.getElementById('start-empty-btn').addEventListener('click', () => {
 
 async function startFromTemplate(templateId) {
   closeModal('modal-new-workout');
-  const tmpl = await dbGet('templates', templateId);
-  if (!tmpl) return;
-  // Build session exercises from template, prefilled from last session using same exercise
-  const exPromises = tmpl.exercises.map(async (te) => {
-    const lastSets = await getLastSetsForVariant(te.variantId);
-    return {
-      variantId: te.variantId,
-      sets: (te.defaultSets || lastSets || []).map(s => ({...s, completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''}))
-    };
-  });
-  const exercises = await Promise.all(exPromises);
+  let tmpl = null;
+  try { tmpl = await dbGet('templates', templateId); } catch(e) {}
+  if (!tmpl) { showToast('Template not found'); return; }
+  
+  // Build session exercises one at a time so one failure can't block others
+  const exercises = [];
+  for (const te of (tmpl.exercises || [])) {
+    try {
+      let lastSets = null;
+      try { lastSets = await getLastSetsForVariant(te.variantId); } catch(e) {}
+      const defaultSets = te.defaultSets && te.defaultSets.length > 0 ? te.defaultSets : null;
+      const rawSets = defaultSets || lastSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
+      exercises.push({
+        variantId: te.variantId,
+        sets: rawSets.map((s,i) => ({
+          index: i,
+          weight: s.weight || 0,
+          reps: s.reps || 8,
+          completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
+        }))
+      });
+    } catch(e) {
+      console.warn('Failed to build exercise', te.variantId, e);
+      // Add with default sets so the exercise still shows up
+      exercises.push({
+        variantId: te.variantId,
+        sets: [{index:0,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+               {index:1,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+               {index:2,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''}]
+      });
+    }
+  }
   startSession({title: tmpl.name, exercises});
 }
 
@@ -2593,19 +2614,22 @@ function startSession(sessionData) {
     startTime: sessionStartEpoch,
     endTime: null,
     durationMinutes: null,
-    exercises: sessionData.exercises.map(ex => ({
-      variantId: ex.variantId,
-      sets: ex.sets.map((s, i) => ({
-        index: i,
-        weight: s.weight || 0,
-        reps: s.reps || 0,
-        completed: false,
-        completedAt: null,
-        rpe: null,
-        restSeconds: null,
-        notes: ''
-      }))
-    }))
+    exercises: (sessionData.exercises || []).map(ex => {
+      const rawSets = (ex.sets && ex.sets.length > 0) ? ex.sets : [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
+      return {
+        variantId: ex.variantId,
+        sets: rawSets.map((s, i) => ({
+          index: i,
+          weight: typeof s.weight === 'number' ? s.weight : (parseFloat(s.weight) || 0),
+          reps: typeof s.reps === 'number' ? s.reps : (parseInt(s.reps) || 8),
+          completed: s.completed || false,
+          completedAt: s.completedAt || null,
+          rpe: s.rpe || null,
+          restSeconds: s.restSeconds || null,
+          notes: s.notes || ''
+        }))
+      };
+    })
   };
   renderActiveSession();
   document.getElementById('active-session').classList.add('open');
@@ -2667,7 +2691,7 @@ function renderActiveSession() {
         <div class="sets-header-cell">REPS</div>
         <div class="sets-header-cell"></div>
       </div>
-      ${ex.sets.map((set, si) => renderSetRow(exIdx, si, set)).join('')}
+      ${(ex.sets || []).map((set, si) => renderSetRow(exIdx, si, set)).join('')}
     `;
     const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
     const hasNote = !!exerciseNotes[ex.variantId];
