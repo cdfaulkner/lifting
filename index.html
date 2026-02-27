@@ -1928,7 +1928,12 @@ function uid() {
 </script>
 <script id="lib-data-script">
 // Library injected by build
-const EXERCISE_LIBRARY = {"equipment_types":["barbell","dumbbell","cable","machine","landmine","band","bodyweight","trap_bar","kettlebell","plate","suspension","voltra"],"muscle_groups":["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"],"movement_patterns":["push","pull","squat","hinge","carry","isolation","core"],"parents":[{"id":"bench_press","name":"Bench Press","primary_muscles":["chest"],"secondary_muscles":["triceps","shoulders"],"movement_pattern":"push","variants":[{"id":"bench_barbell_flat","name":"Flat (Barbell)","equipment":["barbell"]},{"id":"bench_barbell_incline","name":"Incline (Barbell)","equipment":["barbell"]},{"id":"bench_barbell_decline","name":"Decline (Barbell)","equipment":["barbell"]},{"id":"bench_barbell_close_grip","name":"Close Grip (Barbell)","equipment":["barbell"]},{"id":"bench_barbell_pause","name":"Pause (Barbell)","equipment":["barbell"]},{"id":"bench_barbell_bands","name":"With Bands (Barbell)","equipment":["barbell","band"]},{"id":"bench_barbell_guillotine","name":"Guillotine (Barbell)","equipment":["barbell"]},{"id":"bench_dumbbell_flat","name":"Flat (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_dumbbell_incline","name":"Incline (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_dumbbell_decline","name":"Decline (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_dumbbell_single_arm","name":"Single Arm (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_cable","name":"Cable","equipment":["cable"]},{"id":"bench_dumbbell_isometric","name":"Isometric (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_dumbbell_incline_squeeze","name":"Incline Squeeze Press (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_dumbbell_hex","name":"Hex Press (Dumbbell)","equipment":["dumbbell"]},{"id":"bench_landmine_crush","name":"Crush Press (Landmine)","equipment":["landmine"]},{"id":"bench_plate_loaded","name":"Plate-Loaded Machine","equipment":["machine","plate"]}]},{"id":"chest_fly","name":"Chest Fly","primary_muscles":["chest"],"secondary_muscles":["shoulders"],"movement_pattern":"isolation","variants":[{"id":"fly_dumbbell_flat","name":"Flat (Dumbbell)","equipment":["dumbbell"]},{"id":"fly_dumbbell_incline","name":"Incline (Dumbbell)","equipment":["dumbbell"]},{"id":"fly_dumbbell_decline","name":"Decline (Dumbbell)","equipment":["dumbbell"]},{"id":"fly_cable_crossover","name":"Cable Crossover","equipment":["cable"]},{"id":"fly_cable_low","name":"Low Cable Crossover","equipment":["cable"]},{"id":"fly_cable_seated","name":"Seated Cable","equipment":["cable"]},{"id":"fly_machine_pec_deck","name":"Pec Deck Machine","equipment":["machine"]},{"id":"fly_machine","name":"Machine","equipment":["machine"]},{"id":"fly_band_flat","name":"Flat (Band)","equipment":["band"]},{"id":"fly_band_incline","name":"Incline (Band)","equipment":["band"]},{"id":"fly_band_decline","name":"Decline (Band)","equipment":["band"]},{"id":"fly_dumbbell_partial_bottom","name":"Partial Bottom Range (Dumbbell)","equipment":["dumbbell"]},{"id":"fly_cable_single_arm","name":"Single Arm Cable","equipment":["cable"]},{"id":"fly_judd","name":"Judd Flies","equipment":["cable"]},{"id":"fly_butterfly_ext","name":"Butterfly Extensions","equipment":["machine"]},{"id":"fly_dumbbell_incline_crush","name":"Incline Crush Press (Dumbbell)","equipment":["dumbbell"]}]},{"id":"push_up","name":"Push Up","primary_muscles":["chest"],"secondary_muscles":["triceps","shoulders"],"movement_pattern":"push","variants":[{"id":"pushup_bodyweight","name":"Bodyweight","equipment":["bodyweight"]},{"id":"pushup_weighted","name":"Weighted","equipment":["bodyweight","plate"]},{"id":"pushup_band","name":"Band","equipment":["band"]},{"id":"pushup_clap","name":"Clap","equipment":["bodyweight"]},{"id":"pushup_inclined_close_grip","name":"Incline Close Grip","equipment":["bodyweight"]}]},{"id":"dip","name":"Dip","primary_muscles":["chest"],"secondary_muscles":["triceps","shoulders"],"movement_pattern":"push","variants":[{"id":"dip_chest_bodyweight","name":"Chest Dip (Bodyweight)","equipment":["bodyweight"]},{"id":"dip_chest_weighted","name":"Chest Dip (Weighted)","equipment":["bodyweight"]},{"id":"dip_bench","name":"Bench Dip","equipment":["bodyweight"]},{"id":"dip_ring","name":"Ring Dip","equipment":["suspension"]},{"id":"dip_triceps_machine","name":"Machine","equipment":["machine"]},{"id":"dip_triceps_bar","name":"Triceps Dip (Bar)","equipment":["bodyweight"]}]},{"id":"pull_up","name":"Pull Up / Chin Up","primary_muscles":["back"],"secondary_muscles":["biceps"],"movement_pattern":"pull","variants":[{"id":"pullup_bodyweight","name":"Pull Up (Bodyweight)","equipment":["bodyweight"]},{"id":"pullup_weighted","name":"Pull Up (Weighted)","equipment":["bodyweight"]},{"id":"chinup_bodyweight","name":"Chin Up (Bodyweight)","equipment":["bodyweight"]},{"id":"chinup_weighted","name":"Chin Up (Weighted)","equipment":["bodyweight"]},{"id":"pullup_pelican","name":"Pelican Curl","equipment":["bodyweight"]}]},{"id":"lat_pulldown","name":"Lat Pulldown","primary_muscles":["back"],"secondary_muscles":["biceps"],"movement_pattern":"pull","variants":[{"id":"pulldown_cable_wide","name":"Wide Grip (Cable)","equipment":["cable"]},{"id":"pulldown_cable_close","name":"Close Grip (Cable)","equipment":["cable"]},{"id":"pulldown_cable_single_arm","name":"Single Arm (Cable)","equipment":["cable"]},{"id":"pulldown_cable_reverse_grip","name":"Reverse Grip (Cable)","equipment":["cable"]},{"id":"pulldown_plate_loaded","name":"Plate-Loaded Machine","equipment":["machine","plate"]}]},{"id":"row","name":"Row","primary_muscles":["back"],"secondary_muscles":["biceps","shoulders"],"movement_pattern":"pull","variants":[{"id":"row_barbell_bent_over","name":"Bent Over (Barbell)","equipment":["barbell"]},{"id":"row_barbell_chest_supported","name":"Chest Supported (Barbell)","equipment":["barbell"]},{"id":"row_dumbbell_single_arm","name":"Single Arm (Dumbbell)","equipment":["dumbbell"]},{"id":"row_dumbbell_bent_over","name":"Bent Over (Dumbbell)","equipment":["dumbbell"]},{"id":"row_dumbbell_chest_supported_incline","name":"Chest Supported Incline (Dumbbell)","equipment":["dumbbell"]},{"id":"row_cable_bar","name":"Seated Cable (Bar Grip)","equipment":["cable"]},{"id":"row_cable_v_grip","name":"Seated Cable (V Grip)","equipment":["cable"]},{"id":"row_cable_single_arm","name":"Single Arm Cable","equipment":["cable"]},{"id":"row_cable_high","name":"High Cable Row","equipment":["cable"]},{"id":"row_tbar","name":"T-Bar","equipment":["barbell"]},{"id":"row_landmine_tbar","name":"T-Bar (Landmine)","equipment":["landmine"]},{"id":"row_landmine_single_arm","name":"Single Arm (Landmine)","equipment":["landmine"]},{"id":"row_machine_seated","name":"Seated Machine","equipment":["machine"]},{"id":"row_machine_iso_lateral","name":"Iso-Lateral Machine","equipment":["machine"]},{"id":"row_machine_high_plate","name":"High Row (Plate-Loaded)","equipment":["machine","plate"]},{"id":"row_machine_high","name":"High Row Machine","equipment":["machine"]},{"id":"row_plate_single_arm","name":"Single Arm Plate","equipment":["plate"]},{"id":"row_inverted","name":"Inverted Row (Bodyweight)","equipment":["bodyweight"]},{"id":"row_inverted_weighted","name":"Inverted Row (Weighted)","equipment":["bodyweight"]},{"id":"row_suspension_single_arm","name":"Single Arm Suspension","equipment":["suspension"]},{"id":"row_voltra","name":"Voltra Row","equipment":["voltra"]},{"id":"row_fa","name":"FA Row","equipment":["bodyweight"]},{"id":"row_landmine_combo","name":"Row+Press (Landmine)","equipment":["landmine"]}]},{"id":"straight_arm_pulldown","name":"Straight Arm Pulldown","primary_muscles":["back"],"secondary_muscles":[],"movement_pattern":"pull","variants":[{"id":"sal_cable","name":"Cable","equipment":["cable"]},{"id":"sal_cable_iso_lateral","name":"Iso-Lateral Cable","equipment":["cable"]},{"id":"sal_rope","name":"Rope","equipment":["cable"]}]},{"id":"pullover","name":"Pullover","primary_muscles":["back"],"secondary_muscles":["chest"],"movement_pattern":"pull","variants":[{"id":"pullover_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"pullover_barbell","name":"Barbell","equipment":["barbell"]},{"id":"pullover_machine","name":"Machine","equipment":["machine"]}]},{"id":"back_extension","name":"Back Extension","primary_muscles":["hamstrings","glutes"],"secondary_muscles":["back"],"movement_pattern":"hinge","variants":[{"id":"back_ext_weighted","name":"Weighted (Freakathlete)","equipment":["bodyweight"]},{"id":"back_ext_single_leg","name":"Single Leg (Freakathlete)","equipment":["bodyweight"]},{"id":"back_ext_iso_hold","name":"Iso Hold (Freakathlete)","equipment":["bodyweight"]},{"id":"back_ext_single_leg_iso","name":"Single Leg Iso Hold (Freakathlete)","equipment":["bodyweight"]},{"id":"back_ext_reverse_hyper","name":"Reverse Hyperextension","equipment":["bodyweight"]}]},{"id":"overhead_press","name":"Overhead Press","primary_muscles":["shoulders"],"secondary_muscles":["triceps"],"movement_pattern":"push","variants":[{"id":"ohp_barbell_standing","name":"Standing (Barbell)","equipment":["barbell"]},{"id":"ohp_barbell_seated","name":"Seated (Barbell)","equipment":["barbell"]},{"id":"ohp_dumbbell_standing","name":"Standing (Dumbbell)","equipment":["dumbbell"]},{"id":"ohp_dumbbell_seated","name":"Seated (Dumbbell)","equipment":["dumbbell"]},{"id":"ohp_cable","name":"Cable","equipment":["cable"]},{"id":"ohp_machine","name":"Machine","equipment":["machine"]},{"id":"ohp_landmine_kneeling","name":"Kneeling (Landmine)","equipment":["landmine"]},{"id":"ohp_landmine_single","name":"Single Arm (Landmine)","equipment":["landmine"]},{"id":"ohp_landmine_standing","name":"Standing (Landmine)","equipment":["landmine"]},{"id":"ohp_landmine_jammer","name":"Jammer (Landmine)","equipment":["landmine"]},{"id":"ohp_dumbbell_arnold","name":"Arnold Press (Dumbbell)","equipment":["dumbbell"]}]},{"id":"lateral_raise","name":"Lateral Raise","primary_muscles":["shoulders"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"lat_raise_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"lat_raise_dumbbell_seated","name":"Seated (Dumbbell)","equipment":["dumbbell"]},{"id":"lat_raise_cable","name":"Cable","equipment":["cable"]},{"id":"lat_raise_cable_single_arm","name":"Single Arm Cable","equipment":["cable"]},{"id":"lat_raise_machine","name":"Machine","equipment":["machine"]},{"id":"lat_raise_band","name":"Band","equipment":["band"]},{"id":"front_raise_barbell","name":"Front Raise (Barbell)","equipment":["barbell"]},{"id":"front_raise_dumbbell","name":"Front Raise (Dumbbell)","equipment":["dumbbell"]},{"id":"front_raise_plate","name":"Front Raise (Plate)","equipment":["plate"]}]},{"id":"face_pull","name":"Face Pull","primary_muscles":["shoulders"],"secondary_muscles":["back"],"movement_pattern":"pull","variants":[{"id":"face_pull_cable","name":"Cable","equipment":["cable"]},{"id":"face_pull_band","name":"Band","equipment":["band"]}]},{"id":"upright_row","name":"Upright Row","primary_muscles":["shoulders"],"secondary_muscles":["biceps"],"movement_pattern":"pull","variants":[{"id":"upright_row_barbell","name":"Barbell","equipment":["barbell"]},{"id":"upright_row_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"upright_row_cable","name":"Cable","equipment":["cable"]},{"id":"upright_row_dumbbell_single","name":"Single Arm Dumbbell","equipment":["dumbbell"]},{"id":"upright_row_staggered_db_high_pull","name":"Staggered High Pull (Dumbbell)","equipment":["dumbbell"]}]},{"id":"rear_delt_fly","name":"Rear Delt Fly","primary_muscles":["shoulders"],"secondary_muscles":["back"],"movement_pattern":"isolation","variants":[{"id":"rear_delt_cable","name":"Cable","equipment":["cable"]},{"id":"rear_delt_dumbbell_chest_supported","name":"Chest Supported (Dumbbell)","equipment":["dumbbell"]},{"id":"rear_delt_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"rear_delt_machine","name":"Machine","equipment":["machine"]},{"id":"rear_delt_band","name":"Band","equipment":["band"]}]},{"id":"shrug","name":"Shrug","primary_muscles":["shoulders"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"shrug_barbell","name":"Barbell","equipment":["barbell"]},{"id":"shrug_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"shrug_cable","name":"Cable","equipment":["cable"]},{"id":"shrug_trap_bar","name":"Trap Bar","equipment":["trap_bar"]},{"id":"shrug_smith","name":"Smith Machine","equipment":["machine"]}]},{"id":"shoulder_rotation","name":"Shoulder Rotation","primary_muscles":["shoulders"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"shoulder_w_band","name":"W Rotation (Band)","equipment":["band"]},{"id":"band_pullaparts","name":"Pullaparts (Band)","equipment":["band"]},{"id":"sunrise_raises","name":"Sunrise Raises","equipment":["dumbbell"]},{"id":"clock_raises","name":"Clock Raises","equipment":["dumbbell"]},{"id":"jesus_raises","name":"Jesus Raises","equipment":["dumbbell"]}]},{"id":"bicep_curl","name":"Bicep Curl","primary_muscles":["biceps"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"curl_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"curl_dumbbell_incline_seated","name":"Incline Seated (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_dumbbell_concentration","name":"Concentration (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_dumbbell_spider","name":"Spider (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_barbell","name":"Barbell","equipment":["barbell"]},{"id":"curl_barbell_ez","name":"EZ Bar","equipment":["barbell"]},{"id":"curl_barbell_preacher","name":"Preacher (Barbell)","equipment":["barbell"]},{"id":"curl_barbell_spider","name":"Spider (Barbell)","equipment":["barbell"]},{"id":"curl_cable","name":"Cable","equipment":["cable"]},{"id":"curl_cable_rope","name":"Rope (Cable)","equipment":["cable"]},{"id":"curl_cable_high","name":"High Cable (Bar)","equipment":["cable"]},{"id":"curl_cable_single_arm","name":"Single Arm (Cable)","equipment":["cable"]},{"id":"curl_dumbbell_hammer","name":"Hammer (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_cable_hammer","name":"Hammer (Cable)","equipment":["cable"]},{"id":"curl_machine","name":"Machine","equipment":["machine"]},{"id":"curl_dumbbell_preacher","name":"Preacher (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_dumbbell_zottman","name":"Zottman (Dumbbell)","equipment":["dumbbell"]},{"id":"curl_suspension","name":"Suspension Curl","equipment":["suspension"]},{"id":"curl_plate","name":"Plate Curl","equipment":["plate"]}]},{"id":"tricep_extension","name":"Tricep Extension","primary_muscles":["triceps"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"tri_ext_dumbbell_overhead","name":"Overhead (Dumbbell)","equipment":["dumbbell"]},{"id":"tri_ext_barbell_overhead","name":"Overhead (Barbell)","equipment":["barbell"]},{"id":"tri_ext_cable_overhead","name":"Overhead (Cable)","equipment":["cable"]},{"id":"tri_ext_cable_overhead_single","name":"Overhead Single Arm (Cable)","equipment":["cable"]},{"id":"tri_ext_cable_handle","name":"Cable Handle","equipment":["cable"]},{"id":"tri_ext_cable_handleless","name":"Cable Handleless","equipment":["cable"]},{"id":"tri_ext_machine","name":"Machine","equipment":["machine"]},{"id":"tri_ext_band","name":"Band","equipment":["band"]},{"id":"tri_ext_suspension_ring","name":"Ring Extension","equipment":["suspension"]},{"id":"tri_ext_suspension","name":"Suspension Extension","equipment":["suspension"]},{"id":"tri_ext_plate","name":"Plate Extension","equipment":["plate"]},{"id":"tri_ext_dumbbell_single","name":"Single Arm (Dumbbell)","equipment":["dumbbell"]}]},{"id":"tricep_pushdown","name":"Tricep Pushdown","primary_muscles":["triceps"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"tri_push_cable_bar","name":"Bar (Cable)","equipment":["cable"]},{"id":"tri_push_cable_rope","name":"Rope (Cable)","equipment":["cable"]},{"id":"tri_push_cable_reverse","name":"Reverse Grip (Cable)","equipment":["cable"]},{"id":"tri_push_cable_single","name":"Single Arm (Cable)","equipment":["cable"]},{"id":"tri_push_cable_single_handle","name":"Single Arm Handle (Cable)","equipment":["cable"]}]},{"id":"skullcrusher","name":"Skullcrusher","primary_muscles":["triceps"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"skull_barbell","name":"Barbell","equipment":["barbell"]},{"id":"skull_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"skull_cambered","name":"Cambered Close Grip","equipment":["barbell"]}]},{"id":"tricep_kickback","name":"Tricep Kickback","primary_muscles":["triceps"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"kickback_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"kickback_cable","name":"Cable","equipment":["cable"]}]},{"id":"squat","name":"Squat","primary_muscles":["quads"],"secondary_muscles":["glutes","hamstrings"],"movement_pattern":"squat","variants":[{"id":"squat_barbell_back","name":"Back Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_front","name":"Front Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_overhead","name":"Overhead Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_pause","name":"Pause Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_zercher","name":"Zercher Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_cossack","name":"Cossack Squat (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_clean","name":"Squat Clean (Barbell)","equipment":["barbell"]},{"id":"squat_barbell_thruster","name":"Thruster (Barbell)","equipment":["barbell"]},{"id":"squat_landmine","name":"Landmine Squat","equipment":["landmine"]},{"id":"squat_landmine_hack","name":"Landmine Hack Squat","equipment":["landmine"]},{"id":"squat_dumbbell_goblet","name":"Goblet (Dumbbell)","equipment":["dumbbell"]},{"id":"squat_kettlebell_goblet","name":"Goblet (Kettlebell)","equipment":["kettlebell"]},{"id":"squat_cable_goblet","name":"Goblet (Cable)","equipment":["cable"]},{"id":"squat_sissy","name":"Sissy Squat (Weighted)","equipment":["plate"]},{"id":"squat_sissy_cable","name":"Sissy Squat (Cable)","equipment":["cable"]},{"id":"squat_sissy_banded","name":"Sissy Squat (Band)","equipment":["band"]},{"id":"squat_spanish","name":"Spanish Squat","equipment":["band"]},{"id":"squat_belt","name":"Belt Squat","equipment":["machine"]},{"id":"squat_belt_cable","name":"Belt Squat (Cable)","equipment":["cable"]},{"id":"squat_box_pistol","name":"Box Pistol Squat","equipment":["bodyweight"]}]},{"id":"hack_squat","name":"Hack Squat","primary_muscles":["quads"],"secondary_muscles":["glutes"],"movement_pattern":"squat","variants":[{"id":"hack_squat_barbell","name":"Barbell","equipment":["barbell"]},{"id":"hack_squat_machine","name":"Machine","equipment":["machine"]}]},{"id":"leg_press","name":"Leg Press","primary_muscles":["quads"],"secondary_muscles":["glutes","hamstrings"],"movement_pattern":"squat","variants":[{"id":"leg_press_machine","name":"Machine","equipment":["machine"]},{"id":"leg_press_machine_horizontal","name":"Horizontal Machine","equipment":["machine"]},{"id":"leg_press_single_leg","name":"Single Leg Machine","equipment":["machine"]},{"id":"leg_press_calf","name":"Calf Press on Leg Press","equipment":["machine"]}]},{"id":"split_squat","name":"Split Squat / Lunge","primary_muscles":["quads"],"secondary_muscles":["glutes","hamstrings"],"movement_pattern":"squat","variants":[{"id":"split_squat_barbell","name":"Split Squat (Barbell)","equipment":["barbell"]},{"id":"split_squat_dumbbell","name":"Split Squat (Dumbbell)","equipment":["dumbbell"]},{"id":"split_squat_stationary","name":"Stationary Lunge","equipment":["bodyweight"]},{"id":"bulgarian_split_squat_bodyweight","name":"Bulgarian Split Squat (Bodyweight)","equipment":["bodyweight"]},{"id":"bulgarian_split_squat_barbell","name":"Bulgarian Split Squat (Barbell)","equipment":["barbell"]},{"id":"bulgarian_goblet","name":"Goblet Bulgarian Split Squat","equipment":["dumbbell"]},{"id":"lunge_dumbbell","name":"Lunge (Dumbbell)","equipment":["dumbbell"]},{"id":"lunge_barbell","name":"Lunge (Barbell)","equipment":["barbell"]},{"id":"step_up_dumbbell","name":"Step Up (Dumbbell)","equipment":["dumbbell"]}]},{"id":"leg_extension","name":"Leg Extension","primary_muscles":["quads"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"leg_ext_machine","name":"Machine","equipment":["machine"]},{"id":"leg_ext_plate_loaded","name":"Plate-Loaded","equipment":["machine","plate"]},{"id":"leg_ext_machine_iso","name":"Iso Machine","equipment":["machine"]},{"id":"leg_ext_reverse_nordic","name":"Reverse Nordic","equipment":["bodyweight"]}]},{"id":"deadlift","name":"Deadlift","primary_muscles":["hamstrings","glutes"],"secondary_muscles":["back","quads"],"movement_pattern":"hinge","variants":[{"id":"deadlift_barbell","name":"Conventional (Barbell)","equipment":["barbell"]},{"id":"deadlift_trap_bar","name":"Trap Bar","equipment":["trap_bar"]},{"id":"deadlift_landmine","name":"Landmine Deadlift","equipment":["landmine"]},{"id":"deadlift_jefferson_curl","name":"Jefferson Curl (Barbell)","equipment":["barbell"]},{"id":"deadlift_trap_bar_jump","name":"Trap Bar Jump","equipment":["trap_bar"]}]},{"id":"romanian_deadlift","name":"Romanian Deadlift","primary_muscles":["hamstrings","glutes"],"secondary_muscles":["back"],"movement_pattern":"hinge","variants":[{"id":"rdl_barbell","name":"Barbell","equipment":["barbell"]},{"id":"rdl_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"rdl_dumbbell_single_leg","name":"Single Leg (Dumbbell)","equipment":["dumbbell"]},{"id":"rdl_dumbbell_kneeling_single","name":"Kneeling Single Leg (Dumbbell)","equipment":["dumbbell"]},{"id":"rdl_voltra","name":"Voltra RDL","equipment":["voltra"]}]},{"id":"good_morning","name":"Good Morning","primary_muscles":["hamstrings"],"secondary_muscles":["back","glutes"],"movement_pattern":"hinge","variants":[{"id":"good_morning_barbell","name":"Barbell","equipment":["barbell"]},{"id":"good_morning_band","name":"Band","equipment":["band"]}]},{"id":"leg_curl","name":"Leg Curl","primary_muscles":["hamstrings"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"leg_curl_plate_loaded","name":"Plate-Loaded","equipment":["machine","plate"]},{"id":"leg_curl_machine_lying","name":"Lying Machine","equipment":["machine"]},{"id":"leg_curl_machine_iso","name":"Iso Machine","equipment":["machine"]},{"id":"ghd_leg_curl","name":"GHR / Nordic Hamstring Curl (Freakathlete)","equipment":["bodyweight"]},{"id":"nordic_hamstring","name":"Nordic Hamstring Curl","equipment":["bodyweight"]},{"id":"nordic_inclined","name":"Inclined Nordic Curl (Freakathlete)","equipment":["bodyweight"]},{"id":"voltra_ham_curl","name":"Standing Ham Curl (Voltra)","equipment":["voltra"]}]},{"id":"hip_thrust","name":"Hip Thrust","primary_muscles":["glutes"],"secondary_muscles":["hamstrings"],"movement_pattern":"hinge","variants":[{"id":"hip_thrust_barbell","name":"Barbell","equipment":["barbell"]},{"id":"hip_thrust_machine","name":"Machine","equipment":["machine"]}]},{"id":"calf_raise","name":"Calf Raise","primary_muscles":["calves"],"secondary_muscles":[],"movement_pattern":"isolation","variants":[{"id":"calf_seated","name":"Seated Machine","equipment":["machine"]},{"id":"calf_dumbbell_seated","name":"Seated (Dumbbell)","equipment":["dumbbell"]},{"id":"calf_barbell_seated","name":"Seated (Barbell)","equipment":["barbell"]},{"id":"calf_machine_press","name":"Machine Press","equipment":["machine"]},{"id":"calf_standing_machine","name":"Standing Machine","equipment":["machine"]},{"id":"calf_landmine","name":"Landmine Calf Raise","equipment":["landmine"]},{"id":"calf_hanging_landmine","name":"Hanging Landmine Calf Raise","equipment":["landmine"]},{"id":"calf_barbell_standing_single","name":"Single Leg Standing (Barbell)","equipment":["barbell"]},{"id":"calf_belt","name":"Belt Calf Raise","equipment":["machine"]},{"id":"calf_hanging_cable","name":"Hanging Cable Calf Raise","equipment":["cable"]},{"id":"calf_hanging_barbell","name":"Hanging Barbell Calf Raise","equipment":["barbell"]}]},{"id":"crunch","name":"Crunch","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"crunch_cable","name":"Cable Crunch","equipment":["cable"]},{"id":"crunch_machine","name":"Machine","equipment":["machine"]},{"id":"crunch_bench","name":"Bench Crunch","equipment":["bodyweight"]},{"id":"crunch_db","name":"Dumbbell Crunch","equipment":["dumbbell"]},{"id":"crunch_band","name":"Band Crunch","equipment":["band"]},{"id":"crunch_weighted","name":"Weighted Crunch","equipment":["plate"]},{"id":"crunch_ghd","name":"GHD Crunch (Freakathlete)","equipment":["bodyweight"]},{"id":"crunch_suspension","name":"Suspension Crunch","equipment":["suspension"]},{"id":"crunch_decline_weighted","name":"Decline Weighted","equipment":["bodyweight","plate"]}]},{"id":"leg_raise","name":"Leg Raise / Knee Raise","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"knee_raise_parallel","name":"Knee Raise (Parallel Bars)","equipment":["bodyweight"]},{"id":"hanging_leg_raise","name":"Hanging Leg Raise","equipment":["bodyweight"]},{"id":"hanging_knee_raise","name":"Hanging Knee Raise","equipment":["bodyweight"]},{"id":"leg_raise_decline_bench","name":"Decline Bench Leg Lifts","equipment":["bodyweight"]},{"id":"captains_chair","name":"Captain's Chair","equipment":["bodyweight"]},{"id":"ghd_leg_lift","name":"GHD Leg Lift (Freakathlete)","equipment":["bodyweight"]},{"id":"lying_leg_raise","name":"Lying Leg Raise","equipment":["bodyweight"]},{"id":"v_up","name":"V Up","equipment":["bodyweight"]},{"id":"jackknife_suspension","name":"Jackknife (Suspension)","equipment":["suspension"]}]},{"id":"ab_wheel","name":"Ab Wheel / Rollout","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"ab_wheel","name":"Ab Wheel","equipment":["bodyweight"]}]},{"id":"plank","name":"Plank","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"plank_standard","name":"Standard","equipment":["bodyweight"]},{"id":"plank_side","name":"Side Plank","equipment":["bodyweight"]},{"id":"plank_hollow_rock","name":"Hollow Rock","equipment":["bodyweight"]},{"id":"plank_bird_dog","name":"Bird Dog","equipment":["bodyweight"]},{"id":"plank_mountain_climber","name":"Mountain Climber","equipment":["bodyweight"]},{"id":"plank_v_up_weighted","name":"Weighted V-Ups","equipment":["plate"]}]},{"id":"pallof_press","name":"Pallof Press / Anti-Rotation","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"pallof_band","name":"Band","equipment":["band"]},{"id":"pallof_cable","name":"Cable","equipment":["cable"]},{"id":"pallof_twist_press","name":"Twist + Press","equipment":["cable","band"]},{"id":"cable_twist_up_down","name":"Cable Twist (Up to Down)","equipment":["cable"]},{"id":"kneeling_landmine_rotation","name":"Kneeling Rotation (Landmine)","equipment":["landmine"]},{"id":"russian_twist_weighted","name":"Weighted Russian Twist","equipment":["plate"]}]},{"id":"side_bend","name":"Side Bend / QL","primary_muscles":["core"],"secondary_muscles":[],"movement_pattern":"core","variants":[{"id":"side_bend_dumbbell","name":"Dumbbell","equipment":["dumbbell"]},{"id":"side_crunch_cable","name":"Side Crunch (Cable)","equipment":["cable"]},{"id":"weighted_ql_bend","name":"Weighted QL Bend","equipment":["dumbbell"]}]},{"id":"farmers_carry","name":"Farmer's Carry","primary_muscles":["core","forearms"],"secondary_muscles":["shoulders"],"movement_pattern":"carry","variants":[{"id":"farmers_carry_dumbbell","name":"Dumbbell","equipment":["dumbbell"]}]},{"id":"rowing_machine","name":"Rowing Machine","primary_muscles":["back"],"secondary_muscles":["quads","core"],"movement_pattern":"pull","variants":[{"id":"rowing_machine_cardio","name":"Rowing Machine","equipment":["machine"]}]}]};
+const EXERCISE_LIBRARY = {
+  "equipment_types":["barbell","dumbbell","cable","machine","landmine","band","bodyweight","trap_bar","kettlebell","plate","suspension","voltra"],
+  "muscle_groups":["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"],
+  "movement_patterns":["push","pull","squat","hinge","carry","isolation","core"],
+  "parents":[]
+};
 
 // Build lookup maps
 const variantMap = {}; // variantId -> {variant, parent}
@@ -1950,6 +1955,10 @@ function getVariantInfo(variantId) {
 }
 
 function getVariantDisplayName(variantId) {
+  // Try hierarchical name first (works for both legacy and new IDs)
+  const hName = getHierarchicalDisplayName(variantId);
+  if (hName && hName !== variantId) return hName;
+  // Fallback to old library
   const info = variantMap[variantId];
   if (!info) return variantId;
   return `${info.parent.name} — ${info.variant.name}`;
@@ -2095,7 +2104,7 @@ EXERCISE_HIERARCHY.forEach(h => { hierarchyMap[h.id] = h; });
 // Resistance type abbreviation map for display names
 const RES_ABBREV = {
   "Barbell":"BB","Dumbbell":"DB","Voltra":"Voltra","Landmine":"LM",
-  "BW+":"BW+","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt","Goblet":"Goblet","Cable":"Cable"
+  "BW+":"BW+","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt","Goblet":"Goblet","Cable":"Voltra"
 };
 
 // ── Generate a deterministic variant ID from picker selections ──
@@ -2109,11 +2118,11 @@ function buildVariantId(parentId, resistance, mainVariant, mods) {
   return parts.join('__');
 }
 
-// ── Generate display name from picker selections ──
+// ── Generate display name: "{Resistance} {Variant} {Exercise} (mods)" ──
 function buildExerciseName(parentName, resAbbrev, mainVariant, mods) {
   let parts = [];
-  if (mainVariant) parts.push(mainVariant);
   parts.push(resAbbrev);
+  if (mainVariant) parts.push(mainVariant);
   parts.push(parentName);
   let name = parts.join(' ');
   const modParts = [];
@@ -2425,6 +2434,7 @@ function resolveVariantId(parentId, resistance, mainVariant, mods) {
 
 // Get a display name for any variantId (legacy or new)
 function getHierarchicalDisplayName(variantId) {
+  // Legacy variant ID → look up mapping
   const legacy = LEGACY_VARIANT_MAP[variantId];
   if (legacy) {
     const h = hierarchyMap[legacy.p];
@@ -2434,14 +2444,32 @@ function getHierarchicalDisplayName(variantId) {
       return buildExerciseName(h.name, abbrev, legacy.v || '', mods);
     }
   }
-  // Try parsing new-style ID
+  // New-style ID: "parentId__resistance__variant__mod1__mod2..."
   const parts = variantId.split('__');
-  const h = hierarchyMap[parts[0]];
-  if (h) {
-    // Rebuild from parts
-    return getVariantDisplayName(variantId); // fallback to existing
+  if (parts.length >= 2) {
+    const h = hierarchyMap[parts[0]];
+    if (h) {
+      // Find matching resistance from raw part
+      const rawRes = parts[1];
+      const matchedRes = h.resistances.find(r => r.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawRes);
+      const abbrev = matchedRes ? (RES_ABBREV[matchedRes] || matchedRes) : rawRes;
+      // Find variant
+      const rawVar = parts[2] || '';
+      const matchedVar = h.variants.find(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawVar) || '';
+      // Decode mods from remaining parts
+      const modParts = parts.slice(matchedVar ? 3 : 2);
+      const mods = {
+        bands: modParts.includes('bands'),
+        unilateral: modParts.includes('uni'),
+        other: modParts.filter(p => p !== 'bands' && p !== 'uni').join(' ')
+      };
+      return buildExerciseName(h.name, abbrev, matchedVar, mods);
+    }
   }
-  return getVariantDisplayName(variantId);
+  // Check custom variant in variantMap (user-created exercises)
+  const info = variantMap[variantId];
+  if (info && info.variant && info.variant.name) return info.variant.name;
+  return null;
 }
 </script>
 
@@ -2736,9 +2764,7 @@ function renderActiveSession() {
 
   function renderExBlock(exIdx) {
     const ex = exercises[exIdx];
-    const info = variantMap[ex.variantId];
-    const parentName = info ? info.parent.name : ex.variantId;
-    const variantName = info ? info.variant.name : '';
+    const displayName = getVariantDisplayName(ex.variantId);
     const setsHtml = `
       <div class="sets-header">
         <div class="sets-header-cell">#</div>
@@ -2773,8 +2799,7 @@ function renderActiveSession() {
           </button>
         </div>
         <div class="ex-block-info">
-          <div class="ex-name">${escHtml(parentName)}</div>
-          <div class="ex-variant">${escHtml(variantName)}</div>
+          <div class="ex-name">${escHtml(displayName)}</div>
           <div class="ex-summary">${summaryText}</div>
         </div>
         <div class="ex-block-actions">
@@ -2985,8 +3010,7 @@ let supersetTargetIdx = null;
 function openSupersetModal(exIdx) {
   supersetTargetIdx = exIdx;
   const ex = activeSession.exercises[exIdx];
-  const info = variantMap[ex.variantId];
-  const name = info ? info.parent.name : ex.variantId;
+  const name = getVariantDisplayName(ex.variantId);
 
   document.getElementById('superset-modal-title').textContent = 'Superset';
   document.getElementById('superset-modal-sub').textContent = name;
@@ -3000,8 +3024,7 @@ function openSupersetModal(exIdx) {
       .map((e,i) => ({e,i}))
       .filter(({e}) => e.supersetId === ex.supersetId);
     groupList.innerHTML = members.map(({e,i}) => {
-      const mInfo = variantMap[e.variantId];
-      const mName = mInfo ? mInfo.parent.name : e.variantId;
+      const mName = getVariantDisplayName(e.variantId);
       return `<div style="padding:8px 10px;background:var(--bg3);border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px">
         <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
         ${escHtml(mName)}${i === exIdx ? ' <span style="font-size:11px;color:var(--text3)">(this)</span>' : ''}
@@ -3025,15 +3048,12 @@ function openSupersetModal(exIdx) {
     document.querySelector('#superset-link-section .input-label').textContent =
       ex.supersetId ? 'Add to this superset…' : 'Pair with…';
     exList.innerHTML = others.map(({e,i}) => {
-      const mInfo = variantMap[e.variantId];
-      const mName = mInfo ? mInfo.parent.name : e.variantId;
-      const mVariant = mInfo ? mInfo.variant.name : '';
+      const mName = getVariantDisplayName(e.variantId);
       const alreadyInOtherGroup = e.supersetId && e.supersetId !== ex.supersetId;
       return `<div onclick="linkSuperset(${i})"
         style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px">
         <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${escHtml(mName)}</div>
-          ${mVariant ? `<div style="font-size:11px;color:var(--text3)">${escHtml(mVariant)}</div>` : ''}
           ${alreadyInOtherGroup ? `<div style="font-size:11px;color:var(--accent-pink)">in another superset</div>` : ''}
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
@@ -3309,12 +3329,19 @@ async function viewWorkoutDetail(sessionId) {
 async function showExerciseAnalytics(variantId) {
   try {
   const info = variantMap[variantId];
-  const parentName = info ? info.parent.name : variantId.replace(/__/g, ' › ');
-  const variantName = info ? info.variant.name : '';
-  const muscles = info ? info.parent.primary_muscles.join(', ') : '';
+  const displayName = getVariantDisplayName(variantId);
+  // Get muscles from hierarchy if not in variantMap
+  let muscles = '';
+  if (info) {
+    muscles = info.parent.primary_muscles.join(', ');
+  } else {
+    const legacy = LEGACY_VARIANT_MAP[variantId];
+    const h = legacy ? hierarchyMap[legacy.p] : hierarchyMap[(variantId.split('__'))[0]];
+    if (h) muscles = (h.muscles || []).join(', ');
+  }
 
-  document.getElementById('ex-detail-name').textContent = parentName;
-  document.getElementById('ex-detail-sub').textContent = (variantName ? variantName + ' · ' : '') + muscles;
+  document.getElementById('ex-detail-name').textContent = displayName;
+  document.getElementById('ex-detail-sub').textContent = muscles;
 
   const sessions = await dbGetAll('sessions');
   // Collect all sets for this variant
@@ -5033,38 +5060,18 @@ let swapVariantExIdx = null;
 
 function openSwapVariantModal(exIdx) {
   swapVariantExIdx = exIdx;
-  const ex = activeSession.exercises[exIdx];
-  const info = variantMap[ex.variantId];
-
-  if (!info) {
-    // No variant info available — can't swap
-    showToast('No variants available to swap');
-    return;
-  }
-
-  document.getElementById('swap-variant-parent-name').textContent = info.parent.name;
-  const variants = info.parent.variants.filter(v => v.id !== ex.variantId);
-  const list = document.getElementById('swap-variant-list');
-  list.innerHTML = variants.map(v => `
-    <div class="variant-row" onclick="swapVariant('${v.id}')">
-      <div class="variant-row-left">
-        <div class="variant-name">${escHtml(v.name)}</div>
-        <div class="variant-equip-tags">${(v.equipment||[]).map(e => `<span class="tag tag-equipment">${e}</span>`).join('')}</div>
-      </div>
-    </div>`).join('');
-
-  if (variants.length === 0) {
-    list.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No other variants available</div>';
-  }
-  openModal('modal-swap-variant');
-}
-
-function swapVariant(newVariantId) {
-  if (swapVariantExIdx === null || !activeSession) return;
-  activeSession.exercises[swapVariantExIdx].variantId = newVariantId;
-  closeModal('modal-swap-variant');
-  renderActiveSession();
-  showToast('Variant swapped');
+  pendingPickExerciseCallback = (variantId) => {
+    if (swapVariantExIdx !== null && activeSession) {
+      // Keep existing sets, just swap the exercise
+      activeSession.exercises[swapVariantExIdx].variantId = variantId;
+      closeExercisePicker();
+      renderActiveSession();
+      showToast('Exercise swapped');
+      swapVariantExIdx = null;
+    }
+  };
+  document.getElementById('pick-ex-title').textContent = 'Swap Exercise';
+  openExercisePicker();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -5249,11 +5256,29 @@ async function buildClaudeExport() {
   EXERCISE_LIBRARY.muscle_groups.forEach(m => { muscleVol[m] = {sets: 0, vol: 0}; });
   last4w.forEach(s => {
     s.exercises.forEach(ex => {
+      let muscles = [], secMuscles = [];
       const info = variantMap[ex.variantId];
-      if (!info) return;
+      if (info) {
+        muscles = info.parent.primary_muscles || [];
+        secMuscles = info.parent.secondary_muscles || [];
+      } else {
+        // Try legacy → hierarchy lookup
+        const legacy = LEGACY_VARIANT_MAP[ex.variantId];
+        const h = legacy ? hierarchyMap[legacy.p] : null;
+        if (!h) {
+          // Try new-style ID
+          const parts = ex.variantId.split('__');
+          const h2 = hierarchyMap[parts[0]];
+          if (h2) { muscles = h2.muscles || []; secMuscles = h2.sec || []; }
+          else return;
+        } else {
+          muscles = h.muscles || [];
+          secMuscles = h.sec || [];
+        }
+      }
       const done = ex.sets.filter(st => st.completed);
       const vol = done.reduce((sum, st) => sum + (st.weight||0)*(st.reps||0), 0);
-      [...info.parent.primary_muscles, ...info.parent.secondary_muscles].forEach(m => {
+      [...muscles, ...secMuscles].forEach(m => {
         if (muscleVol[m]) { muscleVol[m].sets += done.length; muscleVol[m].vol += vol; }
       });
     });
