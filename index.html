@@ -143,6 +143,7 @@ html, body {
 .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
 .btn-sm { padding: 6px 11px; font-size: 12px; }
 .btn-icon { padding: 8px; border-radius: var(--r); }
+.ex-block-actions .btn-icon { padding: 6px; }
 
 /* ── CARDS ── */
 .card {
@@ -387,6 +388,7 @@ select option { background: var(--bg3); }
   display: none;
   flex-direction: column;
   padding-top: var(--safe-top);
+  height: 100dvh;
 }
 #active-session.open { display: flex; }
 
@@ -415,6 +417,7 @@ select option { background: var(--bg3); }
 }
 .session-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 12px 16px 16px;
@@ -436,17 +439,34 @@ select option { background: var(--bg3); }
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r2);
-  overflow: hidden;
+  overflow: clip;
 }
 .ex-block-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
-  gap: 8px;
+  padding: 10px 12px;
+  gap: 6px;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
+.ex-block-header .collapse-chevron {
+  width: 16px; height: 16px;
+  color: var(--text3);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.ex-block.collapsed .collapse-chevron { transform: rotate(-90deg); }
+.ex-block.collapsed .ex-block-body { display: none; }
 .ex-block-info { flex: 1; min-width: 0; }
+.ex-block-info .ex-summary {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  display: none;
+}
+.ex-block.collapsed .ex-block-info .ex-summary { display: block; }
 .ex-name {
   font-family: var(--display);
   font-size: 14px;
@@ -464,9 +484,10 @@ select option { background: var(--bg3); }
 .ex-block-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   flex-shrink: 0;
 }
+.ex-block.collapsed .ex-block-actions { display: none; }
 
 /* Set rows */
 
@@ -623,7 +644,6 @@ select option { background: var(--bg3); }
 .superset-group .ex-block {
   border: none;
   border-radius: 0;
-}
   background: var(--bg3);
 }
 .prev-best {
@@ -1121,8 +1141,15 @@ textarea { resize: none; }
 
 /* ── Workout notes ── */
 #session-notes-wrap {
-  padding: 8px 16px 0;
+  padding: 0 16px;
   flex-shrink: 0;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.2s, padding 0.2s;
+}
+#session-notes-wrap.open {
+  max-height: 100px;
+  padding: 8px 16px 0;
 }
 #session-notes-input {
   font-size: 13px;
@@ -1133,6 +1160,8 @@ textarea { resize: none; }
   background: var(--bg3);
   border: 1px solid var(--border);
   color: var(--text2);
+  width: 100%;
+  font-family: var(--body);
 }
 #session-notes-input:focus { border-color: var(--accent); color: var(--text); }
 
@@ -1182,7 +1211,12 @@ textarea { resize: none; }
         Back
       </div>
       <div id="session-title" class="session-name">Workout</div>
-      <div id="session-timer" class="session-timer">0:00</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btn-ghost btn-sm btn-icon" id="session-notes-toggle" title="Toggle notes" style="padding:6px;color:var(--text3)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <div id="session-timer" class="session-timer">0:00</div>
+      </div>
     </div>
     <div id="session-notes-wrap">
       <textarea id="session-notes-input" placeholder="Workout notes…" rows="2"></textarea>
@@ -2400,6 +2434,7 @@ function getHierarchicalDisplayName(variantId) {
 let activeSession = null; // current in-progress workout
 let sessionTimerInterval = null;
 let sessionStartEpoch = null;
+let collapsedExercises = new Set(); // track collapsed exercise indices
 
 let editingTemplateId = null;
 let pendingPickExerciseCallback = null;
@@ -2606,6 +2641,7 @@ async function getLastSetsForVariant(variantId) {
 // ═══════════════════════════════════════════════════════════════
 function startSession(sessionData) {
   sessionStartEpoch = Date.now();
+  collapsedExercises = new Set();
   activeSession = {
     id: uid(),
     title: sessionData.title,
@@ -2652,6 +2688,15 @@ function renderActiveSession() {
   if (!activeSession) return;
   document.getElementById('session-title').textContent = activeSession.title;
 
+  // Update notes toggle state
+  const notesToggle = document.getElementById('session-notes-toggle');
+  const notesInput = document.getElementById('session-notes-input');
+  if (notesInput.value.trim()) {
+    notesToggle.style.color = 'var(--accent-blue)';
+  } else {
+    notesToggle.style.color = 'var(--text3)';
+  }
+
   const body = document.getElementById('session-body');
   const exercises = activeSession.exercises;
   const rendered = new Set();
@@ -2695,9 +2740,16 @@ function renderActiveSession() {
     const hasNote = !!exerciseNotes[ex.variantId];
     const cueHtml = hasNote ? `<div class="ex-cue">${escHtml(exerciseNotes[ex.variantId])}</div>` : '';
     const totalEx = exercises.length;
-    return `<div class="ex-block" id="ex-block-${exIdx}">
-      <div class="ex-block-header">
-        <div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;flex-shrink:0">
+    const completedCount = (ex.sets || []).filter(s => s.completed).length;
+    const totalSets = (ex.sets || []).length;
+    const isCollapsed = collapsedExercises.has(exIdx);
+    const summaryText = completedCount > 0
+      ? `${completedCount}/${totalSets} sets done` + ((ex.sets || []).filter(s => s.completed && s.weight).length > 0 ? ` · ${(ex.sets || []).filter(s => s.completed && s.weight).sort((a,b) => b.weight - a.weight)[0].weight} lbs top` : '')
+      : `${totalSets} sets`;
+    return `<div class="ex-block ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
+      <div class="ex-block-header" onclick="toggleExCollapse(${exIdx})">
+        <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;flex-shrink:0" onclick="event.stopPropagation()">
           <button class="reorder-btn" onclick="moveExercise(${exIdx},-1)" ${exIdx===0?'disabled style="opacity:0.3"':''}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
           </button>
@@ -2708,8 +2760,9 @@ function renderActiveSession() {
         <div class="ex-block-info">
           <div class="ex-name">${escHtml(parentName)}</div>
           <div class="ex-variant">${escHtml(variantName)}</div>
+          <div class="ex-summary">${summaryText}</div>
         </div>
-        <div class="ex-block-actions">
+        <div class="ex-block-actions" onclick="event.stopPropagation()">
           <button class="btn btn-ghost btn-sm btn-icon" onclick="openSupersetModal(${exIdx})" title="Superset" style="${ssActive}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
           </button>
@@ -2727,11 +2780,13 @@ function renderActiveSession() {
           </button>
         </div>
       </div>
-      ${cueHtml}
-      ${setsHtml}
-      <div class="ex-block-footer">
-        <div class="prev-best" id="prev-best-${exIdx}">loading…</div>
-        <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${exIdx})">+ Set</button>
+      <div class="ex-block-body">
+        ${cueHtml}
+        ${setsHtml}
+        <div class="ex-block-footer">
+          <div class="prev-best" id="prev-best-${exIdx}">loading…</div>
+          <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${exIdx})">+ Set</button>
+        </div>
       </div>
     </div>`;
   }
@@ -2783,6 +2838,18 @@ function renderSetRow(exIdx, si, set) {
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openSetDetailModal(${exIdx},${si})">Notes / RPE / Rest…</button>
     </div>
   </div>`;
+}
+
+function toggleExCollapse(exIdx) {
+  const block = document.getElementById('ex-block-' + exIdx);
+  if (!block) return;
+  if (collapsedExercises.has(exIdx)) {
+    collapsedExercises.delete(exIdx);
+    block.classList.remove('collapsed');
+  } else {
+    collapsedExercises.add(exIdx);
+    block.classList.add('collapsed');
+  }
 }
 
 function focusSetRow(e, exIdx, si) {
@@ -2889,6 +2956,13 @@ function addSetToExercise(exIdx) {
 function removeExFromSession(exIdx) {
   if (!activeSession) return;
   activeSession.exercises.splice(exIdx, 1);
+  // Rebuild collapsed set with shifted indices
+  const newCollapsed = new Set();
+  collapsedExercises.forEach(i => {
+    if (i < exIdx) newCollapsed.add(i);
+    else if (i > exIdx) newCollapsed.add(i - 1);
+  });
+  collapsedExercises = newCollapsed;
   renderActiveSession();
 }
 
@@ -3089,6 +3163,15 @@ document.getElementById('session-back-btn').addEventListener('click', () => {
   document.getElementById('active-session').classList.remove('open');
   renderHome();
   renderActiveBanner();
+});
+
+// Notes toggle
+document.getElementById('session-notes-toggle').addEventListener('click', () => {
+  const wrap = document.getElementById('session-notes-wrap');
+  wrap.classList.toggle('open');
+  if (wrap.classList.contains('open')) {
+    document.getElementById('session-notes-input').focus();
+  }
 });
 
 function renderActiveBanner() {
@@ -4890,6 +4973,12 @@ function moveExercise(exIdx, direction) {
   const newIdx = exIdx + direction;
   if (newIdx < 0 || newIdx >= exs.length) return;
   [exs[exIdx], exs[newIdx]] = [exs[newIdx], exs[exIdx]];
+  // Swap collapsed state
+  const aCollapsed = collapsedExercises.has(exIdx);
+  const bCollapsed = collapsedExercises.has(newIdx);
+  collapsedExercises.delete(exIdx); collapsedExercises.delete(newIdx);
+  if (aCollapsed) collapsedExercises.add(newIdx);
+  if (bCollapsed) collapsedExercises.add(exIdx);
   renderActiveSession();
 }
 
