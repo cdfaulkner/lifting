@@ -1978,7 +1978,7 @@ const EXERCISE_HIERARCHY = [
   // ── CHEST ──
   { id:"chest_press", name:"Chest Press", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine"],
-    variants:["Flat","Incline","Decline"],
+    variants:["Flat","Incline","Decline","Standing","Kneeling"],
     mods:{bands:true,unilateral:true,other:true} },
   { id:"chest_fly", name:"Chest Fly", pattern:"isolation", muscles:["chest"], sec:["shoulders"],
     resistances:["Dumbbell","Voltra"],
@@ -2040,7 +2040,7 @@ const EXERCISE_HIERARCHY = [
     mods:{bands:true,unilateral:true,other:true} },
   { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra"],
-    variants:["Seated","Standing","Flat","Incline"],
+    variants:["Seated","Standing","Flat","Incline","Overhead"],
     mods:{bands:true,unilateral:true,other:true} },
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
@@ -2111,18 +2111,21 @@ const RES_ABBREV = {
 function buildVariantId(parentId, resistance, mainVariant, mods) {
   let parts = [parentId];
   parts.push(resistance.toLowerCase().replace(/[^a-z0-9]/g,'_'));
-  if (mainVariant) parts.push(mainVariant.toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  // mainVariant can be a string or array of strings
+  const varArr = Array.isArray(mainVariant) ? mainVariant : (mainVariant ? [mainVariant] : []);
+  varArr.sort().forEach(v => { if (v) parts.push(v.toLowerCase().replace(/[^a-z0-9]/g,'_')); });
   if (mods.bands) parts.push('bands');
   if (mods.unilateral) parts.push('uni');
   if (mods.other) parts.push(mods.other.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,20));
   return parts.join('__');
 }
 
-// ── Generate display name: "{Resistance} {Variant} {Exercise} (mods)" ──
+// ── Generate display name: "{Resistance} {Variant(s)} {Exercise} (mods)" ──
 function buildExerciseName(parentName, resAbbrev, mainVariant, mods) {
   let parts = [];
   parts.push(resAbbrev);
-  if (mainVariant) parts.push(mainVariant);
+  const varArr = Array.isArray(mainVariant) ? mainVariant : (mainVariant ? [mainVariant] : []);
+  varArr.forEach(v => { if (v) parts.push(v); });
   parts.push(parentName);
   let name = parts.join(' ');
   const modParts = [];
@@ -2444,26 +2447,31 @@ function getHierarchicalDisplayName(variantId) {
       return buildExerciseName(h.name, abbrev, legacy.v || '', mods);
     }
   }
-  // New-style ID: "parentId__resistance__variant__mod1__mod2..."
+  // New-style ID: "parentId__resistance__variant1__variant2__bands__uni__other"
   const parts = variantId.split('__');
   if (parts.length >= 2) {
     const h = hierarchyMap[parts[0]];
     if (h) {
-      // Find matching resistance from raw part
       const rawRes = parts[1];
       const matchedRes = h.resistances.find(r => r.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawRes);
       const abbrev = matchedRes ? (RES_ABBREV[matchedRes] || matchedRes) : rawRes;
-      // Find variant
-      const rawVar = parts[2] || '';
-      const matchedVar = h.variants.find(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawVar) || '';
-      // Decode mods from remaining parts
-      const modParts = parts.slice(matchedVar ? 3 : 2);
+      // Remaining parts after resistance: could be variants, then mods
+      const remaining = parts.slice(2);
+      const knownMods = ['bands', 'uni'];
+      const matchedVariants = [];
+      const otherMods = [];
+      remaining.forEach(p => {
+        if (knownMods.includes(p)) return; // skip, handled below
+        const matchV = h.variants.find(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_') === p);
+        if (matchV) matchedVariants.push(matchV);
+        else otherMods.push(p);
+      });
       const mods = {
-        bands: modParts.includes('bands'),
-        unilateral: modParts.includes('uni'),
-        other: modParts.filter(p => p !== 'bands' && p !== 'uni').join(' ')
+        bands: remaining.includes('bands'),
+        unilateral: remaining.includes('uni'),
+        other: otherMods.join(' ')
       };
-      return buildExerciseName(h.name, abbrev, matchedVar, mods);
+      return buildExerciseName(h.name, abbrev, matchedVariants, mods);
     }
   }
   // Check custom variant in variantMap (user-created exercises)
@@ -3828,7 +3836,7 @@ let pickerMuscleFilter = '';
 
 function openExercisePicker() {
   pickerMuscleFilter = '';
-  pickerState = { step: 'lift', liftId: null, resistance: null, variant: null, mods: {bands:false,unilateral:false,other:''}, customName: '' };
+  pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {bands:false,unilateral:false,other:''}, customName: '' };
   document.getElementById('pick-ex-search').value = '';
   document.getElementById('pick-ex-search').style.display = '';
   document.getElementById('pick-ex-filters').style.display = '';
@@ -3849,7 +3857,7 @@ function closeExercisePicker() {
   if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
 
-let pickerState = { step: 'lift', liftId: null, resistance: null, variant: null, mods: {bands:false,unilateral:false,other:''}, customName: '' };
+let pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {bands:false,unilateral:false,other:''}, customName: '' };
 
 function renderPickerFilters() {
   const container = document.getElementById('pick-ex-filters');
@@ -3971,7 +3979,7 @@ function pickerSelectLift(liftId) {
   if (!h) return;
   pickerState.liftId = liftId;
   pickerState.resistance = null;
-  pickerState.variant = null;
+  pickerState.variants = [];
   pickerState.mods = {bands:false,unilateral:false,other:''};
   pickerState.customName = '';
 
@@ -4018,17 +4026,35 @@ function renderPickerVariant() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
+  const footerEl = document.getElementById('pick-ex-footer');
+  footerEl.style.display = '';
 
-  list.innerHTML = `<div class="picker-section-label">Select Variant</div>
-    <div class="picker-grid">${h.variants.map(v => `
-      <div class="picker-option" onclick="pickerSelectVariant('${v}')">
+  const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
+  const previewName = buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
+
+  list.innerHTML = `<div class="picker-section-label">Select Variant(s)</div>
+    <div class="picker-grid">${h.variants.map(v => {
+      const sel = pickerState.variants.includes(v);
+      return `<div class="picker-option ${sel ? 'selected' : ''}" onclick="pickerToggleVariant('${v}')" style="${sel ? 'background:rgba(167,139,250,0.15);border-color:var(--accent)' : ''}">
         <div class="picker-option-name">${escHtml(v)}</div>
-      </div>`).join('')}
+      </div>`;
+    }).join('')}
+    </div>
+    <div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border-radius:var(--r);font-size:13px;color:var(--text2);text-align:center">
+      ${escHtml(previewName)}
     </div>`;
+
+  footerEl.innerHTML = `<button class="btn btn-primary" style="width:100%" onclick="pickerVariantDone()">Continue</button>`;
 }
 
-function pickerSelectVariant(v) {
-  pickerState.variant = v;
+function pickerToggleVariant(v) {
+  const idx = pickerState.variants.indexOf(v);
+  if (idx >= 0) pickerState.variants.splice(idx, 1);
+  else pickerState.variants.push(v);
+  renderPickerVariant();
+}
+
+function pickerVariantDone() {
   pickerState.step = 'modifiers';
   renderPickerStep();
 }
@@ -4042,7 +4068,7 @@ function renderPickerModifiers() {
 
   // Build preview name
   const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-  const previewName = buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+  const previewName = buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
 
   let modsHtml = '<div class="picker-section-label">Modifiers (optional)</div>';
 
@@ -4086,7 +4112,7 @@ function updatePickerPreview() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-  const name = buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+  const name = buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
   const el = document.getElementById('picker-preview-name');
   if (el) el.textContent = name;
   const input = document.getElementById('picker-custom-name');
@@ -4119,15 +4145,15 @@ document.getElementById('pick-ex-confirm').addEventListener('click', () => {
   if (!pickerState.liftId || !pickerState.resistance) return;
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
-  if (h.variants.length > 0 && !pickerState.variant) return;
+  if (h.variants.length > 0 && pickerState.variants.length === 0) return;
 
   // Resolve to a variant ID (prefer legacy if exists)
-  const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, pickerState.variant || '', pickerState.mods);
+  const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, pickerState.variants, pickerState.mods);
 
   // Check if this variant exists in variantMap, if not create it
   if (!variantMap[variantId]) {
     const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-    const displayName = pickerState.customName.trim() || buildExerciseName(h.name, abbrev, pickerState.variant || '', pickerState.mods);
+    const displayName = pickerState.customName.trim() || buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
     
     // Find or create parent in old library
     let parent = parentMap[pickerState.liftId] || parentMap['hierarchy_' + pickerState.liftId];
