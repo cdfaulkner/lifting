@@ -145,6 +145,29 @@ html, body {
 .btn-icon { padding: 8px; border-radius: var(--r); }
 .ex-block-actions .btn-icon { padding: 6px; }
 
+.tmpl-set-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 32px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+.tmpl-set-row input {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 6px 8px;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text);
+  width: 100%;
+}
+.tmpl-set-row input:focus { border-color: var(--accent); outline: none; }
+.tmpl-set-num { font-family: var(--mono); font-size: 11px; color: var(--text3); text-align: center; }
+.tmpl-set-remove { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
+.tmpl-set-remove:hover { color: var(--red); }
+
 /* ── CARDS ── */
 .card {
   background: var(--bg2);
@@ -444,21 +467,9 @@ select option { background: var(--bg3); }
 .ex-block-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 10px 12px;
   gap: 6px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
 }
-.ex-block-header .collapse-chevron {
-  width: 16px; height: 16px;
-  color: var(--text3);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-.ex-block.collapsed .collapse-chevron { transform: rotate(-90deg); }
-.ex-block.collapsed .ex-block-body { display: none; }
 .ex-block-info { flex: 1; min-width: 0; }
 .ex-block-info .ex-summary {
   font-family: var(--mono);
@@ -467,6 +478,13 @@ select option { background: var(--bg3); }
   display: none;
 }
 .ex-block.collapsed .ex-block-info .ex-summary { display: block; }
+.ex-block.collapsed .ex-block-body { display: none; }
+.ex-block-collapse-btn {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--text3); display: flex; align-items: center; flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.ex-block.collapsed .ex-block-collapse-btn { transform: rotate(-90deg); }
 .ex-name {
   font-family: var(--display);
   font-size: 14px;
@@ -606,7 +624,7 @@ select option { background: var(--bg3); }
   border: 1px solid var(--border2);
   border-left: 3px solid var(--accent);
   border-radius: var(--r2);
-  overflow: hidden;
+  overflow: clip;
   display: flex;
   flex-direction: column;
 }
@@ -2431,10 +2449,10 @@ function getHierarchicalDisplayName(variantId) {
 // ═══════════════════════════════════════════════════════════════
 // APP STATE
 // ═══════════════════════════════════════════════════════════════
-let activeSession = null; // current in-progress workout
+let activeSession = null;
 let sessionTimerInterval = null;
 let sessionStartEpoch = null;
-let collapsedExercises = new Set(); // track collapsed exercise indices
+let collapsedExercises = new Set();
 
 let editingTemplateId = null;
 let pendingPickExerciseCallback = null;
@@ -2687,15 +2705,9 @@ function updateTimer() {
 function renderActiveSession() {
   if (!activeSession) return;
   document.getElementById('session-title').textContent = activeSession.title;
-
-  // Update notes toggle state
   const notesToggle = document.getElementById('session-notes-toggle');
-  const notesInput = document.getElementById('session-notes-input');
-  if (notesInput.value.trim()) {
-    notesToggle.style.color = 'var(--accent-blue)';
-  } else {
-    notesToggle.style.color = 'var(--text3)';
-  }
+  const notesVal = document.getElementById('session-notes-input').value.trim();
+  if (notesToggle) notesToggle.style.color = notesVal ? 'var(--accent-blue)' : 'var(--text3)';
 
   const body = document.getElementById('session-body');
   const exercises = activeSession.exercises;
@@ -2743,13 +2755,16 @@ function renderActiveSession() {
     const completedCount = (ex.sets || []).filter(s => s.completed).length;
     const totalSets = (ex.sets || []).length;
     const isCollapsed = collapsedExercises.has(exIdx);
+    const topSet = (ex.sets || []).filter(s => s.completed && s.weight).sort((a,b) => b.weight - a.weight)[0];
     const summaryText = completedCount > 0
-      ? `${completedCount}/${totalSets} sets done` + ((ex.sets || []).filter(s => s.completed && s.weight).length > 0 ? ` · ${(ex.sets || []).filter(s => s.completed && s.weight).sort((a,b) => b.weight - a.weight)[0].weight} lbs top` : '')
+      ? `${completedCount}/${totalSets} sets` + (topSet ? ` · ${topSet.weight}×${topSet.reps}` : '')
       : `${totalSets} sets`;
     return `<div class="ex-block ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
-      <div class="ex-block-header" onclick="toggleExCollapse(${exIdx})">
-        <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        <div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;flex-shrink:0" onclick="event.stopPropagation()">
+      <div class="ex-block-header">
+        <button class="ex-block-collapse-btn" onclick="toggleExCollapse(${exIdx})" title="Collapse/expand">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;flex-shrink:0">
           <button class="reorder-btn" onclick="moveExercise(${exIdx},-1)" ${exIdx===0?'disabled style="opacity:0.3"':''}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
           </button>
@@ -2762,7 +2777,7 @@ function renderActiveSession() {
           <div class="ex-variant">${escHtml(variantName)}</div>
           <div class="ex-summary">${summaryText}</div>
         </div>
-        <div class="ex-block-actions" onclick="event.stopPropagation()">
+        <div class="ex-block-actions">
           <button class="btn btn-ghost btn-sm btn-icon" onclick="openSupersetModal(${exIdx})" title="Superset" style="${ssActive}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
           </button>
@@ -2814,11 +2829,9 @@ function renderActiveSession() {
 function renderSetRow(exIdx, si, set) {
   const w = set.weight || '';
   const r = set.reps || '';
-  // Show warmup (W) label for first set if not completed, numbered otherwise
-  const setLabel = si === 0 && !set.completed ? 'W' : String(si + 1);
-  const labelColor = si === 0 && !set.completed ? 'color:var(--accent-pink)' : '';
+  const setLabel = String(si + 1);
   return `<div class="set-row ${set.completed ? 'completed' : ''}" id="set-row-${exIdx}-${si}" onclick="focusSetRow(event, ${exIdx}, ${si})">
-    <div class="set-num" style="${labelColor}">${setLabel}</div>
+    <div class="set-num">${setLabel}</div>
     <input class="set-cell-input" type="number" step="0.5" value="${w}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="weight"
       inputmode="decimal">
@@ -2956,7 +2969,6 @@ function addSetToExercise(exIdx) {
 function removeExFromSession(exIdx) {
   if (!activeSession) return;
   activeSession.exercises.splice(exIdx, 1);
-  // Rebuild collapsed set with shifted indices
   const newCollapsed = new Set();
   collapsedExercises.forEach(i => {
     if (i < exIdx) newCollapsed.add(i);
@@ -3159,13 +3171,11 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
 
 // Session back
 document.getElementById('session-back-btn').addEventListener('click', () => {
-  // Minimize session - go back to home with banner
   document.getElementById('active-session').classList.remove('open');
   renderHome();
   renderActiveBanner();
 });
 
-// Notes toggle
 document.getElementById('session-notes-toggle').addEventListener('click', () => {
   const wrap = document.getElementById('session-notes-wrap');
   wrap.classList.toggle('open');
@@ -3267,16 +3277,21 @@ async function viewWorkoutDetail(sessionId) {
     </div>
     ${notesHtml}
     <div style="padding:12px 16px">
-    ` + session.exercises.map(ex => {
+    ` + session.exercises.map((ex, exI) => {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
     return `<div style="margin-bottom:14px">
       <div style="font-size:14px;font-weight:500;margin-bottom:6px">${escHtml(name)}</div>
       ${sets.map((s, i) => {
+        const origIdx = ex.sets.indexOf(s);
         const rpe = s.rpe ? ` <span style="color:var(--text3)">@${s.rpe}</span>` : '';
         const notes = s.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;padding-left:8px">${escHtml(s.notes)}</div>` : '';
-        return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">
-          <div style="font-family:var(--mono);font-size:13px">${i+1}. ${s.weight} × ${s.reps}${rpe}</div>
+        return `<div style="padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px">
+          <span style="font-family:var(--mono);font-size:13px;color:var(--text3);min-width:18px">${i+1}.</span>
+          <input type="number" step="0.5" value="${s.weight}" style="width:52px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 6px;text-align:center" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
+          <span style="font-family:var(--mono);font-size:13px;color:var(--text3)">×</span>
+          <input type="number" value="${s.reps}" style="width:44px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 6px;text-align:center" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
+          ${rpe}
           ${notes}
         </div>`;
       }).join('')}
@@ -3284,6 +3299,7 @@ async function viewWorkoutDetail(sessionId) {
     </div>`;
   }).join('') + `</div>`;
 
+  editingPastSessionId = session.id;
   openModal('modal-exercise-detail');
 }
 
@@ -3291,13 +3307,14 @@ async function viewWorkoutDetail(sessionId) {
 // EXERCISE ANALYTICS
 // ═══════════════════════════════════════════════════════════════
 async function showExerciseAnalytics(variantId) {
+  try {
   const info = variantMap[variantId];
-  if (!info) return;
-  const parentName = info.parent.name;
-  const variantName = info.variant.name;
+  const parentName = info ? info.parent.name : variantId.replace(/__/g, ' › ');
+  const variantName = info ? info.variant.name : '';
+  const muscles = info ? info.parent.primary_muscles.join(', ') : '';
 
   document.getElementById('ex-detail-name').textContent = parentName;
-  document.getElementById('ex-detail-sub').textContent = variantName + ' · ' + info.parent.primary_muscles.join(', ');
+  document.getElementById('ex-detail-sub').textContent = (variantName ? variantName + ' · ' : '') + muscles;
 
   const sessions = await dbGetAll('sessions');
   // Collect all sets for this variant
@@ -3434,6 +3451,19 @@ async function showExerciseAnalytics(variantId) {
   `;
 
   openModal('modal-exercise-detail');
+  } catch(err) {
+    console.error('Analytics error:', err);
+    document.getElementById('ex-detail-name').textContent = variantId.replace(/__/g, ' › ');
+    document.getElementById('ex-detail-sub').textContent = '';
+    document.getElementById('ex-detail-body').innerHTML = `
+      <div style="padding:30px 20px;text-align:center;color:var(--text3)">
+        <div style="font-size:24px;margin-bottom:8px">📊</div>
+        <div style="font-size:14px;margin-bottom:4px">No data available yet</div>
+        <div style="font-size:12px">Complete some sets to see analytics here</div>
+      </div>`;
+    document.getElementById('ex-detail-footer').style.display = 'none';
+    openModal('modal-exercise-detail');
+  }
 }
 
 function renderSparkline(values) {
@@ -3610,6 +3640,7 @@ document.getElementById('new-template-btn').addEventListener('click', () => open
 
 async function openTemplateEditor(templateId) {
   editingTemplateId = templateId;
+  tmplExpandedIdx = null;
   const deleteBtn = document.getElementById('tmpl-delete-btn');
 
   if (templateId) {
@@ -3629,26 +3660,93 @@ async function openTemplateEditor(templateId) {
 }
 
 let tmplExercises = [];
+let tmplExpandedIdx = null;
+
 function renderTemplateExercises(exercises) {
   tmplExercises = exercises ? [...exercises] : [];
   const list = document.getElementById('tmpl-exercises-list');
   const n = tmplExercises.length;
-  list.innerHTML = tmplExercises.map((ex, i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">
-      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
-        <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
-        </button>
-        <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+  list.innerHTML = tmplExercises.map((ex, i) => {
+    const sets = ex.defaultSets || [];
+    const isExpanded = (tmplExpandedIdx === i);
+    const setsPreview = sets.length > 0
+      ? sets.map(s => `${s.weight||0}×${s.reps||0}`).join(', ')
+      : 'No sets';
+    return `<div style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
+        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0" onclick="event.stopPropagation()">
+          <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' · ' + setsPreview : ''}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div style="flex:1;font-size:13px">${escHtml(getVariantDisplayName(ex.variantId))}</div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(ex.defaultSets||[]).length} sets</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="removeTemplateEx(${i})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      ${isExpanded ? renderTmplSets(i, sets) : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderTmplSets(exIdx, sets) {
+  const rows = sets.map((s, si) => `
+    <div class="tmpl-set-row">
+      <div class="tmpl-set-num">${si + 1}</div>
+      <input type="number" step="0.5" value="${s.weight || ''}" placeholder="lbs"
+        inputmode="decimal" onchange="updateTmplSet(${exIdx},${si},'weight',this.value)">
+      <input type="number" value="${s.reps || ''}" placeholder="reps"
+        inputmode="numeric" onchange="updateTmplSet(${exIdx},${si},'reps',this.value)">
+      <button class="tmpl-set-remove" onclick="removeTmplSet(${exIdx},${si})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-    </div>`).join('');
+    </div>
+  `).join('');
+  return `<div style="padding:0 12px 10px;border-top:1px solid var(--border)">
+    <div style="display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:4px;padding:6px 0 2px">
+      <div></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center">LBS</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center">REPS</div>
+      <div></div>
+    </div>
+    ${rows}
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="addTmplSet(${exIdx})">+ Add Set</button>
+  </div>`;
+}
+
+function toggleTmplExSets(i) {
+  tmplExpandedIdx = (tmplExpandedIdx === i) ? null : i;
+  renderTemplateExercises(tmplExercises);
+}
+
+function updateTmplSet(exIdx, setIdx, field, value) {
+  if (!tmplExercises[exIdx]) return;
+  const sets = tmplExercises[exIdx].defaultSets || [];
+  if (!sets[setIdx]) return;
+  sets[setIdx][field] = field === 'reps' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
+}
+
+function addTmplSet(exIdx) {
+  if (!tmplExercises[exIdx]) return;
+  const sets = tmplExercises[exIdx].defaultSets || [];
+  const last = sets[sets.length - 1] || {weight: 0, reps: 8};
+  sets.push({weight: last.weight, reps: last.reps});
+  tmplExercises[exIdx].defaultSets = sets;
+  renderTemplateExercises(tmplExercises);
+}
+
+function removeTmplSet(exIdx, setIdx) {
+  if (!tmplExercises[exIdx]) return;
+  const sets = tmplExercises[exIdx].defaultSets || [];
+  if (sets.length <= 1) { showToast('Need at least 1 set'); return; }
+  sets.splice(setIdx, 1);
+  renderTemplateExercises(tmplExercises);
 }
 
 function moveTmplEx(i, dir) {
@@ -4937,7 +5035,12 @@ function openSwapVariantModal(exIdx) {
   swapVariantExIdx = exIdx;
   const ex = activeSession.exercises[exIdx];
   const info = variantMap[ex.variantId];
-  if (!info) return;
+
+  if (!info) {
+    // No variant info available — can't swap
+    showToast('No variants available to swap');
+    return;
+  }
 
   document.getElementById('swap-variant-parent-name').textContent = info.parent.name;
   const variants = info.parent.variants.filter(v => v.id !== ex.variantId);
@@ -4973,12 +5076,11 @@ function moveExercise(exIdx, direction) {
   const newIdx = exIdx + direction;
   if (newIdx < 0 || newIdx >= exs.length) return;
   [exs[exIdx], exs[newIdx]] = [exs[newIdx], exs[exIdx]];
-  // Swap collapsed state
-  const aCollapsed = collapsedExercises.has(exIdx);
-  const bCollapsed = collapsedExercises.has(newIdx);
+  const aCol = collapsedExercises.has(exIdx);
+  const bCol = collapsedExercises.has(newIdx);
   collapsedExercises.delete(exIdx); collapsedExercises.delete(newIdx);
-  if (aCollapsed) collapsedExercises.add(newIdx);
-  if (bCollapsed) collapsedExercises.add(exIdx);
+  if (aCol) collapsedExercises.add(newIdx);
+  if (bCol) collapsedExercises.add(exIdx);
   renderActiveSession();
 }
 
@@ -4986,6 +5088,16 @@ function moveExercise(exIdx, direction) {
 // REPEAT WORKOUT
 // ═══════════════════════════════════════════════════════════════
 let repeatWorkoutSessionId = null;
+let editingPastSessionId = null;
+
+async function editPastSet(sessionId, exIdx, setIdx, field, value) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session || !session.exercises[exIdx]) return;
+  const set = session.exercises[exIdx].sets[setIdx];
+  if (!set) return;
+  set[field] = field === 'reps' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
+  await dbPut('sessions', session);
+}
 
 document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
   if (!repeatWorkoutSessionId) return;
