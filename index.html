@@ -1928,29 +1928,9 @@ function uid() {
 </script>
 <script id="lib-data-script">
 // Library injected by build
-// ── Derived constants from hierarchy (replaces old EXERCISE_LIBRARY) ──
-const MUSCLE_GROUPS = ["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"];
-const MOVEMENT_PATTERNS = ["push","pull","squat","hinge","carry","isolation","core"];
-const EQUIPMENT_TYPES = [...new Set(EXERCISE_HIERARCHY.flatMap(h => h.resistances.map(r => r.toLowerCase().replace(/[^a-z0-9+]/g,'_'))))].sort();
-
-// Build lookup maps — populated from hierarchy + custom data at load time
+// ── Lookup maps — populated after EXERCISE_HIERARCHY is defined below ──
 const variantMap = {}; // variantId -> {variant, parent}
-const parentMap = {}; // parentId -> parent (uses old library parent shape for compatibility)
-
-// Build parent entries from hierarchy so library screen, analytics, etc. work
-const hierarchyParents = [];
-EXERCISE_HIERARCHY.forEach(h => {
-  const parent = {
-    id: h.id,
-    name: h.name,
-    primary_muscles: h.muscles,
-    secondary_muscles: h.sec || [],
-    movement_pattern: h.pattern,
-    variants: []  // populated by custom_variants and picker usage
-  };
-  hierarchyParents.push(parent);
-  parentMap[parent.id] = parent;
-});
+const parentMap = {}; // parentId -> parent
 
 
 // ── Convenience: resolve variantId to {parent, variant, displayName} ──
@@ -2128,6 +2108,26 @@ const EXERCISE_HIERARCHY = [
 // Build hierarchy lookup
 const hierarchyMap = {};
 EXERCISE_HIERARCHY.forEach(h => { hierarchyMap[h.id] = h; });
+
+// ── Derived constants from hierarchy ──
+const MUSCLE_GROUPS = ["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"];
+const MOVEMENT_PATTERNS = ["push","pull","squat","hinge","carry","isolation","core"];
+const EQUIPMENT_TYPES = [...new Set(EXERCISE_HIERARCHY.flatMap(h => h.resistances.map(r => r.toLowerCase().replace(/[^a-z0-9+]/g,'_'))))].sort();
+
+// Build parent entries from hierarchy for library screen, analytics, etc.
+const hierarchyParents = [];
+EXERCISE_HIERARCHY.forEach(h => {
+  const parent = {
+    id: h.id,
+    name: h.name,
+    primary_muscles: h.muscles,
+    secondary_muscles: h.sec || [],
+    movement_pattern: h.pattern,
+    variants: []  // populated by custom_variants and picker usage
+  };
+  hierarchyParents.push(parent);
+  parentMap[parent.id] = parent;
+});
 
 // Resistance type abbreviation map for display names
 const RES_ABBREV = {
