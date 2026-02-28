@@ -2775,7 +2775,7 @@ function openSupersetModal(exIdx) {
   const exList = document.getElementById('superset-ex-list');
   const others = activeSession.exercises
     .map((e,i) => ({e,i}))
-    .filter(({e,i}) => i !== exIdx && e.supersetId !== ex.supersetId);
+    .filter(({e,i}) => i !== exIdx && (!ex.supersetId || e.supersetId !== ex.supersetId));
 
   if (others.length === 0) {
     linkSection.style.display = 'none';
