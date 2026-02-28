@@ -2373,6 +2373,7 @@ async function startFromTemplate(templateId) {
       const rawSets = defaultSets || lastSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
       exercises.push({
         variantId: te.variantId,
+        supersetId: te.supersetId || null,
         sets: rawSets.map((s,i) => ({
           index: i,
           weight: s.weight || 0,
@@ -2385,6 +2386,7 @@ async function startFromTemplate(templateId) {
       // Add with default sets so the exercise still shows up
       exercises.push({
         variantId: te.variantId,
+        supersetId: te.supersetId || null,
         sets: [{index:0,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
                {index:1,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
                {index:2,weight:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''}]
@@ -2823,17 +2825,18 @@ function linkSuperset(otherIdx) {
 }
 
 document.getElementById('superset-unlink-btn').addEventListener('click', () => {
+  // Template context
+  if (tmplSupersetIdx !== null) {
+    tmplUnlinkSuperset();
+    return;
+  }
+  // Session context
   if (supersetTargetIdx === null || !activeSession) return;
   const ex = activeSession.exercises[supersetTargetIdx];
   if (!ex.supersetId) return;
 
   const ssId = ex.supersetId;
-  const members = activeSession.exercises.filter(e => e.supersetId === ssId);
-
-  // Remove just this exercise from the group
   ex.supersetId = null;
-
-  // If only 1 left in group, dissolve the group
   const remaining = activeSession.exercises.filter(e => e.supersetId === ssId);
   if (remaining.length <= 1) remaining.forEach(e => e.supersetId = null);
 
@@ -3285,8 +3288,22 @@ async function renderTemplates() {
         </button>
       </div>
       <div class="template-exercises">
-        ${t.exercises.slice(0,5).map(ex => `<div class="template-ex">${escHtml(getVariantDisplayName(ex.variantId))}</div>`).join('')}
-        ${t.exercises.length > 5 ? `<div style="font-size:11px;color:var(--text3)">+${t.exercises.length-5} more</div>` : ''}
+        ${(() => {
+          const seen = new Set();
+          return t.exercises.slice(0,6).map((ex, i) => {
+            if (seen.has(i)) return '';
+            const name = escHtml(getVariantDisplayName(ex.variantId));
+            if (ex.supersetId) {
+              const group = t.exercises.map((e,j) => ({e,j})).filter(({e}) => e.supersetId === ex.supersetId);
+              group.forEach(({j}) => seen.add(j));
+              return '<div class="template-ex" style="border-left:2px solid var(--accent);padding-left:6px">' +
+                group.map(({e}) => escHtml(getVariantDisplayName(e.variantId))).join(' + ') + '</div>';
+            }
+            seen.add(i);
+            return '<div class="template-ex">' + name + '</div>';
+          }).join('');
+        })()}
+        ${t.exercises.length > 6 ? `<div style="font-size:11px;color:var(--text3)">+${t.exercises.length-6} more</div>` : ''}
       </div>
       <div class="template-actions">
         <button class="btn btn-primary btn-sm" onclick="startFromTemplate('${t.id}')">Start Workout</button>
@@ -3422,33 +3439,74 @@ function renderTemplateExercises(exercises) {
   tmplExercises = exercises ? [...exercises] : [];
   const list = document.getElementById('tmpl-exercises-list');
   const n = tmplExercises.length;
-  list.innerHTML = tmplExercises.map((ex, i) => {
-    const sets = ex.defaultSets || [];
-    const isExpanded = (tmplExpandedIdx === i);
-    const setsPreview = sets.length > 0
-      ? sets.map(s => `${s.weight||0}×${s.reps||0}`).join(', ')
-      : 'No sets';
-    return `<div style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
-      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
-        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0" onclick="event.stopPropagation()">
-          <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
-          </button>
-          <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' · ' + setsPreview : ''}</div>
-        </div>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+  // Group exercises: superset groups rendered together, singles standalone
+  const rendered = new Set();
+  const ssColors = ['var(--accent)','var(--accent-pink)','#f59e0b','#10b981','#06b6d4'];
+  const ssColorMap = {};
+  let ssColorIdx = 0;
+  let html = '';
+
+  for (let i = 0; i < n; i++) {
+    if (rendered.has(i)) continue;
+    const ex = tmplExercises[i];
+    if (ex.supersetId) {
+      // Collect all indices for this superset
+      const groupIndices = tmplExercises.map((e,idx) => e.supersetId === ex.supersetId ? idx : -1).filter(idx => idx >= 0);
+      groupIndices.forEach(idx => rendered.add(idx));
+      if (!ssColorMap[ex.supersetId]) {
+        ssColorMap[ex.supersetId] = ssColors[ssColorIdx % ssColors.length];
+        ssColorIdx++;
+      }
+      const color = ssColorMap[ex.supersetId];
+      html += `<div class="superset-group" style="border-left-color:${color}">
+        <div class="superset-label"><div class="superset-label-text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Superset · ${groupIndices.length} exercises
+        </div></div>
+        ${groupIndices.map(idx => renderTmplExCard(idx, n, true)).join(
+          '<div class="superset-connector" data-label="then"></div>'
+        )}
+      </div>`;
+    } else {
+      rendered.add(i);
+      html += renderTmplExCard(i, n, false);
+    }
+  }
+  list.innerHTML = html;
+}
+
+function renderTmplExCard(i, n, inSuperset) {
+  const ex = tmplExercises[i];
+  const sets = ex.defaultSets || [];
+  const isExpanded = (tmplExpandedIdx === i);
+  const setsPreview = sets.length > 0
+    ? sets.map(s => `${s.weight||0}×${s.reps||0}`).join(', ')
+    : 'No sets';
+  const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
+  return `<div style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0" onclick="event.stopPropagation()">
+        <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
       </div>
-      ${isExpanded ? renderTmplSets(i, sets) : ''}
-    </div>`;
-  }).join('');
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' · ' + setsPreview : ''}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); openTmplSupersetModal(${i})" title="Superset" style="flex-shrink:0;${ssActive}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    ${isExpanded ? renderTmplSets(i, sets) : ''}
+  </div>`;
 }
 
 function renderTmplSets(exIdx, sets) {
@@ -3513,8 +3571,109 @@ function moveTmplEx(i, dir) {
 }
 
 function removeTemplateEx(i) {
+  const removed = tmplExercises[i];
   tmplExercises.splice(i, 1);
+  // Clean up superset if only 1 member remains
+  if (removed.supersetId) {
+    const remaining = tmplExercises.filter(e => e.supersetId === removed.supersetId);
+    if (remaining.length <= 1) remaining.forEach(e => e.supersetId = null);
+  }
+  if (tmplExpandedIdx === i) tmplExpandedIdx = null;
+  else if (tmplExpandedIdx > i) tmplExpandedIdx--;
   renderTemplateExercises(tmplExercises);
+}
+
+// ── Template Superset Modal ──
+let tmplSupersetIdx = null;
+
+function openTmplSupersetModal(exIdx) {
+  tmplSupersetIdx = exIdx;
+  const ex = tmplExercises[exIdx];
+  const name = getVariantDisplayName(ex.variantId);
+
+  document.getElementById('superset-modal-title').textContent = 'Superset';
+  document.getElementById('superset-modal-sub').textContent = name;
+
+  // Show current group
+  const currentGroup = document.getElementById('superset-current-group');
+  const groupList = document.getElementById('superset-group-list');
+  if (ex.supersetId) {
+    currentGroup.style.display = '';
+    const members = tmplExercises.map((e,i) => ({e,i})).filter(({e}) => e.supersetId === ex.supersetId);
+    groupList.innerHTML = members.map(({e,i}) => {
+      const mName = getVariantDisplayName(e.variantId);
+      return `<div style="padding:8px 10px;background:var(--bg3);border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>
+        ${escHtml(mName)}${i === exIdx ? ' <span style="font-size:11px;color:var(--text3)">(this)</span>' : ''}
+      </div>`;
+    }).join('');
+  } else {
+    currentGroup.style.display = 'none';
+  }
+
+  // Show pairing options
+  const linkSection = document.getElementById('superset-link-section');
+  const exList = document.getElementById('superset-ex-list');
+  const others = tmplExercises.map((e,i) => ({e,i}))
+    .filter(({e,i}) => i !== exIdx && (!ex.supersetId || e.supersetId !== ex.supersetId));
+
+  if (others.length === 0) {
+    linkSection.style.display = 'none';
+  } else {
+    linkSection.style.display = '';
+    document.querySelector('#superset-link-section .input-label').textContent =
+      ex.supersetId ? 'Add to this superset…' : 'Pair with…';
+    exList.innerHTML = others.map(({e,i}) => {
+      const mName = getVariantDisplayName(e.variantId);
+      const alreadyInOtherGroup = e.supersetId && e.supersetId !== ex.supersetId;
+      return `<div onclick="tmplLinkSuperset(${i})"
+        style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${escHtml(mName)}</div>
+          ${alreadyInOtherGroup ? '<div style="font-size:11px;color:var(--accent-pink)">in another superset</div>' : ''}
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>`;
+    }).join('');
+  }
+
+  openModal('modal-superset');
+}
+
+function tmplLinkSuperset(otherIdx) {
+  if (tmplSupersetIdx === null) return;
+  const exA = tmplExercises[tmplSupersetIdx];
+  const exB = tmplExercises[otherIdx];
+  const ssId = exA.supersetId || exB.supersetId || ('ss_' + Date.now().toString(36));
+
+  if (exB.supersetId && exB.supersetId !== ssId) {
+    const oldId = exB.supersetId;
+    tmplExercises.forEach(e => { if (e.supersetId === oldId) e.supersetId = ssId; });
+  }
+
+  exA.supersetId = ssId;
+  exB.supersetId = ssId;
+
+  closeModal('modal-superset');
+  renderTemplateExercises(tmplExercises);
+  showToast('Superset created');
+  tmplSupersetIdx = null;
+}
+
+function tmplUnlinkSuperset() {
+  if (tmplSupersetIdx === null) return;
+  const ex = tmplExercises[tmplSupersetIdx];
+  if (!ex.supersetId) return;
+
+  const ssId = ex.supersetId;
+  ex.supersetId = null;
+  const remaining = tmplExercises.filter(e => e.supersetId === ssId);
+  if (remaining.length <= 1) remaining.forEach(e => e.supersetId = null);
+
+  closeModal('modal-superset');
+  renderTemplateExercises(tmplExercises);
+  showToast('Removed from superset');
+  tmplSupersetIdx = null;
 }
 
 document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
