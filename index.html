@@ -3914,8 +3914,9 @@ function renderPickerVariant() {
         <div class="picker-option-name">${escHtml(v)}</div>
       </div>`).join('')}
     </div>
-    <div style="padding:12px 0">
-      <button class="btn btn-primary" style="width:100%" ${pickerState.variants.length === 0 ? 'disabled' : ''} onclick="pickerVariantContinue()">Continue</button>
+    <div style="padding:12px 0; display:flex; gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="pickerVariantContinue()">Skip</button>
+      <button class="btn btn-primary" style="flex:2" onclick="pickerVariantContinue()">Continue${pickerState.variants.length > 0 ? ` (${pickerState.variants.length})` : ''}</button>
     </div>`;
 }
 
@@ -3927,7 +3928,6 @@ function pickerToggleVariant(v) {
 }
 
 function pickerVariantContinue() {
-  if (pickerState.variants.length === 0) return;
   pickerState.step = 'modifiers';
   renderPickerStep();
 }
@@ -4018,8 +4018,6 @@ document.getElementById('pick-ex-confirm').addEventListener('click', () => {
   if (!pickerState.liftId || !pickerState.resistance) return;
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
-  if (h.variants.length > 0 && pickerState.variants.length === 0) return;
-
   const variantStr = pickerState.variants.join(' ');
   // Resolve to a variant ID
   const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, variantStr, pickerState.mods);
