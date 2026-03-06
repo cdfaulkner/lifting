@@ -511,7 +511,7 @@ select option { background: var(--bg3); }
 
 .sets-header {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 52px;
+  grid-template-columns: 36px 1fr 1fr 52px 28px;
   padding: 6px 10px;
   background: var(--bg3);
   border-top: 1px solid var(--border);
@@ -528,7 +528,7 @@ select option { background: var(--bg3); }
 
 .set-row {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 52px;
+  grid-template-columns: 36px 1fr 1fr 52px 28px;
   align-items: center;
   border-bottom: 1px solid var(--border);
   min-height: 52px;
@@ -537,6 +537,19 @@ select option { background: var(--bg3); }
 .set-row:last-child { border-bottom: none; }
 .set-row.completed { background: rgba(167,139,250,0.06); }
 .set-row.completed .set-num { color: var(--accent); }
+.set-del-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
+}
+.set-del-btn:hover { color: #ef4444; opacity: 1; }
 
 .set-num {
   font-family: var(--mono);
@@ -2596,6 +2609,7 @@ function renderSetRow(exIdx, si, set) {
         ${set.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
       </button>
     </div>
+    <button class="set-del-btn" onclick="event.stopPropagation(); deleteSetFromExercise(${exIdx},${si})" title="Delete set">×</button>
   </div>
   <div class="set-detail" id="set-detail-${exIdx}-${si}">
     <div class="set-detail-row">
@@ -2726,6 +2740,14 @@ function addSetToExercise(exIdx) {
     notes: ''
   });
   // Re-render just the sets area
+  renderActiveSession();
+}
+
+function deleteSetFromExercise(exIdx, si) {
+  if (!activeSession) return;
+  const ex = activeSession.exercises[exIdx];
+  if (!ex || ex.sets.length <= 1) return;
+  ex.sets.splice(si, 1);
   renderActiveSession();
 }
 
@@ -3040,24 +3062,34 @@ async function viewWorkoutDetail(sessionId) {
     ` + session.exercises.map((ex, exI) => {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
-    return `<div style="margin-bottom:14px">
-      <div style="font-size:14px;font-weight:500;margin-bottom:6px">${escHtml(name)}</div>
-      ${sets.map((s, i) => {
-        const origIdx = ex.sets.indexOf(s);
-        const rpe = s.rpe ? ` <span style="color:var(--text3)">@${s.rpe}</span>` : '';
-        const notes = s.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;padding-left:8px">${escHtml(s.notes)}</div>` : '';
-        return `<div style="padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px">
-          <span style="font-family:var(--mono);font-size:13px;color:var(--text3);min-width:18px">${i+1}.</span>
-          <input type="number" step="0.5" value="${s.weight}" style="width:52px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 6px;text-align:center" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
-          <span style="font-family:var(--mono);font-size:13px;color:var(--text3)">×</span>
-          <input type="number" value="${s.reps}" style="width:44px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 6px;text-align:center" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
-          ${rpe}
-          ${notes}
-        </div>`;
-      }).join('')}
-      ${sets.length === 0 ? '<div style="font-size:12px;color:var(--text3)">No sets completed</div>' : ''}
+    return `<div style="margin-bottom:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</div>
+        <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" onclick="addSetToPastWorkout('${session.id}',${exI})">+ Set</button>
+        <button class="btn btn-ghost btn-sm btn-icon" style="opacity:0.5" onclick="removeExFromPastWorkout('${session.id}',${exI})" title="Remove exercise">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div style="padding:6px 10px">
+        <div style="display:grid;grid-template-columns:20px 1fr 1fr 28px;gap:4px;padding:2px 0 4px;font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center">
+          <div></div><div>LBS</div><div>REPS</div><div></div>
+        </div>
+        ${sets.map((s, i) => {
+          const origIdx = ex.sets.indexOf(s);
+          return `<div style="display:grid;grid-template-columns:20px 1fr 1fr 28px;gap:4px;align-items:center;padding:2px 0;border-top:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
+            <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
+            <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
+            <button onclick="deletePastSet('${session.id}',${exI},${origIdx})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
+          </div>`;
+        }).join('')}
+        ${sets.length === 0 ? '<div style="font-size:12px;color:var(--text3);padding:6px 0">No sets completed</div>' : ''}
+      </div>
     </div>`;
-  }).join('') + `</div>`;
+  }).join('') + `</div>
+  <div style="padding:0 16px 16px">
+    <button class="btn btn-ghost btn-sm" style="width:100%;border:1px dashed var(--border)" onclick="addExToPastWorkout('${session.id}')">+ Add Exercise</button>
+  </div>`;
 
   editingPastSessionId = session.id;
   openModal('modal-exercise-detail');
@@ -3914,9 +3946,8 @@ function renderPickerVariant() {
         <div class="picker-option-name">${escHtml(v)}</div>
       </div>`).join('')}
     </div>
-    <div style="padding:12px 0; display:flex; gap:8px">
-      <button class="btn btn-secondary" style="flex:1" onclick="pickerVariantContinue()">Skip</button>
-      <button class="btn btn-primary" style="flex:2" onclick="pickerVariantContinue()">Continue${pickerState.variants.length > 0 ? ` (${pickerState.variants.length})` : ''}</button>
+    <div style="padding:12px 0">
+      <button class="btn btn-primary" style="width:100%" ${pickerState.variants.length === 0 ? 'disabled' : ''} onclick="pickerVariantContinue()">Continue</button>
     </div>`;
 }
 
@@ -3928,6 +3959,7 @@ function pickerToggleVariant(v) {
 }
 
 function pickerVariantContinue() {
+  if (pickerState.variants.length === 0) return;
   pickerState.step = 'modifiers';
   renderPickerStep();
 }
@@ -4018,6 +4050,8 @@ document.getElementById('pick-ex-confirm').addEventListener('click', () => {
   if (!pickerState.liftId || !pickerState.resistance) return;
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
+  if (h.variants.length > 0 && pickerState.variants.length === 0) return;
+
   const variantStr = pickerState.variants.join(' ');
   // Resolve to a variant ID
   const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, variantStr, pickerState.mods);
@@ -5003,6 +5037,50 @@ async function editPastSet(sessionId, exIdx, setIdx, field, value) {
   if (!set) return;
   set[field] = field === 'reps' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
   await dbPut('sessions', session);
+}
+
+async function addSetToPastWorkout(sessionId, exIdx) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session || !session.exercises[exIdx]) return;
+  const sets = session.exercises[exIdx].sets;
+  const last = sets.filter(s => s.completed).pop() || sets[sets.length - 1] || {weight: 0, reps: 8};
+  sets.push({weight: last.weight, reps: last.reps, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''});
+  await dbPut('sessions', session);
+  viewWorkoutDetail(sessionId);
+}
+
+async function deletePastSet(sessionId, exIdx, setIdx) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session || !session.exercises[exIdx]) return;
+  const sets = session.exercises[exIdx].sets;
+  if (sets.filter(s => s.completed).length <= 1) { showToast('Need at least 1 set'); return; }
+  sets.splice(setIdx, 1);
+  await dbPut('sessions', session);
+  viewWorkoutDetail(sessionId);
+}
+
+async function removeExFromPastWorkout(sessionId, exIdx) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session) return;
+  if (session.exercises.length <= 1) { showToast('Need at least 1 exercise'); return; }
+  session.exercises.splice(exIdx, 1);
+  await dbPut('sessions', session);
+  viewWorkoutDetail(sessionId);
+}
+
+function addExToPastWorkout(sessionId) {
+  pendingPickExerciseCallback = async (variantId) => {
+    const session = await dbGet('sessions', sessionId);
+    if (!session) return;
+    session.exercises.push({
+      variantId,
+      supersetId: null,
+      sets: [{weight: 0, reps: 8, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''}]
+    });
+    await dbPut('sessions', session);
+    viewWorkoutDetail(sessionId);
+  };
+  openExercisePicker();
 }
 
 document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
