@@ -66,6 +66,8 @@ html, body {
   flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
+  position: sticky;
+  bottom: 0;
 }
 
 .nav-btn {
@@ -95,7 +97,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(24px + var(--safe-bot));
+  padding-bottom: calc(80px + var(--safe-bot));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -1739,8 +1741,6 @@ textarea { resize: none; }
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
     </div>
-  </div><!-- end #content -->
-
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
@@ -1764,7 +1764,7 @@ textarea { resize: none; }
       Mobility
     </button>
   </nav>
-</div><!-- end #app -->
+  </div>
 
 <!-- ══ MODALS ══ -->
 <div id="modal-backdrop"></div>
