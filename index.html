@@ -3282,20 +3282,49 @@ async function loadPrevBest(variantId, idx) {
   const el = document.getElementById(`prev-best-${idx}`);
   if (!el) return;
   const sessions = await getSortedSessions();
-  const sorted = sessions;
-  for (const s of sorted) {
+
+  // Collect last 5 sessions that have this exercise with completed sets
+  const history = [];
+  for (const s of sessions) {
     const ex = s.exercises.find(e => e.variantId === variantId);
-    if (ex) {
-      const completed = ex.sets.filter(st => st.completed && st.weight);
-      if (completed.length > 0) {
-        const top = completed.sort((a,b) => b.weight - a.weight)[0];
-        const date = new Date(s.startTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-        el.innerHTML = `Prev: <span>${top.weight}×${top.reps}</span> <span style="color:var(--text3)">${date}</span>`;
-        return;
+    if (!ex) continue;
+    const completed = ex.sets.filter(st => st.completed && st.weight && st.reps);
+    if (completed.length === 0) continue;
+    const top = completed.sort((a,b) => b.weight*b.reps - a.weight*a.reps)[0];
+    history.push({ date: s.startTime, top, allSets: completed });
+    if (history.length >= 5) break;
+  }
+
+  if (history.length === 0) { el.innerHTML = `<span style="color:var(--text3)">First time</span>`; return; }
+
+  const last = history[0];
+  const top = last.top;
+  const date = new Date(last.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+
+  // Progressive overload suggestion
+  let suggestion = '';
+  if (history.length >= 2) {
+    const prev = history[1].top;
+    const lastE1RM = epley1RM(top.weight, top.reps);
+    const prevE1RM = epley1RM(prev.weight, prev.reps);
+    if (lastE1RM >= prevE1RM) {
+      // Progressing — suggest small weight increase or extra rep
+      const suggestWeight = Math.ceil((top.weight * 1.025) / 2.5) * 2.5; // next 2.5lb increment ~2.5%
+      const sameWeightMoreReps = top.reps < 12;
+      if (sameWeightMoreReps && top.reps + 1 <= 12) {
+        suggestion = `<span style="color:var(--accent);font-size:10px">→ try ${top.weight}×${top.reps + 1}</span>`;
+      } else {
+        suggestion = `<span style="color:var(--accent);font-size:10px">→ try ${suggestWeight}×${top.reps}</span>`;
       }
+    } else {
+      // Regressed — just note previous best
+      const pbDate = new Date(history.find(h => epley1RM(h.top.weight, h.top.reps) === Math.max(...history.map(h2 => epley1RM(h2.top.weight, h2.top.reps)))).date)
+        .toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      suggestion = `<span style="color:var(--text3);font-size:10px">below prev best</span>`;
     }
   }
-  el.innerHTML = `<span>First time</span>`;
+
+  el.innerHTML = `<span style="color:var(--text3);font-size:11px">Prev</span> <span>${top.weight}×${top.reps}</span> <span style="color:var(--text3);font-size:11px">${date}</span>${suggestion ? ' ' + suggestion : ''}`;
 }
 
 // Set detail modal
@@ -5271,6 +5300,71 @@ async function seedDefaultTemplates() {
   for (const t of templates) await dbPut('templates', t);
 }
 
+
+// ── Skeleton template seeding ──────────────────────────────────
+async function seedSkeletonTemplates() {
+  const existing = await dbGetAll('templates');
+  if (existing.length > 0) return; // only seed if no templates exist
+
+  // Helper: pick the simplest variant for a given pattern + resistance hint
+  function pickVariant(exerciseId, preferredResistance) {
+    const h = hierarchyMap[exerciseId];
+    if (!h) return null;
+    const res = h.resistances.includes(preferredResistance) ? preferredResistance : h.resistances[0];
+    // No variants = just resistance
+    if (!h.variants || h.variants.length === 0) return `${exerciseId}__${res}`;
+    // Pick first meaningful variant
+    const v = h.variants[0];
+    return `${exerciseId}__${res}__${v.toLowerCase().replace(/ /g,'_')}`;
+  }
+
+  function makeEx(variantId, sets=3, reps=8, weight=0) {
+    return { variantId, defaultSets: Array(sets).fill(null).map(() => ({weight, reps})) };
+  }
+
+  // Use placeholder-friendly variantIds — just the exercise ID + "BW" or "Barbell"
+  // The picker will still work; user swaps resistance/variant when they open the template
+  const templates = [
+    {
+      id: uid(),
+      name: 'Lower',
+      exercises: [
+        makeEx('squat__Barbell__back', 4, 6, 0),         // Squat / Lunge
+        makeEx('lunge__Dumbbell__bss', 3, 10, 0),
+        makeEx('rdl__Barbell', 3, 8, 0),                  // Hinge
+        makeEx('leg_extension__Voltra__unilateral', 3, 12, 0), // Quad Iso
+        makeEx('ham_curl__Voltra__lying', 3, 12, 0),       // Ham Iso
+        makeEx('calf_raise__BW__standing', 3, 15, 0),      // Calf Iso
+      ]
+    },
+    {
+      id: uid(),
+      name: 'Upper A',
+      exercises: [
+        makeEx('chest_press__Barbell__flat', 4, 6, 0),     // Bench
+        makeEx('row__Barbell__neutral', 4, 6, 0),          // Row / horizontal pull
+        makeEx('chest_fly__Voltra__incline', 3, 12, 0),    // Chest Iso
+        makeEx('shoulder_raise__Dumbbell__standing', 3, 15, 0), // Shoulder Iso
+        makeEx('tricep_extension__Voltra__overhead', 3, 12, 0),  // Tri Iso
+      ]
+    },
+    {
+      id: uid(),
+      name: 'Upper B',
+      exercises: [
+        makeEx('pull_up__BW__supinated', 4, 6, 0),         // Vertical pull
+        makeEx('overhead_press__Barbell__standing', 4, 6, 0), // Vertical press
+        makeEx('straight_arm_pulldown__Voltra__unilateral', 3, 12, 0), // Back Iso
+        makeEx('tricep_extension__Voltra__standing', 3, 12, 0), // Tri Iso
+        makeEx('bicep_curl__Dumbbell__incline', 3, 12, 0),  // Bi Iso
+      ]
+    }
+  ];
+
+  for (const t of templates) await dbPut('templates', t);
+  console.log('Skeleton templates seeded');
+}
+
 // ═══════════════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════════════
@@ -5980,8 +6074,39 @@ async function buildClaudeExport() {
 
   lines.push(`# IronLog Training Summary`);
   lines.push(`Generated: ${today}`);
-  if (latestBW) lines.push(`Bodyweight: ${latestBW.weight_lbs} lbs (${latestBW.date})`);
+  if (latestBW) {
+    lines.push(`Bodyweight: ${latestBW.weight_lbs} lbs (${latestBW.date})`);
+    // BW trend over last 2 weeks
+    const bw2w = bwEntries.filter(e => new Date(e.date) >= new Date(Date.now() - 14*86400000));
+    if (bw2w.length >= 2) {
+      const change = bw2w[bw2w.length-1].weight_lbs - bw2w[0].weight_lbs;
+      lines.push(`Bodyweight trend (14d): ${change >= 0 ? '+' : ''}${change.toFixed(1)} lbs`);
+    }
+  }
   lines.push('');
+
+  // ── Training frequency last 4 weeks ──
+  const cutoff4wFreq = Date.now() - 28*86400000;
+  const last4w = sessions.filter(s => s.startTime >= cutoff4wFreq);
+  if (last4w.length > 0) {
+    lines.push(`## Training Frequency (Last 4 Weeks)`);
+    lines.push(`Sessions: ${last4w.length} (${(last4w.length/4).toFixed(1)}/week avg)`);
+    // Pattern frequency
+    const patternDays = {};
+    last4w.forEach(s => {
+      const day = new Date(s.startTime).toISOString().split('T')[0];
+      s.exercises.forEach(ex => {
+        const h = hierarchyMap[ex.variantId.split('__')[0]];
+        if (!h) return;
+        if (!patternDays[h.pattern]) patternDays[h.pattern] = new Set();
+        patternDays[h.pattern].add(day);
+      });
+    });
+    Object.entries(patternDays).sort((a,b) => b[1].size - a[1].size).forEach(([p, days]) => {
+      lines.push(`  ${p}: ${days.size}x`);
+    });
+    lines.push('');
+  }
 
   // ── Recent workouts (last 8) ──
   lines.push(`## Recent Workouts`);
@@ -6053,10 +6178,10 @@ async function buildClaudeExport() {
   lines.push(`## Volume — Last 4 Weeks by Muscle`);
   lines.push('');
   const cutoff4w = Date.now() - 28 * 86400000;
-  const last4w = sessions.filter(s => s.startTime >= cutoff4w);
+  const last4wVol = sessions.filter(s => s.startTime >= cutoff4w);
   const muscleVol = {};
   MUSCLE_GROUPS.forEach(m => { muscleVol[m] = {sets: 0, vol: 0}; });
-  last4w.forEach(s => {
+  last4wVol.forEach(s => {
     s.exercises.forEach(ex => {
       const { primary: muscles, secondary: secMuscles } = getMusclesForVariant(ex.variantId);
       if (muscles.length === 0) return;
@@ -6130,6 +6255,7 @@ async function init() {
     loadExerciseNotes(),
   ]);
   await seedBWData().catch(e => console.warn('seedBW skipped:', e));
+  await seedSkeletonTemplates().catch(e => console.warn('seedTemplates skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
