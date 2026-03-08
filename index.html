@@ -529,7 +529,7 @@ select option { background: var(--bg3); }
 
 .set-row {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 52px 28px;
+  grid-template-columns: 36px 1fr 1fr 52px 28px 28px;
   align-items: center;
   border-bottom: 1px solid var(--border);
   min-height: 52px;
@@ -551,6 +551,107 @@ select option { background: var(--bg3); }
   transition: opacity 0.15s, color 0.15s;
 }
 .set-del-btn:hover { color: #ef4444; opacity: 1; }
+
+.set-copy-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.45;
+  transition: opacity 0.15s, color 0.15s;
+}
+.set-copy-btn:hover { color: var(--accent); opacity: 1; }
+
+/* Swipe-to-delete */
+.swipe-item {
+  position: relative;
+  overflow: hidden;
+}
+.swipe-item-inner {
+  position: relative;
+  transition: transform 0.18s ease;
+  will-change: transform;
+  background: inherit;
+  z-index: 1;
+}
+.swipe-delete-bg {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 80px;
+  background: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 4px;
+  z-index: 0;
+  border-radius: 0 var(--r) var(--r) 0;
+}
+.swipe-delete-bg svg { flex-shrink: 0; }
+
+/* Quick-add from previous session */
+.quick-add-section {
+  padding: 10px 16px 4px;
+}
+.quick-add-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.quick-add-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.quick-add-chip {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.12s, background 0.12s;
+  max-width: 200px;
+}
+.quick-add-chip:active { background: var(--bg4); }
+.quick-add-chip-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  font-weight: 500;
+}
+.quick-add-chip-sets {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+
+/* Draft/autosave indicator */
+.autosave-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+  margin-right: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.autosave-dot.visible { opacity: 1; }
 
 .set-num {
   font-family: var(--mono);
@@ -1403,12 +1504,14 @@ textarea { resize: none; }
         <button class="btn btn-ghost btn-sm btn-icon" id="session-notes-toggle" title="Toggle notes" style="padding:6px;color:var(--text3)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <div id="session-timer" class="session-timer">0:00</div>
+        <div id="autosave-dot" title="Saved"></div>
+      <div id="session-timer" class="session-timer">0:00</div>
       </div>
     </div>
     <div id="session-notes-wrap">
       <textarea id="session-notes-input" placeholder="Workout notes…" rows="2"></textarea>
     </div>
+    <div id="quick-add-section"></div>
     <div id="session-body" class="session-body"></div>
     <div class="session-footer">
       <button class="btn btn-secondary btn-sm" id="session-add-ex-btn" style="flex:1">+ Add Exercise</button>
@@ -1646,7 +1749,7 @@ textarea { resize: none; }
 <div class="modal-overlay" id="modal-template-editor">
   <div class="modal" style="max-height:95vh">
     <div class="modal-header">
-      <div class="modal-title" id="tmpl-editor-title">New Template</div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="modal-title" id="tmpl-editor-title">New Template</div><div id="tmpl-autosave-dot" class="autosave-dot" title="Saved"></div></div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-template-editor')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -2180,7 +2283,7 @@ function getMusclesForVariant(variantId) {
 
 // ── Standard resistance types (uniform pool, each exercise picks from these) ──
 // "BW" = bodyweight / weighted vest / belt — no external implement required
-const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","Trap Bar","Plate","Belt"];
+const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","Trap Bar","Misc","Belt"];
 
 // ── All possible variant toggles ──
 const VARIANT_TYPES = [
@@ -2190,7 +2293,7 @@ const VARIANT_TYPES = [
   "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip",
   // Load position / style
   "Front","Back","Goblet","Zercher","Hack","Sissy","Harness","Belt Squat",
-  "Preacher","Ring","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up",
+  "Preacher","Bar","Ring","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up",
   // Modifier
   "Unilateral","Band","Paused","Tempo",
 ];
@@ -2207,12 +2310,12 @@ const EXERCISE_HIERARCHY = [
     resistances:["BW","Band"],
     variants:["Incline","Decline","Wide","Narrow","Paused"] },
   { id:"dip", name:"Dip", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["BW","Band"],
-    variants:["Wide","Narrow"] },
+    resistances:["BW","Band","Belt"],
+    variants:["Bar","Ring","Wide","Narrow","Harness","Belt"] },
   // ── BACK ──
   { id:"pull_up", name:"Pull Up", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["BW","Band","Belt"],
-    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Ring","Paused"] },
+    resistances:["BW","Band"],
+    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness","Belt"] },
   { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["Voltra","Band"],
     variants:["Wide","Narrow","Neutral","Unilateral"] },
@@ -2221,7 +2324,7 @@ const EXERCISE_HIERARCHY = [
     variants:["Wide","Narrow","Neutral","Unilateral","Seated","Standing","Incline","Paused"] },
   { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["BW"],
-    variants:["Unilateral"] },
+    variants:["Bar","Ring","Unilateral"] },
   { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
     resistances:["Barbell","Dumbbell","Voltra"],
     variants:["Flat","Incline","Unilateral"] },
@@ -2229,7 +2332,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["Voltra","Band"],
     variants:["Unilateral"] },
   { id:"back_extension", name:"Back Extension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["BW","Plate","Band"],
+    resistances:["BW","Misc","Band"],
     variants:["Unilateral"] },
   { id:"reverse_hyper", name:"Reverse Hyperextension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
     resistances:["BW","Band"],
@@ -2239,7 +2342,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
     variants:["Seated","Standing","Kneeling","Unilateral","Paused"] },
   { id:"shoulder_raise", name:"Shoulder Raise", pattern:"isolation", muscles:["shoulders"], sec:[],
-    resistances:["Dumbbell","Voltra","Landmine","Plate","Band"],
+    resistances:["Dumbbell","Voltra","Landmine","Misc","Band"],
     variants:["Seated","Standing","Unilateral","Incline"] },
   { id:"face_pull", name:"Face Pull", pattern:"pull", muscles:["shoulders"], sec:["back"],
     resistances:["Voltra","Band"],
@@ -2258,7 +2361,7 @@ const EXERCISE_HIERARCHY = [
     variants:["Unilateral","Seated","Standing"] },
   // ── ARMS ──
   { id:"bicep_curl", name:"Bicep Curl", pattern:"isolation", muscles:["biceps"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Plate","Band"],
+    resistances:["Barbell","Dumbbell","Voltra","Misc","Band"],
     variants:["Standing","Seated","Incline","Preacher","Unilateral","Narrow","Wide"] },
   { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra","Band"],
@@ -2266,10 +2369,10 @@ const EXERCISE_HIERARCHY = [
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW"],
-    variants:["Back","Front","Zercher","Goblet","Hack","Sissy","Harness","Belt Squat","Cossack","Paused","Band"] },
+    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Belt Squat","Belt","Cossack","Paused","Band"] },
   { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Band","BW"],
-    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Unilateral"] },
+    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Belt","Unilateral"] },
   { id:"leg_extension", name:"Leg Extension", pattern:"isolation", muscles:["quads"], sec:[],
     resistances:["Voltra","Band"],
     variants:["Unilateral"] },
@@ -2300,6 +2403,12 @@ const EXERCISE_HIERARCHY = [
   { id:"reverse_nordic", name:"Reverse Nordic", pattern:"isolation", muscles:["quads"], sec:[],
     resistances:["BW","Band"],
     variants:[] },
+  { id:"sissy_squat", name:"Sissy Squat", pattern:"isolation", muscles:["quads"], sec:[],
+    resistances:["BW","Band","Voltra"],
+    variants:["Unilateral","Paused"] },
+  { id:"tke", name:"Terminal Knee Extension", pattern:"isolation", muscles:["quads"], sec:[],
+    resistances:["Band","Voltra"],
+    variants:["Unilateral"] },
   { id:"calf_raise", name:"Calf Raise", pattern:"isolation", muscles:["calves"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt","BW","Band"],
     variants:["Seated","Standing","Unilateral"] },
@@ -2311,7 +2420,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["BW","Band"],
     variants:["Unilateral"] },
   { id:"ab_wheel", name:"Ab Wheel / Rollout", pattern:"core", muscles:["core"], sec:[],
-    resistances:["BW"],
+    resistances:["BW","Band","Voltra"],
     variants:["Unilateral"] },
   { id:"plank", name:"Plank", pattern:"core", muscles:["core"], sec:[],
     resistances:["BW","Band"],
@@ -2323,11 +2432,8 @@ const EXERCISE_HIERARCHY = [
     resistances:["Dumbbell","Voltra","Band"],
     variants:["Unilateral","Seated","Standing"] },
   // ── OTHER ──
-  { id:"farmers_carry", name:"Farmer's Carry", pattern:"carry", muscles:["core","forearms"], sec:["shoulders"],
-    resistances:["Dumbbell","Trap Bar"],
-    variants:["Unilateral"] },
-  { id:"rowing_machine", name:"Rowing Machine", pattern:"pull", muscles:["back"], sec:["quads","core"],
-    resistances:["Voltra"],
+  { id:"concept2", name:"Concept2", pattern:"cardio", muscles:["full body"], sec:[],
+    resistances:["BW"],
     variants:[] }
 ];
 
@@ -2337,7 +2443,7 @@ EXERCISE_HIERARCHY.forEach(h => { hierarchyMap[h.id] = h; });
 
 // ── Derived constants from hierarchy ──
 const MUSCLE_GROUPS = ["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"];
-const MOVEMENT_PATTERNS = ["push","pull","squat","hinge","carry","isolation","core"];
+const MOVEMENT_PATTERNS = ["push","pull","squat","hinge","cardio","isolation","core"];
 const EQUIPMENT_TYPES = [...new Set(EXERCISE_HIERARCHY.flatMap(h => h.resistances.map(r => r.toLowerCase().replace(/[^a-z0-9+]/g,'_'))))].sort();
 
 // Build parent entries from hierarchy for library screen, analytics, etc.
@@ -2593,20 +2699,35 @@ async function renderHome() {
 
   list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
     const bwHtml = bwMap[s.id] ? `<div class="workout-meta-item"><span class="workout-meta-val">${bwMap[s.id]}</span> lbs</div>` : '';
-    return `<div class="workout-card" onclick="viewWorkoutDetail('${s.id}')">
-      <div class="workout-card-header">
-        <div class="workout-card-title">${escHtml(s.title)}</div>
-        <div class="workout-card-date">${dateStr}</div>
+    return `<div class="workout-card swipe-item" data-sid="${s.id}">
+      <div class="swipe-item-inner" onclick="viewWorkoutDetail('${s.id}')">
+        <div class="workout-card-header">
+          <div class="workout-card-title">${escHtml(s.title)}</div>
+          <div class="workout-card-date">${dateStr}</div>
+        </div>
+        <div class="workout-card-exercises">${exList}${more}</div>
+        <div class="workout-card-meta">
+          ${dur ? `<div class="workout-meta-item"><span class="workout-meta-val">${dur}</span></div>` : ''}
+          <div class="workout-meta-item"><span class="workout-meta-val">${totalSets}</span> sets</div>
+          <div class="workout-meta-item"><span class="workout-meta-val">${s.exercises.length}</span> exercises</div>
+          ${bwHtml}
+        </div>
       </div>
-      <div class="workout-card-exercises">${exList}${more}</div>
-      <div class="workout-card-meta">
-        ${dur ? `<div class="workout-meta-item"><span class="workout-meta-val">${dur}</span></div>` : ''}
-        <div class="workout-meta-item"><span class="workout-meta-val">${totalSets}</span> sets</div>
-        <div class="workout-meta-item"><span class="workout-meta-val">${s.exercises.length}</span> exercises</div>
-        ${bwHtml}
+      <div class="swipe-delete-bg" style="pointer-events:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Delete
       </div>
     </div>`;
   }).join('');
+
+  // Wire swipe-delete on workout history cards
+  initSwipeDelete(list, '.workout-card', async (el) => {
+    const sid = el.dataset.sid;
+    if (sid) {
+      await dbDelete('sessions', sid);
+      showToast('Workout deleted');
+      renderHome();
+    }
+  });
 }
 
 document.getElementById('new-workout-btn').addEventListener('click', () => {
@@ -2786,7 +2907,8 @@ function renderActiveSession() {
     const summaryText = completedCount > 0
       ? `${completedCount}/${totalSets} sets` + (topSet ? ` · ${topSet.weight}×${topSet.reps}` : '')
       : `${totalSets} sets`;
-    return `<div class="ex-block ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
+    return `<div class="ex-block swipe-item ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
+      <div class="swipe-item-inner">
       <div class="ex-block-header">
         <button class="ex-block-collapse-btn" onclick="toggleExCollapse(${exIdx})" title="Collapse/expand">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -2829,6 +2951,11 @@ function renderActiveSession() {
           <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${exIdx})">+ Set</button>
         </div>
       </div>
+    </div>
+      </div>
+      <div class="swipe-delete-bg" style="border-radius:0 var(--r) var(--r) 0;pointer-events:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Remove
+      </div>
     </div>`;
   }
 
@@ -2850,6 +2977,14 @@ function renderActiveSession() {
 
   activeSession.exercises.forEach((ex, idx) => loadPrevBest(ex.variantId, idx));
   attachSetInputListeners();
+  saveSessionDraft();
+  renderQuickAdd();
+
+  // Swipe-to-delete exercise blocks
+  initSwipeDelete(body, '.ex-block', (el) => {
+    const exIdx = parseInt(el.id.replace('ex-block-', ''));
+    if (!isNaN(exIdx)) removeExFromSession(exIdx);
+  });
 }
 
 function renderSetRow(exIdx, si, set) {
@@ -2871,6 +3006,9 @@ function renderSetRow(exIdx, si, set) {
         ${set.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
       </button>
     </div>
+    <button class="set-copy-btn" onclick="event.stopPropagation(); copySetBelow(${exIdx},${si})" title="Duplicate set">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </button>
     <button class="set-del-btn" onclick="event.stopPropagation(); deleteSetFromExercise(${exIdx},${si})" title="Delete set">×</button>
   </div>
   <div class="set-detail" id="set-detail-${exIdx}-${si}">
@@ -3010,6 +3148,16 @@ function deleteSetFromExercise(exIdx, si) {
   const ex = activeSession.exercises[exIdx];
   if (!ex || ex.sets.length <= 1) return;
   ex.sets.splice(si, 1);
+  renderActiveSession();
+}
+
+function copySetBelow(exIdx, si) {
+  if (!activeSession) return;
+  const ex = activeSession.exercises[exIdx];
+  const orig = ex.sets[si];
+  const copy = {...orig, completed: false, completedAt: null};
+  ex.sets.splice(si + 1, 0, copy);
+  saveSessionDraft();
   renderActiveSession();
 }
 
@@ -3244,6 +3392,48 @@ function renderActiveBanner() {
 }
 
 // Finish session
+// ── Session draft (auto-save in-progress workout to IDB) ──
+const SESSION_DRAFT_KEY = '__session_draft__';
+
+function saveSessionDraft() {
+  if (!activeSession) return;
+  localStorage.setItem(SESSION_DRAFT_KEY, JSON.stringify({
+    session: activeSession,
+    epoch: sessionStartEpoch,
+    notes: document.getElementById('session-notes-input')?.value || ''
+  }));
+  // Flash autosave indicator if present
+  const dot = document.getElementById('autosave-dot');
+  if (dot) {
+    dot.classList.add('visible');
+    clearTimeout(dot._hideTimer);
+    dot._hideTimer = setTimeout(() => dot.classList.remove('visible'), 1200);
+  }
+}
+
+async function loadSessionDraft() {
+  try {
+    const raw = localStorage.getItem(SESSION_DRAFT_KEY);
+    if (!raw) return false;
+    const {session, epoch, notes} = JSON.parse(raw);
+    if (!session) return false;
+    // Restore
+    activeSession = session;
+    sessionStartEpoch = epoch;
+    collapsedExercises = new Set();
+    document.getElementById('session-notes-input').value = notes || '';
+    renderActiveSession();
+    document.getElementById('active-session').classList.add('open');
+    startTimer();
+    showToast('Resumed in-progress workout');
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearSessionDraft() {
+  localStorage.removeItem(SESSION_DRAFT_KEY);
+}
+
 document.getElementById('session-finish-btn').addEventListener('click', async () => {
   if (!activeSession) return;
   clearInterval(sessionTimerInterval);
@@ -3253,6 +3443,7 @@ document.getElementById('session-finish-btn').addEventListener('click', async ()
   activeSession.notes = document.getElementById('session-notes-input').value.trim();
 
   await dbPut('sessions', activeSession);
+  clearSessionDraft();
   activeSession = null;
   document.getElementById('active-session').classList.remove('open');
   document.getElementById('active-banner').innerHTML = '';
@@ -3486,6 +3677,7 @@ function setExChartMetric(metric) {
   exChartMetric = metric;
   document.getElementById('ex-chart-btn-max')?.classList.toggle('active', metric === 'max_weight');
   document.getElementById('ex-chart-btn-1rm')?.classList.toggle('active', metric === 'est_1rm');
+  document.getElementById('ex-chart-btn-vol')?.classList.toggle('active', metric === 'volume');
   renderExChart();
 }
 
@@ -3502,7 +3694,9 @@ function renderExChart() {
   const iW = W - pad.left - pad.right;
   const iH = H - pad.top - pad.bottom;
 
-  const values = data.map(d => metric === 'est_1rm' ? d.est1RM : d.maxWeight);
+  const getValue = d => metric === 'est_1rm' ? d.est1RM : metric === 'volume' ? d.volume : d.maxWeight;
+  const isPR = d => metric === 'est_1rm' ? d.isPR1RM : metric === 'volume' ? false : d.isPRWeight;
+  const values = data.map(getValue);
   const minV = Math.min(...values);
   const maxV = Math.max(...values);
   const range = maxV - minV || 1;
@@ -3510,15 +3704,16 @@ function renderExChart() {
   const toX = i => pad.left + (i / (data.length - 1)) * iW;
   const toY = v => pad.top + iH - ((v - minV) / range) * iH;
 
-  const linePoints = data.map((d, i) => `${toX(i)},${toY(metric === 'est_1rm' ? d.est1RM : d.maxWeight)}`).join(' ');
+  const linePoints = data.map((d, i) => `${toX(i)},${toY(getValue(d))}`).join(' ');
   const areaPoints = `${pad.left},${pad.top + iH} ${linePoints} ${pad.left + iW},${pad.top + iH}`;
 
-  // Y axis
+  // Y axis — volume gets K formatting
+  const fmtY = v => metric === 'volume' ? (v >= 1000 ? (v/1000).toFixed(0)+'k' : Math.round(v)) : Math.round(v);
   const ySteps = 3;
   const yLabels = Array.from({length: ySteps + 1}, (_, i) => {
     const val = minV + (i / ySteps) * range;
     const y = toY(val);
-    return `<text x="${pad.left - 4}" y="${y + 4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="DM Mono,monospace">${Math.round(val)}</text>`;
+    return `<text x="${pad.left - 4}" y="${y + 4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="DM Mono,monospace">${fmtY(val)}</text>`;
   }).join('');
 
   // X axis date labels (first, mid, last)
@@ -3528,6 +3723,13 @@ function renderExChart() {
     const label = new Date(d.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
     return `<text x="${toX(i)}" y="${H - 4}" text-anchor="middle" fill="var(--text3)" font-size="9" font-family="DM Mono,monospace">${label}</text>`;
   }).join('');
+
+  // PR dots (star markers on new personal records)
+  const prDots = metric !== 'volume' ? data.map((d, i) => {
+    if (!isPR(d) || i === 0) return '';
+    const x = toX(i), y = toY(getValue(d));
+    return `<polygon points="${x},${y-7} ${x+2.5},${y-2} ${x+7},${y-2} ${x+3},${y+2} ${x+4.5},${y+7} ${x},${y+4} ${x-4.5},${y+7} ${x-3},${y+2} ${x-7},${y-2} ${x-2.5},${y-2}" fill="#facc15" opacity="0.9" pointer-events="none"/>`;
+  }).join('') : '';
 
   // Hit targets
   const slotW = data.length > 1 ? iW / (data.length - 1) : iW;
@@ -3552,6 +3754,7 @@ function renderExChart() {
     <polygon points="${areaPoints}" fill="url(#exg)"/>
     <polyline points="${linePoints}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="${toX(data.length-1)}" cy="${toY(values[data.length-1])}" r="4" fill="var(--accent)"/>
+    ${prDots}
     <line id="ex-chart-crosshair" x1="0" y1="${pad.top}" x2="0" y2="${pad.top + iH}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none"/>
     <circle id="ex-chart-dot" cx="0" cy="0" r="5" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5" opacity="0" pointer-events="none"/>
     ${hitTargets}
@@ -3581,10 +3784,11 @@ function exChartShowTip(idx) {
   const n = _exChartPoints.length;
   const toX = i => pad.left + (i / (n - 1)) * iW;
 
-  const values = _exChartPoints.map(p => exChartMetric === 'est_1rm' ? p.est1RM : p.maxWeight);
+  const getValue = p => exChartMetric === 'est_1rm' ? p.est1RM : exChartMetric === 'volume' ? p.volume : p.maxWeight;
+  const values = _exChartPoints.map(getValue);
   const minV = Math.min(...values), maxV = Math.max(...values);
   const range = maxV - minV || 1;
-  const val = exChartMetric === 'est_1rm' ? d.est1RM : d.maxWeight;
+  const val = getValue(d);
   const toY = v => pad.top + iH - ((v - minV) / range) * iH;
 
   const x = toX(idx);
@@ -3603,8 +3807,12 @@ function exChartShowTip(idx) {
   tooltip.style.left = leftPx + 'px';
   tooltip.style.top = '2px';
 
-  const label = exChartMetric === 'est_1rm' ? 'est. 1RM' : 'heaviest';
-  document.getElementById('ex-chart-tip-value').textContent = Math.round(val) + ' lbs';
+  const label = exChartMetric === 'est_1rm' ? 'est. 1RM' : exChartMetric === 'volume' ? 'volume' : 'heaviest';
+  const fmt = exChartMetric === 'volume'
+    ? (val >= 1000 ? (val/1000).toFixed(1) + 'k lbs' : Math.round(val) + ' lbs')
+    : Math.round(val) + ' lbs';
+  const prFlag = (exChartMetric === 'max_weight' && d.isPRWeight) || (exChartMetric === 'est_1rm' && d.isPR1RM) ? ' ★' : '';
+  document.getElementById('ex-chart-tip-value').textContent = fmt + prFlag;
   document.getElementById('ex-chart-tip-label').textContent = label;
   document.getElementById('ex-chart-tip-date').textContent = new Date(d.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
   if (d.variantName && d.variantName !== getVariantDisplayName(currentAnalyticsVariantId)) {
@@ -3642,26 +3850,36 @@ function renderAnalyticsBody(variantId, sessions) {
 
       const sessionMaxW = Math.max(...completedSets.map(st => st.weight));
       const sessionEst1RM = Math.max(...completedSets.map(st => epley1RM(st.weight, st.reps)));
-      // Use session startTime as key; if multiple matching exercises in one session, keep best
       const key = s.startTime;
       if (!chartByDate[key] || sessionMaxW > chartByDate[key].maxWeight) {
-        // Pick the variant with highest weight for display label in tooltip
         const bestSet = completedSets.sort((a,b) => b.weight - a.weight)[0];
         chartByDate[key] = {
           date: s.startTime,
           maxWeight: sessionMaxW,
           est1RM: Math.round(sessionEst1RM),
           sessionTitle: s.title,
-          variantName: getVariantDisplayName(bestSet.variantId)
+          variantName: getVariantDisplayName(bestSet.variantId),
+          volume: completedSets.reduce((sum, st) => sum + st.weight * st.reps, 0)
         };
+      } else if (chartByDate[key]) {
+        // Accumulate volume for multiple exercises in same session
+        chartByDate[key].volume = (chartByDate[key].volume || 0) + completedSets.reduce((sum, st) => sum + st.weight * st.reps, 0);
       }
     }
   });
 
   const historyEntries = Object.values(sessionMap).sort((a,b) => b.date - a.date).slice(0, 8);
 
-  // Sort chart points chronologically
-  _exChartPoints = Object.values(chartByDate).sort((a,b) => a.date - b.date);
+  // Sort chart points chronologically and mark PRs
+  const rawPts = Object.values(chartByDate).sort((a,b) => a.date - b.date);
+  let runMaxW = 0, runMax1RM = 0;
+  rawPts.forEach(p => {
+    p.isPRWeight = p.maxWeight > runMaxW;
+    p.isPR1RM = p.est1RM > runMax1RM;
+    if (p.isPRWeight) runMaxW = p.maxWeight;
+    if (p.isPR1RM) runMax1RM = p.est1RM;
+  });
+  _exChartPoints = rawPts;
 
   const topRM = allSets.reduce((best, s) => Math.max(best, epley1RM(s.weight, s.reps)), 0);
   const maxWeight = allSets.reduce((best, s) => Math.max(best, s.weight), 0);
@@ -3700,8 +3918,9 @@ function renderAnalyticsBody(variantId, sessions) {
     ${hasChart ? `
     <div class="analytics-card-wide ex-chart-wrap">
       <div class="ex-chart-toggle">
-        <button id="ex-chart-btn-max" class="filter-pill ${exChartMetric === 'max_weight' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('max_weight')">Heaviest Weight</button>
+        <button id="ex-chart-btn-max" class="filter-pill ${exChartMetric === 'max_weight' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('max_weight')">Heaviest</button>
         <button id="ex-chart-btn-1rm" class="filter-pill ${exChartMetric === 'est_1rm' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('est_1rm')">Est. 1RM</button>
+        <button id="ex-chart-btn-vol" class="filter-pill ${exChartMetric === 'volume' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('volume')">Volume</button>
       </div>
       <div class="ex-chart-svg-wrap" id="ex-chart-svg-wrap">
         <svg></svg>
@@ -3842,6 +4061,23 @@ async function renderTemplates() {
     </div>`).join('');
 
   initTemplateDrag();
+
+  // Swipe to delete templates
+  const tmplList = document.getElementById('template-list');
+  [...tmplList.querySelectorAll('.template-card')].forEach(card => {
+    const tid = card.dataset.tid;
+    makeSwipeable(card, async (el) => {
+      await dbDelete('templates', tid);
+      showToast('Template deleted');
+      renderTemplates();
+    });
+  });
+  initSwipeDelete(tmplList, '.template-card', async (el) => {
+    const tid = el.dataset.tid;
+    await dbDelete('templates', tid);
+    showToast('Template deleted');
+    renderTemplates();
+  });
 }
 
 function saveTemplateOrder() {
@@ -3941,24 +4177,69 @@ function initTemplateDrag() {
 }
 
 document.getElementById('new-template-btn').addEventListener('click', () => openTemplateEditor(null));
+document.getElementById('tmpl-name-input').addEventListener('input', () => saveTmplDraft());
+
+const TMPL_DRAFT_KEY = '__tmpl_draft__';
+
+function saveTmplDraft() {
+  const name = document.getElementById('tmpl-name-input')?.value || '';
+  localStorage.setItem(TMPL_DRAFT_KEY, JSON.stringify({
+    id: editingTemplateId,
+    name,
+    exercises: tmplExercises
+  }));
+  const dot = document.getElementById('tmpl-autosave-dot');
+  if (dot) {
+    dot.classList.add('visible');
+    clearTimeout(dot._hideTimer);
+    dot._hideTimer = setTimeout(() => dot.classList.remove('visible'), 1200);
+  }
+}
+
+function loadTmplDraft() {
+  try {
+    const raw = localStorage.getItem(TMPL_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function clearTmplDraft() {
+  localStorage.removeItem(TMPL_DRAFT_KEY);
+}
 
 async function openTemplateEditor(templateId) {
   editingTemplateId = templateId;
   tmplExpandedIdx = null;
   const deleteBtn = document.getElementById('tmpl-delete-btn');
 
+  // Check for unsaved draft of this template
+  const draft = loadTmplDraft();
+  const hasDraft = draft && draft.id === templateId;
+
   if (templateId) {
     const tmpl = await dbGet('templates', templateId);
     if (!tmpl) return;
     document.getElementById('tmpl-editor-title').textContent = 'Edit Template';
-    document.getElementById('tmpl-name-input').value = tmpl.name;
+    if (hasDraft) {
+      document.getElementById('tmpl-name-input').value = draft.name;
+      renderTemplateExercises(draft.exercises);
+      showToast('Restored unsaved changes');
+    } else {
+      document.getElementById('tmpl-name-input').value = tmpl.name;
+      renderTemplateExercises(tmpl.exercises);
+    }
     deleteBtn.style.display = '';
-    renderTemplateExercises(tmpl.exercises);
   } else {
     document.getElementById('tmpl-editor-title').textContent = 'New Template';
-    document.getElementById('tmpl-name-input').value = '';
+    if (hasDraft) {
+      document.getElementById('tmpl-name-input').value = draft.name;
+      renderTemplateExercises(draft.exercises);
+      showToast('Restored unsaved draft');
+    } else {
+      document.getElementById('tmpl-name-input').value = '';
+      renderTemplateExercises([]);
+    }
     deleteBtn.style.display = 'none';
-    renderTemplateExercises([]);
   }
   openModal('modal-template-editor');
 }
@@ -4005,6 +4286,7 @@ function renderTemplateExercises(exercises) {
     }
   }
   list.innerHTML = html;
+  saveTmplDraft();
 }
 
 function renderTmplExCard(i, n, inSuperset) {
@@ -4236,6 +4518,7 @@ document.getElementById('tmpl-delete-btn').addEventListener('click', async () =>
   if (!editingTemplateId) return;
   if (!confirm('Delete this template?')) return;
   await dbDelete('templates', editingTemplateId);
+  clearTmplDraft();
   closeModal('modal-template-editor');
   showToast('Template deleted');
   renderTemplates();
@@ -4350,7 +4633,7 @@ function renderPickerLiftList() {
 
   // Group lifts by movement pattern
   const groups = {};
-  const patternOrder = ['push','pull','squat','hinge','isolation','core','carry'];
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
 
   EXERCISE_HIERARCHY.forEach(h => {
     if (pickerMuscleFilter) {
@@ -5847,7 +6130,6 @@ async function init() {
     loadExerciseNotes(),
   ]);
   await seedBWData().catch(e => console.warn('seedBW skipped:', e));
-  await seedDefaultTemplates().catch(e => console.warn('seedTemplates skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
@@ -5876,6 +6158,8 @@ init().catch(e => {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
   renderHome();
+  // Restore in-progress session if browser was closed mid-workout
+  if (!activeSession) loadSessionDraft();
 });
 
 
@@ -6018,7 +6302,7 @@ function renderAdminList() {
   const container = document.getElementById('admin-exercise-list');
   if (!container) return;
 
-  const patternOrder = ['push','pull','squat','hinge','isolation','core','carry'];
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
   const grouped = {};
   EXERCISE_HIERARCHY.forEach(h => {
     if (q && !h.name.toLowerCase().includes(q)) return;
@@ -6083,6 +6367,153 @@ loadAdminOverrides().then(() => {
   }
   console.log('BW seed done');
 })();
+
+// ── Swipe-to-delete ──────────────────────────────────────────
+// Usage: initSwipeDelete(containerEl, selector, onDelete)
+// selector: CSS selector for swipeable items within container
+// onDelete: called with the element that was swiped away
+function initSwipeDelete(container, selector, onDelete) {
+  if (!container) return;
+  let startX = 0, startY = 0, currentEl = null, currentInner = null;
+  let isDragging = false, isSwipe = false;
+  const THRESHOLD = 60; // px to trigger delete
+
+  function getItems() { return [...container.querySelectorAll(selector)]; }
+
+  function resetEl(inner) {
+    if (!inner) return;
+    inner.style.transition = 'transform 0.2s ease';
+    inner.style.transform = 'translateX(0)';
+  }
+
+  container.addEventListener('touchstart', e => {
+    const item = e.target.closest(selector);
+    if (!item) return;
+    // Don't intercept inputs, buttons, handles
+    if (e.target.closest('input,button,.tmpl-drag-handle,.set-check')) return;
+    currentEl = item;
+    currentInner = item.querySelector('.swipe-item-inner');
+    if (!currentInner) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isDragging = false;
+    isSwipe = false;
+  }, {passive: true});
+
+  container.addEventListener('touchmove', e => {
+    if (!currentInner) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (!isDragging) {
+      if (Math.abs(dy) > Math.abs(dx)) { currentInner = null; return; } // vertical scroll
+      if (Math.abs(dx) > 6) { isDragging = true; isSwipe = true; }
+      else return;
+    }
+    if (dx > 0) return; // only left swipe
+    e.preventDefault();
+    const clamped = Math.max(dx, -80);
+    currentInner.style.transition = 'none';
+    currentInner.style.transform = `translateX(${clamped}px)`;
+  }, {passive: false});
+
+  container.addEventListener('touchend', e => {
+    if (!currentInner || !isSwipe) { currentInner = null; return; }
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx < -THRESHOLD) {
+      currentInner.style.transition = 'transform 0.15s ease';
+      currentInner.style.transform = 'translateX(-80px)';
+      // Show delete state, wait for tap on bg or auto-confirm
+      const bg = currentEl.querySelector('.swipe-delete-bg');
+      if (bg) {
+        bg.style.pointerEvents = 'auto';
+        const onBgTap = () => {
+          bg.removeEventListener('click', onBgTap);
+          currentInner.style.transition = 'transform 0.15s ease, opacity 0.15s';
+          currentInner.style.transform = 'translateX(-100%)';
+          currentInner.style.opacity = '0';
+          setTimeout(() => onDelete(currentEl), 150);
+        };
+        bg.addEventListener('click', onBgTap);
+        // Auto-reset after 3s if not tapped
+        currentEl._resetTimer = setTimeout(() => {
+          bg.removeEventListener('click', onBgTap);
+          bg.style.pointerEvents = '';
+          resetEl(currentInner);
+        }, 3000);
+      }
+    } else {
+      resetEl(currentInner);
+    }
+    currentInner = null;
+  }, {passive: true});
+}
+
+function makeSwipeable(el, onDeleteFn) {
+  el.classList.add('swipe-item');
+  // Wrap existing content in inner div if not already wrapped
+  if (!el.querySelector('.swipe-item-inner')) {
+    const inner = document.createElement('div');
+    inner.className = 'swipe-item-inner';
+    while (el.firstChild) inner.appendChild(el.firstChild);
+    el.appendChild(inner);
+    const bg = document.createElement('div');
+    bg.className = 'swipe-delete-bg';
+    bg.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Delete';
+    bg.style.pointerEvents = 'none';
+    el.appendChild(bg);
+  }
+}
+
+// ── Quick-add from last session ──────────────────────────────
+async function renderQuickAdd() {
+  const container = document.getElementById('quick-add-section');
+  if (!container) return;
+  if (!activeSession) { container.innerHTML = ''; return; }
+
+  const sessions = await getSortedSessions();
+  if (sessions.length === 0) { container.innerHTML = ''; return; }
+
+  // Find the last session with the same title, or just the last session
+  const sameTitle = sessions.find(s => s.title === activeSession.title);
+  const lastSession = sameTitle || sessions[0];
+
+  // Get exercises not already in active session
+  const existingIds = new Set(activeSession.exercises.map(e => e.variantId));
+  const candidates = lastSession.exercises.filter(e => !existingIds.has(e.variantId));
+  if (candidates.length === 0) { container.innerHTML = ''; return; }
+
+  const chips = candidates.slice(0, 6).map(ex => {
+    const name = escHtml(getVariantDisplayName(ex.variantId));
+    const completedSets = ex.sets.filter(s => s.completed);
+    const topSet = completedSets.sort((a,b) => b.weight - a.weight)[0];
+    const setsLabel = topSet ? `${topSet.weight}×${topSet.reps}` : `${completedSets.length}s`;
+    return `<button class="quick-add-chip" onclick="quickAddExercise('${ex.variantId}')">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" style="flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span class="quick-add-chip-name">${name}</span>
+      <span class="quick-add-chip-sets">${setsLabel}</span>
+    </button>`;
+  }).join('');
+
+  const label = sameTitle ? `From last "${escHtml(lastSession.title)}"` : `From last session`;
+  container.innerHTML = `<div class="quick-add-section">
+    <div class="quick-add-label">${label}</div>
+    <div class="quick-add-chips">${chips}</div>
+  </div>`;
+}
+
+function quickAddExercise(variantId) {
+  if (!activeSession) return;
+  const ex = {
+    variantId,
+    sets: [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]
+  };
+  activeSession.exercises.push(ex);
+  renderActiveSession();
+  // Refresh quick-add chips
+  renderQuickAdd();
+  showToast('Added ' + getVariantDisplayName(variantId));
+}
+
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
