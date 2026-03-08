@@ -2576,9 +2576,9 @@ EXERCISE_HIERARCHY.forEach(h => {
 // Resistance type abbreviation map for display names
 const RES_ABBREV = {
   "Barbell":"BB","Dumbbell":"DB","Voltra":"Voltra","Landmine":"LM",
-  "BW":"BW","Band":"Band","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt",
+  "BW":"BW","Band":"Band","Trap Bar":"Trap Bar","Misc":"Misc","Belt":"Belt",
   // Legacy compat
-  "BW+":"BW","Goblet":"Goblet","Cable":"Voltra"
+  "BW+":"BW","Goblet":"Goblet","Cable":"Voltra","Plate":"Misc"
 };
 
 // ── Generate a deterministic variant ID from picker selections ──
@@ -2598,11 +2598,15 @@ function buildVariantId(parentId, resistance, variants, mods) {
 // ── Generate display name: "{Resistance} {Variants…} {Exercise}" ──
 function buildExerciseName(parentName, resAbbrev, variants, mods) {
   const varArr = Array.isArray(variants) ? variants : (variants ? [variants] : []);
-  let parts = [resAbbrev];
+  const parts = [];
+  if (resAbbrev) parts.push(resAbbrev);
   if (varArr.length > 0) parts.push(varArr.join(' '));
   parts.push(parentName);
   let name = parts.join(' ');
-  if (mods && mods.other) name += ' (' + mods.other + ')';
+  if (mods && mods.other) {
+    const otherDisplay = slugToDisplay(mods.other);
+    name += ' (' + otherDisplay + ')';
+  }
   return name;
 }
 
@@ -2612,8 +2616,21 @@ function resolveVariantId(parentId, resistance, variants, mods) {
 }
 
 // Decode a slug back to a display string (best-effort, for variant labels)
+// Known acronyms/special display labels that shouldn't be title-cased naively
+const SLUG_DISPLAY_MAP = {
+  'bss': 'BSS', 'rdl': 'RDL', 'ohp': 'OHP', 'bw': 'BW',
+  'db': 'DB', 'bb': 'BB', 'lm': 'LM',
+  'close_grip': 'Close Grip', 'belt_squat': 'Belt Squat',
+  'step_up': 'Step-Up',
+};
+
 function slugToDisplay(slug) {
-  return slug.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  if (SLUG_DISPLAY_MAP[slug]) return SLUG_DISPLAY_MAP[slug];
+  return slug.split('_').map(w => {
+    // Preserve known acronyms within compound slugs
+    if (SLUG_DISPLAY_MAP[w]) return SLUG_DISPLAY_MAP[w];
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
 }
 
 // Get a display name for any variantId
@@ -6691,33 +6708,6 @@ loadAdminOverrides().then(() => {
   });
 });
 
-
-// ── One-time BW seed for Feb-Mar 2026 entries ──
-(async function seedRecentBW() {
-  const data = [
-    {date:"2026-02-19",weight_lbs:183.8},
-    {date:"2026-02-20",weight_lbs:181.8},
-    {date:"2026-02-21",weight_lbs:181.6},
-    {date:"2026-02-22",weight_lbs:182.0},
-    {date:"2026-02-23",weight_lbs:184.8},
-    {date:"2026-02-24",weight_lbs:182.0},
-    {date:"2026-02-25",weight_lbs:180.6},
-    {date:"2026-02-26",weight_lbs:183.6},
-    {date:"2026-02-27",weight_lbs:181.6},
-    {date:"2026-03-01",weight_lbs:183.6},
-    {date:"2026-03-02",weight_lbs:183.6},
-    {date:"2026-03-03",weight_lbs:181.2},
-    {date:"2026-03-04",weight_lbs:181.6},
-    {date:"2026-03-05",weight_lbs:183.4},
-    {date:"2026-03-06",weight_lbs:181.4},
-    {date:"2026-03-07",weight_lbs:184.8}
-  ];
-  for (const entry of data) {
-    const existing = await dbGet('bodyweight', entry.date);
-    if (!existing) await dbPut('bodyweight', entry);
-  }
-  console.log('BW seed done');
-})();
 
 // ── Swipe-to-delete ──────────────────────────────────────────
 // Usage: initSwipeDelete(containerEl, selector, onDelete)
