@@ -6056,6 +6056,33 @@ loadAdminOverrides().then(() => {
   });
 });
 
+
+// ── One-time BW seed for Feb-Mar 2026 entries ──
+(async function seedRecentBW() {
+  const data = [
+    {date:"2026-02-19",weight_lbs:183.8},
+    {date:"2026-02-20",weight_lbs:181.8},
+    {date:"2026-02-21",weight_lbs:181.6},
+    {date:"2026-02-22",weight_lbs:182.0},
+    {date:"2026-02-23",weight_lbs:184.8},
+    {date:"2026-02-24",weight_lbs:182.0},
+    {date:"2026-02-25",weight_lbs:180.6},
+    {date:"2026-02-26",weight_lbs:183.6},
+    {date:"2026-02-27",weight_lbs:181.6},
+    {date:"2026-03-01",weight_lbs:183.6},
+    {date:"2026-03-02",weight_lbs:183.6},
+    {date:"2026-03-03",weight_lbs:181.2},
+    {date:"2026-03-04",weight_lbs:181.6},
+    {date:"2026-03-05",weight_lbs:183.4},
+    {date:"2026-03-06",weight_lbs:181.4},
+    {date:"2026-03-07",weight_lbs:184.8}
+  ];
+  for (const entry of data) {
+    const existing = await dbGet('bodyweight', entry.date);
+    if (!existing) await dbPut('bodyweight', entry);
+  }
+  console.log('BW seed done');
+})();
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
