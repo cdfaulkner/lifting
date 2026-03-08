@@ -66,8 +66,10 @@ html, body {
   flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .nav-btn {
@@ -1741,7 +1743,7 @@ textarea { resize: none; }
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
     </div>
-  <div style="height:80px;flex-shrink:0"></div>
+  <div style="height:calc(64px + var(--safe-bot));flex-shrink:0"></div>
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
@@ -2181,7 +2183,7 @@ textarea { resize: none; }
 // ═══════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
-const SUPABASE_STORES = new Set(['sessions', 'templates']);
+const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight']);
 
 async function sbRequest(method, path, body) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -5567,12 +5569,19 @@ async function seedSkeletonTemplates() {
     }
   ];
 
-  // Purge any template not in the keeper list
+  // Purge any template not in the keeper list, and deduplicate by name
   const all = await dbGetAll('templates');
+  const seen = {};
   for (const t of all) {
     if (!KEEPER_NAMES.includes(t.name)) {
       await dbDelete('templates', t.id);
       console.log('Purged old template:', t.name);
+    } else if (seen[t.name]) {
+      // Duplicate keeper name — delete the extra
+      await dbDelete('templates', t.id);
+      console.log('Removed duplicate template:', t.name);
+    } else {
+      seen[t.name] = true;
     }
   }
 
@@ -6452,7 +6461,7 @@ async function buildClaudeExport() {
 }
 
 async function migrateToSupabase() {
-  const migrationKey = 'supabase_migrated_v1';
+  const migrationKey = 'supabase_migrated_v2';
   if (localStorage.getItem(migrationKey)) return;
   try {
     const existingSessions = await sbGetAll('sessions');
@@ -6465,11 +6474,15 @@ async function migrateToSupabase() {
       const localTemplates = await idbGetAll('templates');
       for (const t of localTemplates) await sbPut('templates', t);
     }
+    // Migrate bodyweight entries (v2)
+    const existingBW = await sbGetAll('bodyweight');
+    if (existingBW.length === 0) {
+      const localBW = await idbGetAll('bodyweight');
+      for (const b of localBW) await sbPut('bodyweight', b);
+    }
     localStorage.setItem(migrationKey, '1');
-    console.log('Migrated local data to Supabase');
+    console.log('Migrated local data to Supabase (v2 incl. bodyweight)');
   } catch(e) {
-    // Network errors mean Supabase is unreachable (offline / extension not active).
-    // Data is safe in IndexedDB — mark done so we stop retrying every load.
     if (e instanceof TypeError || (e.message || '').includes('fetch')) {
       localStorage.setItem(migrationKey, '1');
       console.log('Supabase unreachable — migration skipped, local data intact');
