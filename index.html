@@ -95,6 +95,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
+  padding-bottom: calc(16px + var(--safe-bot));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -289,7 +290,7 @@ select option { background: var(--bg3); }
 }
 .modal-title { font-family: var(--display); font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
 .modal-body { overflow-y: auto; flex: 1; padding: 12px 16px; }
-.modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.modal-footer { padding: 14px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
 
 /* ── TOAST ── */
 #toast {
@@ -454,7 +455,7 @@ select option { background: var(--bg3); }
   display: flex;
   gap: 8px;
   flex-shrink: 0;
-  padding-bottom: calc(12px + var(--safe-bot));
+  padding-bottom: calc(16px + var(--safe-bot));
 }
 
 /* Exercise block in active session */
@@ -894,6 +895,103 @@ select option { background: var(--bg3); }
 .variant-equip-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 
 /* ════════════════════════════════════
+   ADMIN SCREEN
+════════════════════════════════════ */
+#screen-admin .admin-exercise-list {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.admin-ex-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.admin-ex-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  gap: 10px;
+}
+.admin-ex-header:active { background: var(--bg3); }
+.admin-ex-title {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--display);
+  letter-spacing: -0.01em;
+}
+.admin-ex-meta {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+.admin-ex-chevron {
+  color: var(--text3);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.admin-ex-card.open .admin-ex-chevron { transform: rotate(90deg); }
+.admin-ex-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.admin-ex-card.open .admin-ex-body { display: block; }
+.admin-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 12px 0 6px;
+}
+.admin-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--body);
+}
+.admin-chip.on {
+  background: rgba(167,139,250,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.admin-chip .chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+}
+.admin-chip.on .chip-dot { background: var(--accent); }
+.admin-search-bar {
+  padding: 12px 16px 8px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+/* ════════════════════════════════════
    EXERCISE DETAIL / ANALYTICS
 ════════════════════════════════════ */
 
@@ -1296,7 +1394,7 @@ textarea { resize: none; }
           <div class="page-title">Library</div>
           <div class="page-sub" id="lib-count-sub"></div>
         </div>
-        <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
+        <div style="display:flex;gap:6px;align-items:center"><button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button></div>
       </div>
       <div class="library-search-bar">
         <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
@@ -1351,6 +1449,21 @@ textarea { resize: none; }
     </div>
   </div>
 
+
+    <!-- ══ ADMIN ══ -->
+    <div id="screen-admin" class="screen">
+      <div class="page-header" style="justify-content:space-between">
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <div class="page-title">Admin</div>
+          <div class="page-sub">Exercise taxonomy</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showScreen('library')">← Back</button>
+      </div>
+      <div class="admin-search-bar">
+        <input id="admin-search" type="search" placeholder="Filter exercises…" autocomplete="off" oninput="renderAdminList()">
+      </div>
+      <div class="admin-exercise-list" id="admin-exercise-list"></div>
+    </div>
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
@@ -1453,6 +1566,15 @@ textarea { resize: none; }
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-exercise-detail')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
+    </div>
+    <div id="ex-detail-filter-bar" style="display:none;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0">Show:</span>
+        <div style="display:flex;gap:4px">
+          <button id="ex-filter-exact" class="filter-pill active" onclick="setAnalyticsMatchMode('exact')" style="font-size:11px;padding:3px 9px">Exact variants</button>
+          <button id="ex-filter-any-variant" class="filter-pill" onclick="setAnalyticsMatchMode('any_variant')" style="font-size:11px;padding:3px 9px">Any variant</button>
+        </div>
+      </div>
     </div>
     <div class="modal-body" id="ex-detail-body" style="padding:0"></div>
     <div class="modal-footer" id="ex-detail-footer" style="display:none">
@@ -1991,131 +2113,163 @@ function getMusclesForVariant(variantId) {
 // ═══════════════════════════════════════════════════════════════
 // NEW HIERARCHICAL EXERCISE TAXONOMY
 // ═══════════════════════════════════════════════════════════════
-// Each "lift" defines: resistance types, main variants (angle/grip/stance),
-// and which modifier flags are available.
-// The picker flow: Main Lift → Resistance → Main Variant → Modifiers → Confirm
+// Each "lift" defines:
+//   resistances: which resistance types are valid (all drawn from RESISTANCE_TYPES)
+//   variants: which variant toggles are applicable (drawn from VARIANT_TYPES)
+//             variants are MULTI-SELECT; zero selection is allowed (skips variant step)
+// The picker flow: Main Lift → Resistance → Variants (multi-select, optional) → Confirm
+
+// ── Standard resistance types (uniform pool, each exercise picks from these) ──
+// "BW" = bodyweight / weighted vest / belt — no external implement required
+const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","Trap Bar","Plate","Belt"];
+
+// ── All possible variant toggles ──
+const VARIANT_TYPES = [
+  // Position / angle
+  "Flat","Incline","Decline","Seated","Standing","Kneeling","Overhead","Lying",
+  // Grip
+  "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip",
+  // Load position / style
+  "Front","Back","Goblet","Zercher","Hack","Sissy","Harness","Belt Squat",
+  "Preacher","Ring","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up",
+  // Modifier
+  "Unilateral","Band","Paused","Tempo",
+];
 
 const EXERCISE_HIERARCHY = [
   // ── CHEST ──
   { id:"chest_press", name:"Chest Press", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
-    variants:["Flat","Incline","Decline","Standing","Kneeling"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
+    variants:["Flat","Incline","Decline","Standing","Kneeling","Unilateral","Paused","Close Grip"] },
   { id:"chest_fly", name:"Chest Fly", pattern:"isolation", muscles:["chest"], sec:["shoulders"],
-    resistances:["Dumbbell","Voltra"],
-    variants:["Flat","Incline","Decline"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Dumbbell","Voltra","Band"],
+    variants:["Flat","Incline","Decline","Unilateral"] },
   { id:"push_up", name:"Push Up", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:["Incline","Decline","Wide","Narrow","Paused"] },
   { id:"dip", name:"Dip", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:["Wide","Narrow"] },
   // ── BACK ──
   { id:"pull_up", name:"Pull Up", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["BW+"], variants:["Supinated","Pronated","Neutral","Ring"],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band","Belt"],
+    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Ring","Paused"] },
   { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["Voltra"], variants:["Wide","Narrow","Neutral"],
-    mods:{bands:false,unilateral:true,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Wide","Narrow","Neutral","Unilateral"] },
   { id:"row", name:"Row", pattern:"pull", muscles:["back"], sec:["biceps","shoulders"],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
-    variants:["Wide","Narrow","Neutral"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
+    variants:["Wide","Narrow","Neutral","Unilateral","Seated","Standing","Incline","Paused"] },
   { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+    resistances:["BW"],
+    variants:["Unilateral"] },
   { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
-    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
-    mods:{bands:false,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra"],
+    variants:["Flat","Incline","Unilateral"] },
   { id:"straight_arm_pulldown", name:"Pulldown", pattern:"pull", muscles:["back"], sec:[],
-    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Unilateral"] },
   { id:"back_extension", name:"Back Extension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+    resistances:["BW","Plate","Band"],
+    variants:["Unilateral"] },
   { id:"reverse_hyper", name:"Reverse Hyperextension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+    resistances:["BW","Band"],
+    variants:["Unilateral"] },
   // ── SHOULDERS ──
   { id:"overhead_press", name:"Overhead Press", pattern:"push", muscles:["shoulders"], sec:["triceps"],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
-    variants:["Seated","Standing","Kneeling"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
+    variants:["Seated","Standing","Kneeling","Unilateral","Paused"] },
   { id:"shoulder_raise", name:"Shoulder Raise", pattern:"isolation", muscles:["shoulders"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine","Plate"],
-    variants:["Seated","Standing"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Dumbbell","Voltra","Landmine","Plate","Band"],
+    variants:["Seated","Standing","Unilateral","Incline"] },
   { id:"face_pull", name:"Face Pull", pattern:"pull", muscles:["shoulders"], sec:["back"],
-    resistances:["Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Seated","Standing","Unilateral"] },
   { id:"upright_row", name:"Upright Row", pattern:"pull", muscles:["shoulders"], sec:["biceps"],
-    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Band"],
+    variants:["Wide","Narrow"] },
   { id:"rear_delt_fly", name:"Rear Delt Fly", pattern:"isolation", muscles:["shoulders"], sec:["back"],
-    resistances:["Dumbbell","Voltra"], variants:[],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Dumbbell","Voltra","Band"],
+    variants:["Seated","Standing","Unilateral","Incline"] },
   { id:"shrug", name:"Shrug", pattern:"isolation", muscles:["shoulders"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Trap Bar"], variants:[],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Trap Bar","Band"],
+    variants:["Unilateral"] },
   { id:"shoulder_rotation", name:"Shoulder Rotation", pattern:"isolation", muscles:["shoulders"], sec:[],
-    resistances:["Dumbbell","Voltra"], variants:[],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Dumbbell","Voltra","Band"],
+    variants:["Unilateral","Seated","Standing"] },
   // ── ARMS ──
   { id:"bicep_curl", name:"Bicep Curl", pattern:"isolation", muscles:["biceps"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Plate"],
-    variants:["Standing","Seated","Incline","Preacher"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Plate","Band"],
+    variants:["Standing","Seated","Incline","Preacher","Unilateral","Narrow","Wide"] },
   { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra"],
-    variants:["Seated","Standing","Flat","Incline","Overhead"],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Band"],
+    variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip"] },
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine"],
-    variants:["Back","Front","Zercher","Goblet","Hack","Sissy","Harness","Belt","Cossack"],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW"],
+    variants:["Back","Front","Zercher","Goblet","Hack","Sissy","Harness","Belt Squat","Cossack","Paused","Band"] },
   { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
-    resistances:["Barbell","Dumbbell","Goblet"],
-    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up"],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Band","BW"],
+    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Unilateral"] },
   { id:"leg_extension", name:"Leg Extension", pattern:"isolation", muscles:["quads"], sec:[],
-    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Unilateral"] },
   { id:"deadlift", name:"Deadlift", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back","quads"],
-    resistances:["Barbell","Dumbbell","Trap Bar"], variants:[],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Barbell","Dumbbell","Trap Bar","Band"],
+    variants:["Paused","Unilateral"] },
   { id:"rdl", name:"RDL", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
-    mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Band"],
+    variants:["Unilateral","Paused"] },
   { id:"good_morning", name:"Good Morning", pattern:"hinge", muscles:["hamstrings"], sec:["back","glutes"],
-    resistances:["Barbell","Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Voltra","Band"],
+    variants:["Seated","Standing","Unilateral"] },
   { id:"jefferson_curl", name:"Jefferson Curl", pattern:"hinge", muscles:["hamstrings"], sec:["back"],
-    resistances:["Barbell","Dumbbell","Voltra"], variants:[], mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra"],
+    variants:["Unilateral"] },
   { id:"ghr", name:"GHR", pattern:"isolation", muscles:["hamstrings"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:["Unilateral"] },
   { id:"nordic_curl", name:"Nordic Curl", pattern:"isolation", muscles:["hamstrings"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:[] },
   { id:"ham_curl", name:"Ham Curl", pattern:"isolation", muscles:["hamstrings"], sec:[],
-    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Unilateral","Seated","Lying"] },
   { id:"hip_thrust", name:"Hip Thrust", pattern:"hinge", muscles:["glutes"], sec:["hamstrings"],
-    resistances:["Barbell","Dumbbell","Voltra"], variants:[],
-    mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Band","BW"],
+    variants:["Unilateral","Paused","Band"] },
   { id:"reverse_nordic", name:"Reverse Nordic", pattern:"isolation", muscles:["quads"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:[] },
   { id:"calf_raise", name:"Calf Raise", pattern:"isolation", muscles:["calves"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt"],
-    variants:["Seated","Standing"], mods:{bands:true,unilateral:true,other:true} },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt","BW","Band"],
+    variants:["Seated","Standing","Unilateral"] },
   // ── CORE ──
   { id:"crunch", name:"Crunch", pattern:"core", muscles:["core"], sec:[],
-    resistances:["Voltra","BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["Voltra","BW","Band"],
+    variants:["Unilateral","Incline"] },
   { id:"leg_raise", name:"Leg Raise / Knee Raise", pattern:"core", muscles:["core"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:["Unilateral"] },
   { id:"ab_wheel", name:"Ab Wheel / Rollout", pattern:"core", muscles:["core"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["BW"],
+    variants:["Unilateral"] },
   { id:"plank", name:"Plank", pattern:"core", muscles:["core"], sec:[],
-    resistances:["BW+"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["BW","Band"],
+    variants:["Unilateral"] },
   { id:"pallof_press", name:"Pallof Press / Anti-Rotation", pattern:"core", muscles:["core"], sec:[],
-    resistances:["Voltra"], variants:[], mods:{bands:true,unilateral:false,other:true} },
+    resistances:["Voltra","Band"],
+    variants:["Seated","Standing","Kneeling"] },
   { id:"side_bend", name:"Side Bend / QL", pattern:"core", muscles:["core"], sec:[],
-    resistances:["Dumbbell","Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} },
+    resistances:["Dumbbell","Voltra","Band"],
+    variants:["Unilateral","Seated","Standing"] },
   // ── OTHER ──
   { id:"farmers_carry", name:"Farmer's Carry", pattern:"carry", muscles:["core","forearms"], sec:["shoulders"],
-    resistances:["Dumbbell","Trap Bar"], variants:[], mods:{bands:false,unilateral:true,other:true} },
+    resistances:["Dumbbell","Trap Bar"],
+    variants:["Unilateral"] },
   { id:"rowing_machine", name:"Rowing Machine", pattern:"pull", muscles:["back"], sec:["quads","core"],
-    resistances:["Voltra"], variants:[], mods:{bands:false,unilateral:false,other:true} }
+    resistances:["Voltra"],
+    variants:[] }
 ];
 
 // Build hierarchy lookup
@@ -2145,62 +2299,110 @@ EXERCISE_HIERARCHY.forEach(h => {
 // Resistance type abbreviation map for display names
 const RES_ABBREV = {
   "Barbell":"BB","Dumbbell":"DB","Voltra":"Voltra","Landmine":"LM",
-  "BW+":"BW+","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt","Goblet":"Goblet","Cable":"Voltra"
+  "BW":"BW","Band":"Band","Trap Bar":"Trap Bar","Plate":"Plate","Belt":"Belt",
+  // Legacy compat
+  "BW+":"BW","Goblet":"Goblet","Cable":"Voltra"
 };
 
 // ── Generate a deterministic variant ID from picker selections ──
-function buildVariantId(parentId, resistance, mainVariant, mods) {
+// New format: "parentId__resistance__var1_var2_var3__other_text"
+// variants is an array of selected variant strings
+function buildVariantId(parentId, resistance, variants, mods) {
   let parts = [parentId];
   parts.push(resistance.toLowerCase().replace(/[^a-z0-9]/g,'_'));
-  if (mainVariant) parts.push(mainVariant.toLowerCase().replace(/[^a-z0-9]/g,'_'));
-  if (mods.bands) parts.push('bands');
-  if (mods.unilateral) parts.push('uni');
-  if (mods.other) parts.push(mods.other.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,20));
+  const varArr = Array.isArray(variants) ? variants : (variants ? [variants] : []);
+  if (varArr.length > 0) {
+    parts.push(varArr.map(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_')).sort().join('_'));
+  }
+  if (mods && mods.other) parts.push(mods.other.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,20));
   return parts.join('__');
 }
 
-// ── Generate display name: "{Resistance} {Variant} {Exercise} (mods)" ──
-function buildExerciseName(parentName, resAbbrev, mainVariant, mods) {
-  let parts = [];
-  parts.push(resAbbrev);
-  if (mainVariant) parts.push(mainVariant);
+// ── Generate display name: "{Resistance} {Variants…} {Exercise}" ──
+function buildExerciseName(parentName, resAbbrev, variants, mods) {
+  const varArr = Array.isArray(variants) ? variants : (variants ? [variants] : []);
+  let parts = [resAbbrev];
+  if (varArr.length > 0) parts.push(varArr.join(' '));
   parts.push(parentName);
   let name = parts.join(' ');
-  const modParts = [];
-  if (mods.bands) modParts.push('Bands');
-  if (mods.unilateral) modParts.push('Unilateral');
-  if (mods.other) modParts.push(mods.other);
-  if (modParts.length > 0) name += ' (' + modParts.join(', ') + ')';
+  if (mods && mods.other) name += ' (' + mods.other + ')';
   return name;
 }
 
-// ── Resolve variant ID: just builds the deterministic ID ──
-function resolveVariantId(parentId, resistance, mainVariant, mods) {
-  return buildVariantId(parentId, resistance, mainVariant, mods);
+// ── Resolve variant ID ──
+function resolveVariantId(parentId, resistance, variants, mods) {
+  return buildVariantId(parentId, resistance, variants, mods);
+}
+
+// Decode a slug back to a display string (best-effort, for variant labels)
+function slugToDisplay(slug) {
+  return slug.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 // Get a display name for any variantId
 function getHierarchicalDisplayName(variantId) {
-  // New-style ID: "parentId__resistance__variant__mod1__mod2..."
   const parts = variantId.split('__');
   if (parts.length >= 2) {
     const h = hierarchyMap[parts[0]];
     if (h) {
-      // Find matching resistance from raw part
       const rawRes = parts[1];
-      const matchedRes = h.resistances.find(r => r.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawRes);
-      const abbrev = matchedRes ? (RES_ABBREV[matchedRes] || matchedRes) : rawRes;
-      // Find variant
-      const rawVar = parts[2] || '';
-      const matchedVar = h.variants.find(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawVar) || '';
-      // Decode mods from remaining parts
-      const modParts = parts.slice(matchedVar ? 3 : 2);
-      const mods = {
-        bands: modParts.includes('bands'),
-        unilateral: modParts.includes('uni'),
-        other: modParts.filter(p => p !== 'bands' && p !== 'uni').join(' ')
-      };
-      return buildExerciseName(h.name, abbrev, matchedVar, mods);
+      // Try to match resistance from hierarchy first, then fall back to RESISTANCE_TYPES
+      const allRes = [...h.resistances, ...RESISTANCE_TYPES];
+      const matchedRes = allRes.find(r => r.toLowerCase().replace(/[^a-z0-9]/g,'_') === rawRes);
+      const abbrev = matchedRes ? (RES_ABBREV[matchedRes] || matchedRes) : slugToDisplay(rawRes);
+
+      // Part[2] is variant slug(s), part[3] is other text
+      const rawVarSlug = parts[2] || '';
+      const rawOther = parts[3] || '';
+
+      // Reconstruct variant display labels from slug
+      // The slug is sorted individual variant slugs joined by _
+      // We try to match back to known variants, else prettify
+      let variantLabels = [];
+      if (rawVarSlug) {
+        // Legacy compat: old IDs had bands/uni as separate tokens
+        if (rawVarSlug === 'bands') { variantLabels = ['Band']; }
+        else if (rawVarSlug === 'uni') { variantLabels = ['Unilateral']; }
+        else {
+          // Try to match against all known VARIANT_TYPES by slug
+          const knownSlugs = {};
+          VARIANT_TYPES.forEach(v => { knownSlugs[v.toLowerCase().replace(/[^a-z0-9]/g,'_')] = v; });
+          // The compound slug may be multiple variants sorted and joined by _
+          // Try greedy match from longest known slugs
+          const found = [];
+          let remaining = rawVarSlug;
+          const sortedKnown = Object.entries(knownSlugs).sort((a,b) => b[0].length - a[0].length);
+          let iter = 0;
+          while (remaining && iter++ < 20) {
+            let matched = false;
+            for (const [slug, label] of sortedKnown) {
+              if (remaining === slug || remaining.startsWith(slug + '_')) {
+                found.push(label);
+                remaining = remaining.slice(slug.length + 1);
+                matched = true;
+                break;
+              }
+            }
+            if (!matched) {
+              // Unknown token — prettify as-is
+              const nextUnderscore = remaining.indexOf('_');
+              const token = nextUnderscore >= 0 ? remaining.slice(0, nextUnderscore) : remaining;
+              found.push(slugToDisplay(token));
+              remaining = nextUnderscore >= 0 ? remaining.slice(nextUnderscore + 1) : '';
+            }
+          }
+          variantLabels = found;
+        }
+      }
+
+      // Legacy compat: old IDs had __bands or __uni as their own part (parts[2] or parts[3])
+      ['bands','uni'].forEach((tok, i) => {
+        if (parts[2] === tok) variantLabels = [tok === 'bands' ? 'Band' : 'Unilateral'];
+        if (parts[3] === tok && !rawOther) variantLabels.push(tok === 'bands' ? 'Band' : 'Unilateral');
+      });
+
+      const mods = rawOther ? { other: slugToDisplay(rawOther) } : {};
+      return buildExerciseName(h.name, abbrev, variantLabels, mods);
     }
   }
   // Check custom variant in variantMap (user-created exercises)
@@ -2244,6 +2446,7 @@ function showScreen(name) {
   if (name === 'library') renderLibrary();
   if (name === 'progress') renderProgress();
   if (name === 'mobility') renderMobility();
+  if (name === 'admin') renderAdminList();
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -3032,6 +3235,7 @@ async function viewWorkoutDetail(sessionId) {
 
   // Show repeat button
   repeatWorkoutSessionId = sessionId;
+  document.getElementById('ex-detail-filter-bar').style.display = 'none';
   document.getElementById('ex-detail-footer').style.display = '';
 
   const notesHtml = session.notes
@@ -3098,87 +3302,180 @@ async function viewWorkoutDetail(sessionId) {
 // ═══════════════════════════════════════════════════════════════
 // EXERCISE ANALYTICS
 // ═══════════════════════════════════════════════════════════════
+
+// State for the analytics filter mode
+let currentAnalyticsVariantId = null;
+let analyticsMatchMode = 'exact'; // 'exact' | 'any_variant'
+
+// Parse a variantId into its constituent parts for matching
+// Format: parentId__resistance[__variantSlug][__other]
+function parseVariantId(variantId) {
+  const parts = variantId.split('__');
+  const parentId = parts[0] || '';
+  const resistance = parts[1] || '';
+  // part[2] is the compound variant slug (sorted variant names joined by _)
+  // We decode it back to individual variant names for OR matching
+  const variantSlug = parts[2] || '';
+  const otherSlug = parts[3] || '';
+
+  // Decode compound slug to individual variant slugs
+  let variantSlugs = [];
+  if (variantSlug) {
+    // Greedily match known VARIANT_TYPES slugs
+    const knownSlugs = {};
+    VARIANT_TYPES.forEach(v => {
+      knownSlugs[v.toLowerCase().replace(/[^a-z0-9]/g,'_')] = v;
+    });
+    const sortedKnown = Object.keys(knownSlugs).sort((a,b) => b.length - a.length);
+    let remaining = variantSlug;
+    let iter = 0;
+    while (remaining && iter++ < 20) {
+      let matched = false;
+      for (const slug of sortedKnown) {
+        if (remaining === slug || remaining.startsWith(slug + '_')) {
+          variantSlugs.push(slug);
+          remaining = remaining.slice(slug.length + 1);
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        // Unknown token, grab until next underscore
+        const next = remaining.indexOf('_');
+        variantSlugs.push(next >= 0 ? remaining.slice(0, next) : remaining);
+        remaining = next >= 0 ? remaining.slice(next + 1) : '';
+      }
+    }
+  }
+
+  return { parentId, resistance, variantSlug, variantSlugs, otherSlug };
+}
+
+// Does a session exercise's variantId match the current filter?
+function variantIdMatchesMode(candidateId, referenceId, mode) {
+  if (mode === 'exact') return candidateId === referenceId;
+
+  // 'any_variant': same parentId + resistance, and at least one variant slug overlaps
+  const ref = parseVariantId(referenceId);
+  const cand = parseVariantId(candidateId);
+
+  if (cand.parentId !== ref.parentId) return false;
+  if (cand.resistance !== ref.resistance) return false;
+
+  // If the reference has no variants, match anything with same exercise+resistance
+  if (ref.variantSlugs.length === 0) return true;
+  // If candidate has no variants, it doesn't share any
+  if (cand.variantSlugs.length === 0) return false;
+
+  // OR: at least one slug in common
+  return cand.variantSlugs.some(s => ref.variantSlugs.includes(s));
+}
+
+function setAnalyticsMatchMode(mode) {
+  analyticsMatchMode = mode;
+  // Update pill styles
+  document.getElementById('ex-filter-exact').classList.toggle('active', mode === 'exact');
+  document.getElementById('ex-filter-any-variant').classList.toggle('active', mode === 'any_variant');
+  // Re-render with same variantId
+  if (currentAnalyticsVariantId) renderAnalyticsBody(currentAnalyticsVariantId, window._analyticsSessions);
+}
+
 async function showExerciseAnalytics(variantId) {
-  try {
+  currentAnalyticsVariantId = variantId;
+  analyticsMatchMode = 'exact';
+
+  // Show/update filter bar
+  const filterBar = document.getElementById('ex-detail-filter-bar');
+  filterBar.style.display = '';
+  document.getElementById('ex-filter-exact').classList.add('active');
+  document.getElementById('ex-filter-any-variant').classList.remove('active');
+
   const displayName = getVariantDisplayName(variantId);
   const { primary } = getMusclesForVariant(variantId);
-  const muscles = primary.join(', ');
-
   document.getElementById('ex-detail-name').textContent = displayName;
-  document.getElementById('ex-detail-sub').textContent = muscles;
+  document.getElementById('ex-detail-sub').textContent = primary.join(', ');
+  document.getElementById('ex-detail-footer').style.display = 'none';
 
-  const sessions = await dbGetAll('sessions');
-  // Collect all sets for this variant
+  try {
+    const sessions = await dbGetAll('sessions');
+    // Include active session if present
+    const allSessions = activeSession ? [...sessions, {...activeSession, startTime: activeSession.startTime || Date.now()}] : sessions;
+    window._analyticsSessions = allSessions;
+    renderAnalyticsBody(variantId, allSessions);
+    openModal('modal-exercise-detail');
+  } catch(err) {
+    console.error('Analytics error:', err);
+    document.getElementById('ex-detail-name').textContent = variantId.replace(/__/g, ' › ');
+    document.getElementById('ex-detail-sub').textContent = '';
+    document.getElementById('ex-detail-body').innerHTML = `
+      <div style="padding:30px 20px;text-align:center;color:var(--text3)">
+        <div style="font-size:24px;margin-bottom:8px">📊</div>
+        <div style="font-size:14px;margin-bottom:4px">No data available yet</div>
+        <div style="font-size:12px">Complete some sets to see analytics here</div>
+      </div>`;
+    document.getElementById('ex-detail-footer').style.display = 'none';
+    openModal('modal-exercise-detail');
+  }
+}
+
+function renderAnalyticsBody(variantId, sessions) {
+  const mode = analyticsMatchMode;
+
+  // Collect matching exercises from sessions
   const allSets = [];
+  const sessionMap = {};
+  const progressByDate = {};
+  const volumeByDate = {};
+
   sessions.forEach(s => {
-    const ex = s.exercises.find(e => e.variantId === variantId);
-    if (ex) {
-      ex.sets.filter(st => st.completed && st.weight && st.reps).forEach(st => {
-        allSets.push({...st, sessionDate: s.startTime, sessionTitle: s.title});
-      });
+    // Find all exercises in this session that match
+    const matchingExes = s.exercises.filter(e => variantIdMatchesMode(e.variantId, variantId, mode));
+    if (matchingExes.length === 0) return;
+
+    const completedSets = matchingExes.flatMap(e => e.sets.filter(st => st.completed && st.weight && st.reps)
+      .map(st => ({...st, sessionDate: s.startTime, variantId: e.variantId})));
+
+    completedSets.forEach(st => allSets.push(st));
+
+    if (completedSets.length > 0) {
+      const existingSets = sessionMap[s.id]?.sets || [];
+      sessionMap[s.id] = {
+        date: s.startTime,
+        title: s.title,
+        sets: [...existingSets, ...completedSets]
+      };
+
+      const maxW = Math.max(...completedSets.map(st => st.weight));
+      if (maxW > 0) progressByDate[s.startTime] = Math.max(progressByDate[s.startTime] || 0, maxW);
+
+      const vol = completedSets.reduce((sum, st) => sum + st.weight * st.reps, 0);
+      if (vol > 0) volumeByDate[s.startTime] = (volumeByDate[s.startTime] || 0) + vol;
     }
   });
 
-  // Also include sets from active session
-  if (activeSession) {
-    const ex = activeSession.exercises.find(e => e.variantId === variantId);
-    if (ex) ex.sets.filter(st => st.weight && st.reps).forEach(st => allSets.push({...st, sessionDate: Date.now(), sessionTitle: activeSession.title}));
-  }
+  const historyEntries = Object.values(sessionMap).sort((a,b) => b.date - a.date).slice(0, 8);
+  const progressData = Object.entries(progressByDate).sort((a,b) => a[0]-b[0]).slice(-30);
+  const volumeData = Object.entries(volumeByDate).sort((a,b) => a[0]-b[0]).slice(-30);
 
   const topRM = allSets.reduce((best, s) => Math.max(best, epley1RM(s.weight, s.reps)), 0);
   const maxWeight = allSets.reduce((best, s) => Math.max(best, s.weight), 0);
 
-  // Rep-max table
   const repBuckets = [1,2,3,5,8,10,12,15];
   const repMaxes = repBuckets.map(rep => {
-    const sets = allSets.filter(s => s.reps === rep);
-    if (sets.length === 0) return {rep, weight: null, date: null};
-    const best = sets.sort((a,b) => b.weight - a.weight)[0];
+    const matching = allSets.filter(s => s.reps === rep);
+    if (!matching.length) return {rep, weight: null, date: null};
+    const best = matching.sort((a,b) => b.weight - a.weight)[0];
     return {rep, weight: best.weight, date: best.sessionDate};
   });
 
-  // History (last 8 sessions with this exercise)
-  const sessionMap = {};
-  sessions.forEach(s => {
-    const ex = s.exercises.find(e => e.variantId === variantId);
-    if (ex && ex.sets.some(st => st.completed)) {
-      sessionMap[s.id] = {date: s.startTime, sets: ex.sets.filter(st => st.completed)};
-    }
-  });
-  const historyEntries = Object.values(sessionMap).sort((a,b) => b.date - a.date).slice(0, 8);
-
-  // Max weight progression
-  const progressByDate = {};
-  sessions.forEach(s => {
-    const ex = s.exercises.find(e => e.variantId === variantId);
-    if (ex) {
-      const maxW = Math.max(...ex.sets.filter(st => st.completed && st.weight).map(st => st.weight));
-      if (maxW > 0) progressByDate[s.startTime] = maxW;
-    }
-  });
-  const progressData = Object.entries(progressByDate).sort((a,b) => a[0]-b[0]).slice(-30);
-
-  // Volume per session (sets * reps * weight)
-  const volumeByDate = {};
-  sessions.forEach(s => {
-    const ex = s.exercises.find(e => e.variantId === variantId);
-    if (ex) {
-      const vol = ex.sets.filter(st => st.completed && st.weight && st.reps)
-        .reduce((sum, st) => sum + st.weight * st.reps, 0);
-      if (vol > 0) volumeByDate[s.startTime] = vol;
-    }
-  });
-  const volumeData = Object.entries(volumeByDate).sort((a,b) => a[0]-b[0]).slice(-30);
-  const totalSetCount = allSets.length;
-
-  // Hide repeat button in analytics context
-  document.getElementById('ex-detail-footer').style.display = 'none';
+  // Scope label shown under stats
+  const scopeLabel = mode === 'any_variant' ? ' (any variant)' : '';
 
   const body = document.getElementById('ex-detail-body');
   body.innerHTML = `
     <div class="analytics-grid">
       <div class="analytics-card">
-        <div class="analytics-label">Est. 1RM</div>
+        <div class="analytics-label">Est. 1RM${escHtml(scopeLabel)}</div>
         <div class="analytics-value">${topRM > 0 ? Math.round(topRM) : '—'} <span class="analytics-unit">lbs</span></div>
       </div>
       <div class="analytics-card">
@@ -3187,7 +3484,7 @@ async function showExerciseAnalytics(variantId) {
       </div>
       <div class="analytics-card">
         <div class="analytics-label">Total Sets</div>
-        <div class="analytics-value">${totalSetCount || '—'}</div>
+        <div class="analytics-value">${allSets.length || '—'}</div>
       </div>
       <div class="analytics-card">
         <div class="analytics-label">Sessions</div>
@@ -3227,34 +3524,24 @@ async function showExerciseAnalytics(variantId) {
       <div class="analytics-label" style="padding:0 14px;margin-bottom:6px">Recent History</div>
       ${historyEntries.length === 0 ? '<div style="padding:0 14px;font-size:13px;color:var(--text3)">No history yet</div>' :
       `<table class="history-table">
-        <thead><tr><th>Date</th><th>Sets</th></tr></thead>
+        <thead><tr><th>Date / Exercise</th><th>Sets</th></tr></thead>
         <tbody>
-          ${historyEntries.map(h => `
-            <tr>
-              <td>${new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+          ${historyEntries.map(h => {
+            const showName = mode === 'any_variant' && h.sets.some(s => s.variantId && s.variantId !== variantId);
+            return `<tr>
+              <td>
+                <div>${new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+                ${showName ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">${escHtml(h.title || '')}</div>` : ''}
+              </td>
               <td><div class="sets-summary">${h.sets.map(s =>
                 `<div class="set-line">${s.weight}×${s.reps}${s.rpe ? ` @${s.rpe}` : ''}</div>`
               ).join('')}</div></td>
-            </tr>`).join('')}
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>`}
     </div>
   `;
-
-  openModal('modal-exercise-detail');
-  } catch(err) {
-    console.error('Analytics error:', err);
-    document.getElementById('ex-detail-name').textContent = variantId.replace(/__/g, ' › ');
-    document.getElementById('ex-detail-sub').textContent = '';
-    document.getElementById('ex-detail-body').innerHTML = `
-      <div style="padding:30px 20px;text-align:center;color:var(--text3)">
-        <div style="font-size:24px;margin-bottom:8px">📊</div>
-        <div style="font-size:14px;margin-bottom:4px">No data available yet</div>
-        <div style="font-size:12px">Complete some sets to see analytics here</div>
-      </div>`;
-    document.getElementById('ex-detail-footer').style.display = 'none';
-    openModal('modal-exercise-detail');
-  }
 }
 
 function renderSparkline(values) {
@@ -3749,7 +4036,7 @@ let pickerMuscleFilter = '';
 
 function openExercisePicker() {
   pickerMuscleFilter = '';
-  pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {bands:false,unilateral:false,other:''}, customName: '' };
+  pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {other:''}, customName: '' };
   document.getElementById('pick-ex-search').value = '';
   document.getElementById('pick-ex-search').style.display = '';
   document.getElementById('pick-ex-filters').style.display = '';
@@ -3770,7 +4057,7 @@ function closeExercisePicker() {
   if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
 
-let pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {bands:false,unilateral:false,other:''}, customName: '' };
+let pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {other:''}, customName: '' };
 
 function renderPickerFilters() {
   const container = document.getElementById('pick-ex-filters');
@@ -3829,10 +4116,10 @@ function renderStepIndicator() {
   const hasVariants = h.variants.length > 0;
   const steps = [
     { label: h.name, key: 'lift' },
-    { label: 'Type', key: 'resistance' },
+    { label: 'Resistance', key: 'resistance' },
   ];
-  if (hasVariants) steps.push({ label: 'Variant', key: 'variant' });
-  steps.push({ label: 'Modifiers', key: 'modifiers' });
+  if (hasVariants) steps.push({ label: 'Variants', key: 'variant' });
+  steps.push({ label: 'Confirm', key: 'modifiers' });
 
   const currentIdx = steps.findIndex(s => s.key === pickerState.step);
   el.innerHTML = steps.map((s, i) => {
@@ -3893,7 +4180,7 @@ function pickerSelectLift(liftId) {
   pickerState.liftId = liftId;
   pickerState.resistance = null;
   pickerState.variants = [];
-  pickerState.mods = {bands:false,unilateral:false,other:''};
+  pickerState.mods = {other:''};
   pickerState.customName = '';
 
   if (h.resistances.length === 1) {
@@ -3919,7 +4206,7 @@ function renderPickerResistance() {
     <div class="picker-grid">${h.resistances.map(r => `
       <div class="picker-option" onclick="pickerSelectResistance('${r}')">
         <div class="picker-option-name">${escHtml(r)}</div>
-        <div class="picker-option-sub">${RES_ABBREV[r] || r}</div>
+        <div class="picker-option-sub">${escHtml(RES_ABBREV[r] || r)}</div>
       </div>`).join('')}
     </div>`;
 }
@@ -3940,14 +4227,15 @@ function renderPickerVariant() {
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
 
-  list.innerHTML = `<div class="picker-section-label">Select Variant(s)</div>
+  list.innerHTML = `<div class="picker-section-label">Select Variants <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
     <div class="picker-grid">${h.variants.map(v => `
-      <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" onclick="pickerToggleVariant('${v}')">
+      <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" onclick="pickerToggleVariant('${escHtml(v)}')">
         <div class="picker-option-name">${escHtml(v)}</div>
       </div>`).join('')}
     </div>
-    <div style="padding:12px 0">
-      <button class="btn btn-primary" style="width:100%" ${pickerState.variants.length === 0 ? 'disabled' : ''} onclick="pickerVariantContinue()">Continue</button>
+    <div style="padding:12px 0;display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:0 0 auto" onclick="pickerVariantContinue()">Skip</button>
+      <button class="btn btn-primary" style="flex:1" onclick="pickerVariantContinue()">Continue${pickerState.variants.length > 0 ? ' (' + pickerState.variants.length + ' selected)' : ''}</button>
     </div>`;
 }
 
@@ -3959,7 +4247,6 @@ function pickerToggleVariant(v) {
 }
 
 function pickerVariantContinue() {
-  if (pickerState.variants.length === 0) return;
   pickerState.step = 'modifiers';
   renderPickerStep();
 }
@@ -3973,51 +4260,29 @@ function renderPickerModifiers() {
 
   // Build preview name
   const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-  const previewName = buildExerciseName(h.name, abbrev, pickerState.variants.join(' '), pickerState.mods);
+  const previewName = buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
 
-  let modsHtml = '<div class="picker-section-label">Modifiers (optional)</div>';
-
-  if (h.mods.bands) {
-    modsHtml += `<div class="picker-modifier-row ${pickerState.mods.bands ? 'active' : ''}" onclick="pickerToggleMod('bands')">
-      <div class="picker-modifier-check">${pickerState.mods.bands ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
-      <div class="picker-modifier-label">Bands</div>
+  list.innerHTML = `
+    <div class="picker-section-label">Confirm Exercise</div>
+    <div class="picker-preview" id="picker-preview">
+      <div class="picker-preview-label">Exercise name</div>
+      <div class="picker-preview-name" id="picker-preview-name">${escHtml(previewName)}</div>
+      <input class="picker-name-edit" id="picker-custom-name" type="text"
+        placeholder="${escHtml(previewName)}" value="${escHtml(pickerState.customName)}"
+        oninput="pickerState.customName=this.value">
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Leave blank to use auto-generated name</div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="input-label" style="margin-bottom:4px">Notes (optional)</div>
+      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Paused, Tempo…" value="${escHtml(pickerState.mods.other)}" oninput="pickerState.mods.other=this.value;updatePickerPreview()">
     </div>`;
-  }
-  if (h.mods.unilateral) {
-    modsHtml += `<div class="picker-modifier-row ${pickerState.mods.unilateral ? 'active' : ''}" onclick="pickerToggleMod('unilateral')">
-      <div class="picker-modifier-check">${pickerState.mods.unilateral ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
-      <div class="picker-modifier-label">Unilateral</div>
-    </div>`;
-  }
-  if (h.mods.other) {
-    modsHtml += `<div style="margin-top:6px">
-      <div class="input-label" style="margin-bottom:4px">Other</div>
-      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Pause, Machine…" value="${escHtml(pickerState.mods.other)}" oninput="pickerState.mods.other=this.value;updatePickerPreview()">
-    </div>`;
-  }
-
-  modsHtml += `<div class="picker-preview" id="picker-preview">
-    <div class="picker-preview-label">Exercise name</div>
-    <div class="picker-preview-name" id="picker-preview-name">${escHtml(previewName)}</div>
-    <input class="picker-name-edit" id="picker-custom-name" type="text"
-      placeholder="${escHtml(previewName)}" value="${escHtml(pickerState.customName)}"
-      oninput="pickerState.customName=this.value">
-    <div style="font-size:11px;color:var(--text3);margin-top:4px">Leave blank to use auto-generated name</div>
-  </div>`;
-
-  list.innerHTML = modsHtml;
-}
-
-function pickerToggleMod(mod) {
-  pickerState.mods[mod] = !pickerState.mods[mod];
-  renderPickerModifiers();
 }
 
 function updatePickerPreview() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-  const name = buildExerciseName(h.name, abbrev, pickerState.variants.join(' '), pickerState.mods);
+  const name = buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
   const el = document.getElementById('picker-preview-name');
   if (el) el.textContent = name;
   const input = document.getElementById('picker-custom-name');
@@ -4050,17 +4315,15 @@ document.getElementById('pick-ex-confirm').addEventListener('click', () => {
   if (!pickerState.liftId || !pickerState.resistance) return;
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
-  if (h.variants.length > 0 && pickerState.variants.length === 0) return;
 
-  const variantStr = pickerState.variants.join(' ');
-  // Resolve to a variant ID
-  const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, variantStr, pickerState.mods);
+  // Resolve to a variant ID (variants is now an array)
+  const variantId = resolveVariantId(pickerState.liftId, pickerState.resistance, pickerState.variants, pickerState.mods);
 
   // Check if this variant exists in variantMap, if not create it
   if (!variantMap[variantId]) {
     const abbrev = RES_ABBREV[pickerState.resistance] || pickerState.resistance;
-    const displayName = pickerState.customName.trim() || buildExerciseName(h.name, abbrev, variantStr, pickerState.mods);
-    
+    const displayName = pickerState.customName.trim() || buildExerciseName(h.name, abbrev, pickerState.variants, pickerState.mods);
+
     // Find parent from hierarchy
     let parent = parentMap[pickerState.liftId];
     if (!parent) {
@@ -5339,6 +5602,180 @@ init().catch(e => {
 
 
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN SCREEN — Exercise Taxonomy Editor
+// ═══════════════════════════════════════════════════════════════
+
+// Persisted overrides stored in IndexedDB under 'admin_overrides'
+// Each record: { id: exerciseId, resistances: [...], variants: [...] }
+const adminOverrides = {}; // exerciseId -> { resistances: Set, variants: Set }
+
+async function loadAdminOverrides() {
+  try {
+    const records = await dbGetAll('admin_overrides');
+    records.forEach(r => {
+      adminOverrides[r.id] = {
+        resistances: new Set(r.resistances),
+        variants: new Set(r.variants)
+      };
+    });
+  } catch(e) {
+    // store may not exist yet, that's fine
+  }
+}
+
+function getAdminState(exerciseId) {
+  if (adminOverrides[exerciseId]) return adminOverrides[exerciseId];
+  const h = hierarchyMap[exerciseId];
+  if (!h) return null;
+  return {
+    resistances: new Set(h.resistances),
+    variants: new Set(h.variants)
+  };
+}
+
+async function saveAdminOverride(exerciseId) {
+  const state = adminOverrides[exerciseId];
+  if (!state) return;
+  const h = hierarchyMap[exerciseId];
+  // Write back to live EXERCISE_HIERARCHY so picker picks it up immediately
+  h.resistances = [...state.resistances];
+  h.variants = [...state.variants];
+  // Persist
+  await dbPut('admin_overrides', {
+    id: exerciseId,
+    resistances: h.resistances,
+    variants: h.variants
+  });
+}
+
+function adminToggleResistance(exerciseId, resistance) {
+  if (!adminOverrides[exerciseId]) {
+    const h = hierarchyMap[exerciseId];
+    adminOverrides[exerciseId] = {
+      resistances: new Set(h.resistances),
+      variants: new Set(h.variants)
+    };
+  }
+  const state = adminOverrides[exerciseId];
+  if (state.resistances.has(resistance)) {
+    if (state.resistances.size <= 1) return; // must keep at least one
+    state.resistances.delete(resistance);
+  } else {
+    state.resistances.add(resistance);
+  }
+  saveAdminOverride(exerciseId);
+  renderAdminCard(exerciseId);
+}
+
+function adminToggleVariant(exerciseId, variant) {
+  if (!adminOverrides[exerciseId]) {
+    const h = hierarchyMap[exerciseId];
+    adminOverrides[exerciseId] = {
+      resistances: new Set(h.resistances),
+      variants: new Set(h.variants)
+    };
+  }
+  const state = adminOverrides[exerciseId];
+  if (state.variants.has(variant)) {
+    state.variants.delete(variant);
+  } else {
+    state.variants.add(variant);
+  }
+  saveAdminOverride(exerciseId);
+  renderAdminCard(exerciseId);
+}
+
+function adminToggleCard(exerciseId) {
+  const card = document.getElementById('admin-card-' + exerciseId);
+  if (!card) return;
+  card.classList.toggle('open');
+}
+
+function renderAdminCard(exerciseId) {
+  const card = document.getElementById('admin-card-' + exerciseId);
+  if (!card) return;
+  const h = hierarchyMap[exerciseId];
+  if (!h) return;
+  const state = getAdminState(exerciseId);
+  const isOpen = card.classList.contains('open');
+
+  const resChips = RESISTANCE_TYPES.map(r => {
+    const on = state.resistances.has(r);
+    return `<button class="admin-chip ${on ? 'on' : ''}" onclick="adminToggleResistance('${exerciseId}','${r}')">
+      <span class="chip-dot"></span>${r}
+    </button>`;
+  }).join('');
+
+  const varChips = VARIANT_TYPES.map(v => {
+    const on = state.variants.has(v);
+    return `<button class="admin-chip ${on ? 'on' : ''}" onclick="adminToggleVariant('${exerciseId}',${JSON.stringify(v)})">
+      <span class="chip-dot"></span>${v}
+    </button>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="admin-ex-header" onclick="adminToggleCard('${exerciseId}')">
+      <div>
+        <div class="admin-ex-title">${escHtml(h.name)}</div>
+        <div class="admin-ex-meta">${h.pattern} · ${state.resistances.size} resistance · ${state.variants.size} variant${state.variants.size !== 1 ? 's' : ''}</div>
+      </div>
+      <svg class="admin-ex-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="admin-ex-body">
+      <div class="admin-section-label">Resistance Types</div>
+      <div class="admin-chip-grid">${resChips}</div>
+      <div class="admin-section-label">Variant Toggles</div>
+      <div class="admin-chip-grid">${varChips}</div>
+    </div>`;
+
+  if (isOpen) card.classList.add('open');
+}
+
+function renderAdminList() {
+  const q = (document.getElementById('admin-search')?.value || '').toLowerCase().trim();
+  const container = document.getElementById('admin-exercise-list');
+  if (!container) return;
+
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','carry'];
+  const grouped = {};
+  EXERCISE_HIERARCHY.forEach(h => {
+    if (q && !h.name.toLowerCase().includes(q)) return;
+    if (!grouped[h.pattern]) grouped[h.pattern] = [];
+    grouped[h.pattern].push(h);
+  });
+
+  let html = '';
+  patternOrder.forEach(pat => {
+    if (!grouped[pat]) return;
+    html += `<div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:12px 0 6px">${pat}</div>`;
+    grouped[pat].forEach(h => {
+      html += `<div class="admin-ex-card" id="admin-card-${h.id}"></div>`;
+    });
+  });
+
+  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text3)">No exercises found</div>';
+
+  // Render each card's content
+  EXERCISE_HIERARCHY.forEach(h => {
+    if (q && !h.name.toLowerCase().includes(q)) return;
+    renderAdminCard(h.id);
+  });
+}
+
+// Load overrides on startup and apply to live hierarchy
+loadAdminOverrides().then(() => {
+  // Apply any saved overrides to the live EXERCISE_HIERARCHY
+  Object.entries(adminOverrides).forEach(([id, state]) => {
+    const h = hierarchyMap[id];
+    if (h) {
+      h.resistances = [...state.resistances];
+      h.variants = [...state.variants];
+    }
+  });
+});
 
 // Register service worker
 if ('serviceWorker' in navigator) {
