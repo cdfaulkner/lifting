@@ -95,7 +95,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(16px + var(--safe-bot));
+  padding-bottom: calc(90px + var(--safe-bot));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -455,7 +455,7 @@ select option { background: var(--bg3); }
   display: flex;
   gap: 8px;
   flex-shrink: 0;
-  padding-bottom: calc(16px + var(--safe-bot));
+  padding-bottom: calc(90px + var(--safe-bot));
 }
 
 /* Exercise block in active session */
@@ -593,7 +593,10 @@ select option { background: var(--bg3); }
   gap: 4px;
   z-index: 0;
   border-radius: 0 var(--r) var(--r) 0;
+  opacity: 0;
+  transition: opacity 0.12s;
 }
+.swipe-delete-bg.revealed { opacity: 1; }
 .swipe-delete-bg svg { flex-shrink: 0; }
 
 /* Quick-add from previous session */
@@ -876,6 +879,105 @@ select option { background: var(--bg3); }
   transition: all 0.15s;
 }
 .filter-pill.active { background: var(--gradient); color: #fff; border-color: transparent; }
+
+.lib-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 16px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.lib-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Picker-style exercise card in library browse */
+.lib-ex-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  margin: 0 16px 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.lib-ex-card.open { border-color: var(--accent); }
+.lib-ex-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.lib-ex-card-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+.lib-ex-card-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.lib-ex-card-chevron {
+  color: var(--text3);
+  transition: transform 0.18s;
+  flex-shrink: 0;
+}
+.lib-ex-card.open .lib-ex-card-chevron { transform: rotate(180deg); }
+.lib-ex-card-body {
+  display: none;
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--border);
+}
+.lib-ex-card.open .lib-ex-card-body { display: block; }
+
+/* Resistance chips in library */
+.lib-res-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0 6px; }
+.lib-res-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.lib-res-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Variant grid in library */
+.lib-variant-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 8px; }
+.lib-variant-chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.lib-variant-chip.selected { background: rgba(167,139,250,0.15); border-color: var(--accent); color: var(--accent); }
+
+/* History log list */
+.lib-history-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  gap: 10px;
+  transition: background 0.1s;
+}
+.lib-history-item:active { background: var(--bg3); }
+.lib-history-item-name { flex: 1; font-size: 13px; font-weight: 500; }
+.lib-history-item-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.lib-history-item-count { font-family: var(--mono); font-size: 12px; color: var(--text3); text-align:right; flex-shrink:0; }
 
 .library-list {
   padding: 8px 16px 16px;
@@ -1556,21 +1658,31 @@ textarea { resize: none; }
           <div class="page-title">Library</div>
           <div class="page-sub" id="lib-count-sub"></div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center"><button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button></div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+          <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
+        </div>
       </div>
-      <div class="library-search-bar">
-        <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
-        <div class="library-filters" id="lib-filters"></div>
+      <!-- View tabs -->
+      <div style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
+        <button id="lib-tab-browse" class="lib-tab active" onclick="setLibTab('browse')">Browse</button>
+        <button id="lib-tab-history" class="lib-tab" onclick="setLibTab('history')">History</button>
       </div>
-      <div class="filter-row">
-        <select id="lib-equip-filter">
-          <option value="">All Equipment</option>
-        </select>
-        <select id="lib-muscle-filter">
-          <option value="">All Muscles</option>
-        </select>
+      <!-- Browse view -->
+      <div id="lib-view-browse">
+        <div class="library-search-bar">
+          <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
+          <div class="library-filters" id="lib-filters"></div>
+        </div>
+        <div id="library-list" class="library-list"></div>
       </div>
-      <div id="library-list" class="library-list"></div>
+      <!-- History log view -->
+      <div id="lib-view-history" style="display:none">
+        <div style="padding:10px 16px 6px">
+          <input id="lib-history-search" type="search" placeholder="Search logged exercises…" autocomplete="off">
+        </div>
+        <div id="lib-history-list" class="library-list"></div>
+      </div>
     </div>
 
     <!-- ══ PROGRESS ══ -->
@@ -4897,92 +5009,200 @@ function pickExercise(variantId) {
 let libMuscleFilter = '';
 let libEquipFilter = '';
 
+// ── Library tab state ──────────────────────────────────────────
+let libTab = 'browse'; // 'browse' | 'history'
+let libOpenCardId = null; // which exercise card is expanded in browse
+let libSelectedRes = {}; // exerciseId -> selected resistance
+let libHistoryCache = null; // cached [{variantId, name, sessions, lastDate}]
+
+function setLibTab(tab) {
+  libTab = tab;
+  document.getElementById('lib-tab-browse').classList.toggle('active', tab === 'browse');
+  document.getElementById('lib-tab-history').classList.toggle('active', tab === 'history');
+  document.getElementById('lib-view-browse').style.display = tab === 'browse' ? '' : 'none';
+  document.getElementById('lib-view-history').style.display = tab === 'history' ? '' : 'none';
+  if (tab === 'history') renderLibraryHistory();
+}
+
 function renderLibrary() {
   const countEl = document.getElementById('lib-count-sub');
-  const total = hierarchyParents.reduce((a, p) => a + p.variants.length, 0);
-  countEl.textContent = `${total} variants · ${hierarchyParents.length} movements`;
+  countEl.textContent = `${EXERCISE_HIERARCHY.length} exercises`;
+  renderLibraryBrowse(document.getElementById('lib-search').value || '');
+  if (libTab === 'history') renderLibraryHistory();
+}
 
-  // Build filter pills
-  const filtersEl = document.getElementById('lib-filters');
-  const muscles = ['all', ...MUSCLE_GROUPS];
-  filtersEl.innerHTML = muscles.map(m => `
-    <button class="filter-pill ${libMuscleFilter === (m==='all'?'':m) ? 'active' : ''}"
-      onclick="setLibMuscle('${m === 'all' ? '' : m}')">
-      ${m}
-    </button>`).join('');
+document.getElementById('lib-search').addEventListener('input', e => renderLibraryBrowse(e.target.value));
+document.getElementById('lib-history-search').addEventListener('input', e => renderLibraryHistoryList(e.target.value));
 
-  // Equipment dropdown
-  const equipSel = document.getElementById('lib-equip-filter');
-  const currentEquipVal = equipSel.value;
-  equipSel.innerHTML = '<option value="">All Equipment</option>';
-  EQUIPMENT_TYPES.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e; opt.textContent = e;
-    equipSel.appendChild(opt);
+function renderLibraryBrowse(query) {
+  const q = query.toLowerCase().trim();
+  const list = document.getElementById('library-list');
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
+  const groups = {};
+
+  EXERCISE_HIERARCHY.forEach(h => {
+    if (q && !h.name.toLowerCase().includes(q)) return;
+    if (!groups[h.pattern]) groups[h.pattern] = [];
+    groups[h.pattern].push(h);
   });
-  if (currentEquipVal) equipSel.value = currentEquipVal;
-  const muscleSel = document.getElementById('lib-muscle-filter');
-  if (muscleSel.options.length <= 1) {
-    MUSCLE_GROUPS.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m; opt.textContent = m;
-      muscleSel.appendChild(opt);
-    });
+
+  if (Object.keys(groups).length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-title">No results</div></div>';
+    return;
   }
 
-  renderLibraryList(document.getElementById('lib-search').value);
+  let html = '';
+  patternOrder.forEach(pat => {
+    if (!groups[pat]) return;
+    html += `<div class="picker-section-label" style="padding:10px 16px 4px">${pat}</div>`;
+    groups[pat].forEach(h => {
+      const muscleStr = h.muscles.join(', ');
+      const isOpen = libOpenCardId === h.id;
+      const selRes = libSelectedRes[h.id] || h.resistances[0];
+
+      // Build resistance chips
+      const resChips = h.resistances.map(r =>
+        `<button class="lib-res-chip ${r === selRes ? 'selected' : ''}"
+          onclick="event.stopPropagation(); libSelectRes('${h.id}','${r}')">${r}</button>`
+      ).join('');
+
+      // Build variant chips for selected resistance — show all variants
+      const varChips = h.variants.length > 0
+        ? `<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin:6px 0 2px;text-transform:uppercase;letter-spacing:0.05em">Variants</div>
+           <div class="lib-variant-grid">
+             ${h.variants.map(v =>
+               `<button class="lib-variant-chip" onclick="event.stopPropagation(); libOpenVariantAnalytics('${h.id}','${selRes}','${v}')">${v}</button>`
+             ).join('')}
+           </div>`
+        : '';
+
+      const baseBtn = `<button class="lib-variant-chip" style="border-color:var(--accent);color:var(--accent)"
+        onclick="event.stopPropagation(); showExerciseAnalytics('${h.id}__${selRes}')">
+        ${h.name} (${selRes}) →
+      </button>`;
+
+      html += `<div class="lib-ex-card ${isOpen ? 'open' : ''}" id="lib-card-${h.id}">
+        <div class="lib-ex-card-header" onclick="libToggleCard('${h.id}')">
+          <div style="flex:1;min-width:0">
+            <div class="lib-ex-card-name">${escHtml(h.name)}</div>
+            <div class="lib-ex-card-meta">${muscleStr} · ${h.resistances.length} resistance${h.resistances.length>1?'s':''}</div>
+          </div>
+          <svg class="lib-ex-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="lib-ex-card-body">
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Resistance</div>
+          <div class="lib-res-chips">${resChips}</div>
+          ${varChips}
+          <div style="margin-top:8px">${baseBtn}</div>
+        </div>
+      </div>`;
+    });
+  });
+
+  list.innerHTML = html;
+}
+
+function libToggleCard(id) {
+  libOpenCardId = (libOpenCardId === id) ? null : id;
+  renderLibraryBrowse(document.getElementById('lib-search').value || '');
+}
+
+function libSelectRes(exerciseId, res) {
+  libSelectedRes[exerciseId] = res;
+  // Re-render just that card's body without closing it
+  libOpenCardId = exerciseId;
+  renderLibraryBrowse(document.getElementById('lib-search').value || '');
+}
+
+function libOpenVariantAnalytics(exerciseId, resistance, variant) {
+  const slug = variant.toLowerCase().replace(/ /g,'_');
+  const variantId = `${exerciseId}__${resistance}__${slug}`;
+  showExerciseAnalytics(variantId);
+}
+
+// ── History log view ──────────────────────────────────────────
+async function renderLibraryHistory() {
+  const list = document.getElementById('lib-history-list');
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Loading…</div>';
+
+  const sessions = await getSortedSessions();
+  const variantStats = {}; // variantId -> {name, sessions:Set, lastDate}
+
+  sessions.forEach(s => {
+    s.exercises.forEach(ex => {
+      const completed = ex.sets.filter(st => st.completed && (st.weight || st.reps));
+      if (completed.length === 0) return;
+      if (!variantStats[ex.variantId]) {
+        variantStats[ex.variantId] = {
+          variantId: ex.variantId,
+          name: getVariantDisplayName(ex.variantId),
+          parentId: ex.variantId.split('__')[0],
+          sessions: new Set(),
+          lastDate: s.startTime,
+          totalSets: 0
+        };
+      }
+      const stat = variantStats[ex.variantId];
+      stat.sessions.add(s.id);
+      stat.lastDate = Math.max(stat.lastDate, s.startTime);
+      stat.totalSets += completed.length;
+    });
+  });
+
+  libHistoryCache = Object.values(variantStats)
+    .sort((a,b) => b.lastDate - a.lastDate);
+
+  renderLibraryHistoryList(document.getElementById('lib-history-search').value || '');
+}
+
+function renderLibraryHistoryList(query) {
+  const list = document.getElementById('lib-history-list');
+  if (!libHistoryCache) { renderLibraryHistory(); return; }
+
+  const q = query.toLowerCase().trim();
+  const items = libHistoryCache.filter(item =>
+    !q || item.name.toLowerCase().includes(q)
+  );
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-title">No logged exercises yet</div></div>';
+    return;
+  }
+
+  // Group by parent exercise
+  const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
+  const groups = {};
+  items.forEach(item => {
+    const h = hierarchyMap[item.parentId];
+    const pat = h?.pattern || 'other';
+    if (!groups[pat]) groups[pat] = [];
+    groups[pat].push(item);
+  });
+
+  let html = '';
+  patternOrder.forEach(pat => {
+    if (!groups[pat]) return;
+    html += `<div class="picker-section-label" style="padding:10px 16px 4px">${pat}</div>`;
+    groups[pat].forEach(item => {
+      const lastDate = new Date(item.lastDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+      const sessionCount = item.sessions.size;
+      html += `<div class="lib-history-item" onclick="showExerciseAnalytics('${item.variantId}')">
+        <div style="flex:1;min-width:0">
+          <div class="lib-history-item-name">${escHtml(item.name)}</div>
+          <div class="lib-history-item-meta">${item.totalSets} sets · last ${lastDate}</div>
+        </div>
+        <div class="lib-history-item-count">${sessionCount}<br><span style="font-size:9px">sessions</span></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    });
+  });
+
+  list.innerHTML = html;
 }
 
 function setLibMuscle(m) {
   libMuscleFilter = m;
   renderLibrary();
-}
-
-document.getElementById('lib-search').addEventListener('input', e => renderLibraryList(e.target.value));
-document.getElementById('lib-equip-filter').addEventListener('change', e => { libEquipFilter = e.target.value; renderLibraryList(document.getElementById('lib-search').value); });
-document.getElementById('lib-muscle-filter').addEventListener('change', e => { libMuscleFilter = e.target.value; renderLibrary(); });
-
-function renderLibraryList(query) {
-  const q = query.toLowerCase().trim();
-  const list = document.getElementById('library-list');
-  let html = '';
-
-  hierarchyParents.forEach(parent => {
-    const muscleMatch = !libMuscleFilter || parent.primary_muscles.includes(libMuscleFilter) || parent.secondary_muscles.includes(libMuscleFilter);
-    if (!muscleMatch) return;
-
-    const variants = parent.variants.filter(v => {
-      if (libEquipFilter && !v.equipment.includes(libEquipFilter)) return false;
-      if (q) {
-        const name = `${parent.name} ${v.name}`.toLowerCase();
-        if (!name.includes(q)) return false;
-      }
-      return true;
-    });
-    if (variants.length === 0) return;
-
-    const muscleTags = [...parent.primary_muscles].map(m => `<span class="tag tag-muscle">${m}</span>`).join('');
-    html += `<div class="parent-group">
-      <div class="parent-label">
-        <span>${escHtml(parent.name)}</span>
-        <span class="count">${variants.length}v</span>
-        <div class="muscle-tags">${muscleTags}</div>
-      </div>
-      ${variants.map(v => `
-        <div class="variant-row" style="cursor:default">
-          <div class="variant-row-left" style="cursor:pointer;flex:1" onclick="showExerciseAnalytics('${v.id}')">
-            <div class="variant-name">${escHtml(v.name)}</div>
-            <div class="variant-equip-tags">${v.equipment.map(e => `<span class="tag tag-equipment">${e}</span>`).join('')}</div>
-          </div>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="openVariantEditor('${parent.id}','${v.id}')" title="Edit" style="flex-shrink:0;margin-left:4px">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-        </div>`).join('')}
-      <button class="btn btn-ghost btn-sm" onclick="openNewVariantModal('${parent.id}')" style="width:100%;margin-top:4px;margin-bottom:6px;border-style:dashed;color:var(--text3)">+ Add Variant</button>
-    </div>`;
-  });
-
-  list.innerHTML = html || `<div class="empty-state"><div class="empty-state-title">No results</div></div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6227,10 +6447,8 @@ async function migrateToSupabase() {
   const migrationKey = 'supabase_migrated_v1';
   if (localStorage.getItem(migrationKey)) return;
   try {
-    // Check if Supabase already has data
     const existingSessions = await sbGetAll('sessions');
     if (existingSessions.length === 0) {
-      // Migrate sessions from IndexedDB
       const localSessions = await idbGetAll('sessions');
       for (const s of localSessions) await sbPut('sessions', s);
     }
@@ -6242,7 +6460,14 @@ async function migrateToSupabase() {
     localStorage.setItem(migrationKey, '1');
     console.log('Migrated local data to Supabase');
   } catch(e) {
-    console.warn('Migration failed, will retry next load:', e);
+    // Network errors mean Supabase is unreachable (offline / extension not active).
+    // Data is safe in IndexedDB — mark done so we stop retrying every load.
+    if (e instanceof TypeError || (e.message || '').includes('fetch')) {
+      localStorage.setItem(migrationKey, '1');
+      console.log('Supabase unreachable — migration skipped, local data intact');
+    } else {
+      console.warn('Migration failed, will retry next load:', e);
+    }
   }
 }
 
@@ -6510,6 +6735,10 @@ function initSwipeDelete(container, selector, onDelete) {
     if (!inner) return;
     inner.style.transition = 'transform 0.2s ease';
     inner.style.transform = 'translateX(0)';
+    // Hide delete bg
+    const item = inner.closest('.swipe-item');
+    const bg = item?.querySelector('.swipe-delete-bg');
+    if (bg) bg.classList.remove('revealed');
   }
 
   container.addEventListener('touchstart', e => {
@@ -6535,11 +6764,19 @@ function initSwipeDelete(container, selector, onDelete) {
       if (Math.abs(dx) > 6) { isDragging = true; isSwipe = true; }
       else return;
     }
-    if (dx > 0) return; // only left swipe
+    if (dx > 0) {
+      // swiping right — hide bg if visible
+      const bg = currentEl?.querySelector('.swipe-delete-bg');
+      if (bg) bg.classList.remove('revealed');
+      return;
+    }
     e.preventDefault();
     const clamped = Math.max(dx, -80);
     currentInner.style.transition = 'none';
     currentInner.style.transform = `translateX(${clamped}px)`;
+    // Reveal bg proportionally
+    const bg = currentEl?.querySelector('.swipe-delete-bg');
+    if (bg && Math.abs(dx) > 8) bg.classList.add('revealed');
   }, {passive: false});
 
   container.addEventListener('touchend', e => {
@@ -6550,6 +6787,7 @@ function initSwipeDelete(container, selector, onDelete) {
       currentInner.style.transform = 'translateX(-80px)';
       // Show delete state, wait for tap on bg or auto-confirm
       const bg = currentEl.querySelector('.swipe-delete-bg');
+      if (bg) bg.classList.add('revealed');
       if (bg) {
         bg.style.pointerEvents = 'auto';
         const onBgTap = () => {
