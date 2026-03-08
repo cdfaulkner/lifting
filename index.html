@@ -99,7 +99,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: 0;
+  padding-bottom: calc(58px + var(--safe-bot));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -1743,7 +1743,6 @@ textarea { resize: none; }
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
     </div>
-  <div style="height:calc(64px + var(--safe-bot));flex-shrink:0"></div>
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
@@ -6474,11 +6473,12 @@ async function migrateToSupabase() {
       const localTemplates = await idbGetAll('templates');
       for (const t of localTemplates) await sbPut('templates', t);
     }
-    // Migrate bodyweight entries (v2)
+    // Migrate bodyweight entries (v2) — merge all local entries not yet in Supabase
     const existingBW = await sbGetAll('bodyweight');
-    if (existingBW.length === 0) {
-      const localBW = await idbGetAll('bodyweight');
-      for (const b of localBW) await sbPut('bodyweight', b);
+    const existingBWDates = new Set(existingBW.map(b => b.date));
+    const localBW = await idbGetAll('bodyweight');
+    for (const b of localBW) {
+      if (!existingBWDates.has(b.date)) await sbPut('bodyweight', b);
     }
     localStorage.setItem(migrationKey, '1');
     console.log('Migrated local data to Supabase (v2 incl. bodyweight)');
