@@ -5539,67 +5539,111 @@ async function seedDefaultTemplates() {
 
 
 // ── Skeleton template seeding ──────────────────────────────────
+async function migrateTemplateIds() {
+  const templates = await dbGetAll('templates');
+  let anyFixed = false;
+  for (const t of templates) {
+    let fixed = false;
+    const newExercises = t.exercises.map(ex => {
+      const newId = migrateLegacyId(ex.variantId);
+      if (newId !== ex.variantId) { fixed = true; return { ...ex, variantId: newId }; }
+      return ex;
+    });
+    if (fixed) {
+      await dbPut('templates', { ...t, exercises: newExercises });
+      anyFixed = true;
+      console.log('Migrated template IDs:', t.name);
+    }
+  }
+  // Also migrate session exercise IDs (for history display)
+  const sessions = await idbGetAll('sessions');
+  for (const s of sessions) {
+    let fixed = false;
+    const newExercises = s.exercises.map(ex => {
+      const newId = migrateLegacyId(ex.variantId);
+      if (newId !== ex.variantId) { fixed = true; return { ...ex, variantId: newId }; }
+      return ex;
+    });
+    if (fixed) {
+      await idbPut('sessions', { ...s, exercises: newExercises });
+      anyFixed = true;
+    }
+  }
+  if (anyFixed) console.log('Legacy ID migration complete');
+}
+
 async function seedSkeletonTemplates() {
-  const existing = await dbGetAll('templates');
-  if (existing.length > 0) return; // only seed if no templates exist
-
-  // Helper: pick the simplest variant for a given pattern + resistance hint
-  function pickVariant(exerciseId, preferredResistance) {
-    const h = hierarchyMap[exerciseId];
-    if (!h) return null;
-    const res = h.resistances.includes(preferredResistance) ? preferredResistance : h.resistances[0];
-    // No variants = just resistance
-    if (!h.variants || h.variants.length === 0) return `${exerciseId}__${res}`;
-    // Pick first meaningful variant
-    const v = h.variants[0];
-    return `${exerciseId}__${res}__${v.toLowerCase().replace(/ /g,'_')}`;
+  // buildVariantId format: parentId__res_lowercase__variant_slug
+  // Use buildVariantId to generate correct IDs
+  function V(parentId, resistance, variantArr=[]) {
+    const resPart = resistance.toLowerCase().replace(/[^a-z0-9]/g,'_');
+    if (variantArr.length === 0) return `${parentId}__${resPart}`;
+    const varPart = variantArr.map(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_')).sort().join('_');
+    return `${parentId}__${resPart}__${varPart}`;
+  }
+  function makeEx(variantId, sets=3, reps=8) {
+    return { variantId, defaultSets: Array(sets).fill(null).map(() => ({weight:0, reps})) };
   }
 
-  function makeEx(variantId, sets=3, reps=8, weight=0) {
-    return { variantId, defaultSets: Array(sets).fill(null).map(() => ({weight, reps})) };
-  }
-
-  // Use placeholder-friendly variantIds — just the exercise ID + "BW" or "Barbell"
-  // The picker will still work; user swaps resistance/variant when they open the template
-  const templates = [
+  const skeletonTemplates = [
     {
-      id: uid(),
       name: 'Lower',
       exercises: [
-        makeEx('squat__Barbell__back', 4, 6, 0),         // Squat / Lunge
-        makeEx('lunge__Dumbbell__bss', 3, 10, 0),
-        makeEx('rdl__Barbell', 3, 8, 0),                  // Hinge
-        makeEx('leg_extension__Voltra__unilateral', 3, 12, 0), // Quad Iso
-        makeEx('ham_curl__Voltra__lying', 3, 12, 0),       // Ham Iso
-        makeEx('calf_raise__BW__standing', 3, 15, 0),      // Calf Iso
+        makeEx(V('squat',     'Barbell',   ['Back']),       4, 5),
+        makeEx(V('lunge',     'Dumbbell',  ['BSS']),        3, 10),
+        makeEx(V('rdl',       'Barbell',   []),             3, 8),
+        makeEx(V('leg_extension','Voltra', ['Unilateral']), 3, 12),
+        makeEx(V('ham_curl',  'Voltra',    ['Lying']),      3, 12),
+        makeEx(V('calf_raise','BW',        ['Standing']),   3, 15),
       ]
     },
     {
-      id: uid(),
       name: 'Upper A',
       exercises: [
-        makeEx('chest_press__Barbell__flat', 4, 6, 0),     // Bench
-        makeEx('row__Barbell__neutral', 4, 6, 0),          // Row / horizontal pull
-        makeEx('chest_fly__Voltra__incline', 3, 12, 0),    // Chest Iso
-        makeEx('shoulder_raise__Dumbbell__standing', 3, 15, 0), // Shoulder Iso
-        makeEx('tricep_extension__Voltra__overhead', 3, 12, 0),  // Tri Iso
+        makeEx(V('chest_press','Barbell',  ['Flat']),       4, 5),
+        makeEx(V('row',        'Barbell',  ['Neutral']),    4, 6),
+        makeEx(V('chest_fly',  'Voltra',   ['Incline']),    3, 12),
+        makeEx(V('shoulder_raise','Dumbbell',['Standing']), 3, 15),
+        makeEx(V('tricep_extension','Voltra',['Overhead']), 3, 12),
       ]
     },
     {
-      id: uid(),
       name: 'Upper B',
       exercises: [
-        makeEx('pull_up__BW__supinated', 4, 6, 0),         // Vertical pull
-        makeEx('overhead_press__Barbell__standing', 4, 6, 0), // Vertical press
-        makeEx('straight_arm_pulldown__Voltra__unilateral', 3, 12, 0), // Back Iso
-        makeEx('tricep_extension__Voltra__standing', 3, 12, 0), // Tri Iso
-        makeEx('bicep_curl__Dumbbell__incline', 3, 12, 0),  // Bi Iso
+        makeEx(V('pull_up',   'BW',        ['Supinated']),  4, 6),
+        makeEx(V('overhead_press','Barbell',['Standing']),  4, 5),
+        makeEx(V('straight_arm_pulldown','Voltra',['Unilateral']), 3, 12),
+        makeEx(V('tricep_extension','Voltra',['Standing']), 3, 12),
+        makeEx(V('bicep_curl','Dumbbell',  ['Incline']),    3, 12),
       ]
     }
   ];
 
-  for (const t of templates) await dbPut('templates', t);
-  console.log('Skeleton templates seeded');
+  // Check if we already have templates with these names — fix bad IDs or seed fresh
+  const existing = await dbGetAll('templates');
+  const skeletonNames = skeletonTemplates.map(t => t.name);
+
+  for (const skeleton of skeletonTemplates) {
+    const match = existing.find(t => t.name === skeleton.name);
+    if (!match) {
+      // Seed fresh
+      await dbPut('templates', { id: uid(), ...skeleton });
+    } else {
+      // Check if any IDs look broken (raw slugs without __ separator, or capitalized resistance)
+      const hasBadIds = match.exercises.some(ex => {
+        const parts = ex.variantId.split('__');
+        // Bad if: only 1 part, or resistance part has uppercase, or contains single _ between known parts
+        return parts.length < 2 || /[A-Z]/.test(parts[1]);
+      });
+      if (hasBadIds) {
+        // Replace exercises with corrected IDs, preserve template id
+        const fixed = { ...match, exercises: skeleton.exercises };
+        await dbPut('templates', fixed);
+        console.log(`Fixed bad variant IDs in template: ${skeleton.name}`);
+      }
+    }
+  }
+  console.log('Skeleton templates ready');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6488,6 +6532,95 @@ async function migrateToSupabase() {
   }
 }
 
+
+// ── Legacy variant ID migration map ──────────────────────────
+// Maps old single-underscore IDs → new __-separated taxonomy IDs
+// Covers all IDs seen in the wild from pre-taxonomy sessions/templates
+const LEGACY_ID_MAP = {
+  // Squats / Lower
+  'squat_barbell_back':        'squat__barbell__back',
+  'squat_barbell_front':       'squat__barbell__front',
+  'squat_barbell':             'squat__barbell',
+  'squat_dumbbell_goblet':     'squat__dumbbell__goblet',
+  'squat_belt_cable':          'squat__voltra__belt_squat',
+  'squat_belt':                'squat__belt__belt_squat',
+  // Lunge
+  'lunge_barbell':             'lunge__barbell',
+  'lunge_dumbbell':            'lunge__dumbbell',
+  'lunge_dumbbell_bss':        'lunge__dumbbell__bss',
+  // RDL / Deadlift
+  'rdl_barbell':               'rdl__barbell',
+  'rdl_dumbbell':              'rdl__dumbbell',
+  'deadlift_barbell':          'deadlift__barbell',
+  'deadlift_trap_bar':         'deadlift__trap_bar',
+  // Bench / Chest Press
+  'bench_barbell_flat':        'chest_press__barbell__flat',
+  'bench_barbell_incline':     'chest_press__barbell__incline',
+  'bench_dumbbell_flat':       'chest_press__dumbbell__flat',
+  'bench_dumbbell_incline':    'chest_press__dumbbell__incline',
+  'chest_press_barbell_flat':  'chest_press__barbell__flat',
+  'chest_press_barbell_incline':'chest_press__barbell__incline',
+  // OHP
+  'ohp_barbell_standing':      'overhead_press__barbell__standing',
+  'ohp_landmine_standing':     'overhead_press__landmine__standing',
+  'ohp_dumbbell_seated':       'overhead_press__dumbbell__seated',
+  'ohp_barbell':               'overhead_press__barbell',
+  // Row
+  'row_barbell_bent_over':     'row__barbell__neutral',
+  'row_barbell_neutral':       'row__barbell__neutral',
+  'row_dumbbell':              'row__dumbbell',
+  'row_cable':                 'row__voltra',
+  'row_cable_neutral':         'row__voltra__neutral',
+  // Pull-up / Pulldown
+  'pullup_weighted':           'pull_up__bw',
+  'pullup_bw':                 'pull_up__bw',
+  'pullup_bw_supinated':       'pull_up__bw__supinated',
+  'pulldown_cable_close':      'lat_pulldown__voltra__neutral',
+  'pulldown_cable_wide':       'lat_pulldown__voltra__wide',
+  // Dip
+  'dip_bw':                    'dip__bw',
+  'dip_chest_weighted':        'dip__belt',
+  'dip_weighted':              'dip__belt',
+  // Isolation — arms
+  'curl_barbell':              'bicep_curl__barbell',
+  'curl_dumbbell':             'bicep_curl__dumbbell',
+  'curl_cable':                'bicep_curl__voltra',
+  'tri_push_cable_rope':       'tricep_extension__voltra',
+  'tri_push_cable':            'tricep_extension__voltra',
+  'tri_pushdown_cable':        'tricep_extension__voltra',
+  'face_pull_cable':           'face_pull__voltra',
+  // Isolation — shoulders
+  'lat_raise_dumbbell':        'shoulder_raise__dumbbell__standing',
+  'lat_raise_cable':           'shoulder_raise__voltra__standing',
+  // Isolation — chest
+  'chest_fly_cable':           'chest_fly__voltra',
+  'chest_fly_dumbbell':        'chest_fly__dumbbell',
+  // Isolation — back
+  'straight_arm_pulldown_cable': 'straight_arm_pulldown__voltra',
+  // Isolation — core
+  'crunch_cable':              'crunch__voltra',
+  'crunch_bw':                 'crunch__bw',
+  // Legs
+  'leg_press_machine':         'leg_extension__voltra',
+  'leg_ext_plate_loaded':      'leg_extension__misc',
+  'leg_extension_cable':       'leg_extension__voltra',
+  'leg_curl_cable':            'ham_curl__voltra',
+  'leg_curl_cable_lying':      'ham_curl__voltra__lying',
+  'nordic_hamstring':          'nordic_curl__bw',
+  'calf_landmine':             'calf_raise__landmine',
+  'calf_raise_bw':             'calf_raise__bw',
+  // Hip hinge
+  'hip_thrust_barbell':        'hip_thrust__barbell',
+  'good_morning_barbell':      'good_morning__barbell',
+};
+
+function migrateLegacyId(id) {
+  if (!id) return id;
+  // Already new format (has __)
+  if (id.includes('__')) return id;
+  return LEGACY_ID_MAP[id] || id;
+}
+
 async function init() {
   await openDB();
   migrateToSupabase().catch(e => console.warn('Migration skipped:', e));
@@ -6497,6 +6630,7 @@ async function init() {
     loadExerciseNotes(),
   ]);
   await seedBWData().catch(e => console.warn('seedBW skipped:', e));
+  await migrateTemplateIds().catch(e => console.warn('Template ID migration skipped:', e));
   await seedSkeletonTemplates().catch(e => console.warn('seedTemplates skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
