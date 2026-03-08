@@ -95,10 +95,11 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(90px + var(--safe-bot));
+  padding-bottom: calc(24px + var(--safe-bot));
 }
 
 .screen { display: none; min-height: 100%; }
+.nav-spacer { height: calc(80px + var(--safe-bot)); flex-shrink: 0; }
 .screen.active { display: block; }
 
 /* ── HEADER ── */
@@ -1719,7 +1720,7 @@ textarea { resize: none; }
           <button class="btn btn-primary btn-sm" id="mobility-add-btn">+ Add</button>
         </div>
       </div>
-      <div id="mobility-list" style="padding:0 16px 80px;display:flex;flex-direction:column;gap:6px"></div>
+      <div id="mobility-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:6px"></div>
     </div>
   </div>
 
@@ -1738,6 +1739,8 @@ textarea { resize: none; }
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
     </div>
+  </div><!-- end #content -->
+
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
@@ -1761,7 +1764,7 @@ textarea { resize: none; }
       Mobility
     </button>
   </nav>
-</div>
+</div><!-- end #app -->
 
 <!-- ══ MODALS ══ -->
 <div id="modal-backdrop"></div>
@@ -5482,62 +5485,6 @@ async function seedBWData() {
   }
 }
 
-async function seedDefaultTemplates() {
-  const existing = await dbGetAll('templates');
-  if (existing.length > 0) return;
-
-  const templates = [
-    {
-      id: uid(),
-      name: 'Push',
-      exercises: [
-        {variantId: 'bench_barbell_flat', defaultSets: [{weight:225,reps:5},{weight:225,reps:5},{weight:225,reps:5},{weight:225,reps:5},{weight:225,reps:5}]},
-        {variantId: 'ohp_landmine_standing', defaultSets: [{weight:90,reps:10},{weight:90,reps:10},{weight:90,reps:10}]},
-        {variantId: 'dip_chest_weighted', defaultSets: [{weight:45,reps:10},{weight:45,reps:10},{weight:45,reps:10}]},
-        {variantId: 'lat_raise_dumbbell', defaultSets: [{weight:25,reps:15},{weight:25,reps:15},{weight:25,reps:15},{weight:25,reps:15}]},
-        {variantId: 'tri_push_cable_rope', defaultSets: [{weight:50,reps:12},{weight:50,reps:12},{weight:50,reps:12}]},
-      ]
-    },
-    {
-      id: uid(),
-      name: 'Pull',
-      exercises: [
-        {variantId: 'pulldown_cable_close', defaultSets: [{weight:125,reps:12},{weight:160,reps:12},{weight:160,reps:12},{weight:160,reps:12}]},
-        {variantId: 'row_barbell_bent_over', defaultSets: [{weight:185,reps:8},{weight:185,reps:8},{weight:185,reps:8},{weight:185,reps:8}]},
-        {variantId: 'pullup_weighted', defaultSets: [{weight:25,reps:8},{weight:25,reps:8},{weight:25,reps:8}]},
-        {variantId: 'face_pull_cable', defaultSets: [{weight:40,reps:15},{weight:40,reps:15},{weight:40,reps:15}]},
-        {variantId: 'curl_dumbbell', defaultSets: [{weight:40,reps:12},{weight:40,reps:12},{weight:40,reps:12}]},
-      ]
-    },
-    {
-      id: uid(),
-      name: 'Legs',
-      exercises: [
-        {variantId: 'squat_barbell_back', defaultSets: [{weight:225,reps:8},{weight:275,reps:5},{weight:315,reps:3},{weight:315,reps:3},{weight:315,reps:3}]},
-        {variantId: 'rdl_barbell', defaultSets: [{weight:225,reps:8},{weight:225,reps:8},{weight:225,reps:8}]},
-        {variantId: 'leg_press_machine', defaultSets: [{weight:270,reps:12},{weight:270,reps:12},{weight:270,reps:12}]},
-        {variantId: 'leg_ext_plate_loaded', defaultSets: [{weight:90,reps:15},{weight:90,reps:15},{weight:90,reps:15}]},
-        {variantId: 'calf_landmine', defaultSets: [{weight:90,reps:15},{weight:90,reps:15},{weight:90,reps:15}]},
-      ]
-    },
-    {
-      id: uid(),
-      name: 'Full Body',
-      exercises: [
-        {variantId: 'squat_barbell_back', defaultSets: [{weight:225,reps:5},{weight:275,reps:5},{weight:275,reps:5}]},
-        {variantId: 'bench_barbell_flat', defaultSets: [{weight:185,reps:8},{weight:185,reps:8},{weight:185,reps:8}]},
-        {variantId: 'pullup_weighted', defaultSets: [{weight:25,reps:8},{weight:25,reps:8},{weight:25,reps:8}]},
-        {variantId: 'rdl_barbell', defaultSets: [{weight:185,reps:10},{weight:185,reps:10},{weight:185,reps:10}]},
-        {variantId: 'ohp_landmine_standing', defaultSets: [{weight:80,reps:10},{weight:80,reps:10},{weight:80,reps:10}]},
-        {variantId: 'crunch_cable', defaultSets: [{weight:70,reps:15},{weight:70,reps:15},{weight:70,reps:15}]},
-      ]
-    }
-  ];
-
-  for (const t of templates) await dbPut('templates', t);
-}
-
-
 // ── Skeleton template seeding ──────────────────────────────────
 async function migrateTemplateIds() {
   const templates = await dbGetAll('templates');
@@ -5573,8 +5520,8 @@ async function migrateTemplateIds() {
 }
 
 async function seedSkeletonTemplates() {
-  // buildVariantId format: parentId__res_lowercase__variant_slug
-  // Use buildVariantId to generate correct IDs
+  const KEEPER_NAMES = ['Lower', 'Upper A', 'Upper B'];
+
   function V(parentId, resistance, variantArr=[]) {
     const resPart = resistance.toLowerCase().replace(/[^a-z0-9]/g,'_');
     if (variantArr.length === 0) return `${parentId}__${resPart}`;
@@ -5585,65 +5532,64 @@ async function seedSkeletonTemplates() {
     return { variantId, defaultSets: Array(sets).fill(null).map(() => ({weight:0, reps})) };
   }
 
-  const skeletonTemplates = [
+  const skeletonDefs = [
     {
       name: 'Lower',
       exercises: [
-        makeEx(V('squat',     'Barbell',   ['Back']),       4, 5),
-        makeEx(V('lunge',     'Dumbbell',  ['BSS']),        3, 10),
-        makeEx(V('rdl',       'Barbell',   []),             3, 8),
-        makeEx(V('leg_extension','Voltra', ['Unilateral']), 3, 12),
-        makeEx(V('ham_curl',  'Voltra',    ['Lying']),      3, 12),
-        makeEx(V('calf_raise','BW',        ['Standing']),   3, 15),
+        makeEx(V('squat',        'Barbell',  ['Back']),       4, 5),
+        makeEx(V('lunge',        'Dumbbell', ['BSS']),        3, 10),
+        makeEx(V('rdl',          'Barbell',  []),             3, 8),
+        makeEx(V('leg_extension','Voltra',   ['Unilateral']), 3, 12),
+        makeEx(V('ham_curl',     'Voltra',   ['Lying']),      3, 12),
+        makeEx(V('calf_raise',   'BW',       ['Standing']),   3, 15),
       ]
     },
     {
       name: 'Upper A',
       exercises: [
-        makeEx(V('chest_press','Barbell',  ['Flat']),       4, 5),
-        makeEx(V('row',        'Barbell',  ['Neutral']),    4, 6),
-        makeEx(V('chest_fly',  'Voltra',   ['Incline']),    3, 12),
-        makeEx(V('shoulder_raise','Dumbbell',['Standing']), 3, 15),
-        makeEx(V('tricep_extension','Voltra',['Overhead']), 3, 12),
+        makeEx(V('chest_press',    'Barbell',  ['Flat']),      4, 5),
+        makeEx(V('row',            'Barbell',  ['Neutral']),   4, 6),
+        makeEx(V('chest_fly',      'Voltra',   ['Incline']),   3, 12),
+        makeEx(V('shoulder_raise', 'Dumbbell', ['Standing']),  3, 15),
+        makeEx(V('tricep_extension','Voltra',  ['Overhead']),  3, 12),
       ]
     },
     {
       name: 'Upper B',
       exercises: [
-        makeEx(V('pull_up',   'BW',        ['Supinated']),  4, 6),
-        makeEx(V('overhead_press','Barbell',['Standing']),  4, 5),
-        makeEx(V('straight_arm_pulldown','Voltra',['Unilateral']), 3, 12),
-        makeEx(V('tricep_extension','Voltra',['Standing']), 3, 12),
-        makeEx(V('bicep_curl','Dumbbell',  ['Incline']),    3, 12),
+        makeEx(V('pull_up',               'BW',      ['Supinated']),  4, 6),
+        makeEx(V('overhead_press',        'Barbell', ['Standing']),   4, 5),
+        makeEx(V('straight_arm_pulldown', 'Voltra',  ['Unilateral']), 3, 12),
+        makeEx(V('tricep_extension',      'Voltra',  ['Standing']),   3, 12),
+        makeEx(V('bicep_curl',            'Dumbbell',['Incline']),    3, 12),
       ]
     }
   ];
 
-  // Check if we already have templates with these names — fix bad IDs or seed fresh
-  const existing = await dbGetAll('templates');
-  const skeletonNames = skeletonTemplates.map(t => t.name);
-
-  for (const skeleton of skeletonTemplates) {
-    const match = existing.find(t => t.name === skeleton.name);
-    if (!match) {
-      // Seed fresh
-      await dbPut('templates', { id: uid(), ...skeleton });
-    } else {
-      // Check if any IDs look broken (raw slugs without __ separator, or capitalized resistance)
-      const hasBadIds = match.exercises.some(ex => {
-        const parts = ex.variantId.split('__');
-        // Bad if: only 1 part, or resistance part has uppercase, or contains single _ between known parts
-        return parts.length < 2 || /[A-Z]/.test(parts[1]);
-      });
-      if (hasBadIds) {
-        // Replace exercises with corrected IDs, preserve template id
-        const fixed = { ...match, exercises: skeleton.exercises };
-        await dbPut('templates', fixed);
-        console.log(`Fixed bad variant IDs in template: ${skeleton.name}`);
-      }
+  // Purge any template not in the keeper list
+  const all = await dbGetAll('templates');
+  for (const t of all) {
+    if (!KEEPER_NAMES.includes(t.name)) {
+      await dbDelete('templates', t.id);
+      console.log('Purged old template:', t.name);
     }
   }
-  console.log('Skeleton templates ready');
+
+  // Seed or repair keepers
+  const remaining = await dbGetAll('templates');
+  for (const def of skeletonDefs) {
+    const match = remaining.find(t => t.name === def.name);
+    if (!match) {
+      await dbPut('templates', { id: uid(), ...def });
+    } else {
+      const hasBadIds = match.exercises.some(ex => {
+        const parts = ex.variantId.split('__');
+        return parts.length < 2 || /[A-Z]/.test(parts[1]);
+      });
+      if (hasBadIds) await dbPut('templates', { ...match, exercises: def.exercises });
+    }
+  }
+  console.log('Templates ready: Lower, Upper A, Upper B');
 }
 
 // ═══════════════════════════════════════════════════════════════
