@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0b14">
@@ -35,6 +35,7 @@
   --r2: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
+  --nav-height: calc(58px + env(safe-area-inset-bottom, 20px));
   --gradient: linear-gradient(135deg, #7c3aed, #db2777);
   --gradient-soft: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(219,39,119,0.1));
 }
@@ -62,7 +63,7 @@ html, body {
   display: flex;
   background: var(--bg2);
   border-top: 1px solid var(--border);
-  padding-bottom: var(--safe-bot);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
   flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
@@ -99,7 +100,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(58px + var(--safe-bot));
+  padding-bottom: calc(58px + max(env(safe-area-inset-bottom, 0px), 20px));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -2214,8 +2215,10 @@ async function sbGet(store, key) {
 }
 
 async function sbPut(store, val) {
+  // bodyweight uses 'date' as keyPath, others use 'id'
+  const key = val.id !== undefined ? val.id : val.date;
   await sbRequest('POST', `ironlog_${store}`, {
-    id: val.id,
+    id: key,
     data: val,
     updated_at: new Date().toISOString()
   });
@@ -6460,7 +6463,7 @@ async function buildClaudeExport() {
 }
 
 async function migrateToSupabase() {
-  const migrationKey = 'supabase_migrated_v2';
+  const migrationKey = 'supabase_migrated_v3';
   if (localStorage.getItem(migrationKey)) return;
   try {
     const existingSessions = await sbGetAll('sessions');
@@ -6481,7 +6484,7 @@ async function migrateToSupabase() {
       if (!existingBWDates.has(b.date)) await sbPut('bodyweight', b);
     }
     localStorage.setItem(migrationKey, '1');
-    console.log('Migrated local data to Supabase (v2 incl. bodyweight)');
+    console.log('Migrated local data to Supabase (v3 fixed BW key)');
   } catch(e) {
     if (e instanceof TypeError || (e.message || '').includes('fetch')) {
       localStorage.setItem(migrationKey, '1');
