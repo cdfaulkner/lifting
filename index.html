@@ -97,7 +97,7 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(80px + var(--safe-bot));
+  padding-bottom: 0;
 }
 
 .screen { display: none; min-height: 100%; }
@@ -1741,6 +1741,7 @@ textarea { resize: none; }
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
     </div>
+  <div style="height:80px;flex-shrink:0"></div>
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
