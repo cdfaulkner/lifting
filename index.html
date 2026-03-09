@@ -41,6 +41,11 @@
   --nav-height: calc(58px + env(safe-area-inset-bottom, 20px));
   --gradient: linear-gradient(135deg, #7c3aed, #db2777);
   --gradient-soft: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(219,39,119,0.1));
+  --ss-color-1: #a78bfa;
+  --ss-color-2: #f472b6;
+  --ss-color-3: #f59e0b;
+  --ss-color-4: #10b981;
+  --ss-color-5: #06b6d4;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1752,9 +1757,12 @@ textarea { resize: none; }
       <div class="bw-chart-wrap">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div style="font-size:11px;color:var(--text3);font-weight:500">Bodyweight</div>
-          <div style="display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px">
-            <button id="bw-tab-chart" onclick="setBWTab('chart')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--body);font-weight:500">Chart</button>
-            <button id="bw-tab-entries" onclick="setBWTab('entries')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:var(--body);font-weight:500">Entries</button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button id="bw-log-btn" onclick="openBWModal()" class="btn btn-secondary btn-sm">+ Log Weight</button>
+            <div style="display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px">
+              <button id="bw-tab-chart" onclick="setBWTab('chart')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--body);font-weight:500">Chart</button>
+              <button id="bw-tab-entries" onclick="setBWTab('entries')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:var(--body);font-weight:500">Entries</button>
+            </div>
           </div>
         </div>
         <!-- Chart view -->
@@ -2853,6 +2861,23 @@ function closeModal(id) {
   // Hide backdrop if no modals are open
   const anyOpen = document.querySelector('.modal-overlay.open');
   if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
+}
+
+function showActionSheet(title, actions) {
+  let sheet = document.getElementById('_action-sheet');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = '_action-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;justify-content:flex-end';
+    sheet.innerHTML = '<div id="_action-sheet-bg" style="position:absolute;inset:0;background:rgba(0,0,0,0.5)"></div><div id="_action-sheet-body" style="position:relative;background:var(--bg2);border-radius:16px 16px 0 0;padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px))"></div>';
+    sheet.querySelector('#_action-sheet-bg').addEventListener('click', () => sheet.remove());
+    document.body.appendChild(sheet);
+  }
+  const body = sheet.querySelector('#_action-sheet-body');
+  body.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--text3);text-align:center;padding:4px 16px 12px;letter-spacing:0.04em;text-transform:uppercase">${title}</div>` +
+    actions.map(a => `<button onclick="${a.fn};document.getElementById('_action-sheet').remove()"
+      style="display:block;width:100%;padding:14px 20px;background:none;border:none;border-top:1px solid var(--border);color:var(--text);font-size:15px;text-align:left;cursor:pointer;font-family:var(--body)">${a.label}</button>`).join('');
+  sheet.style.display = 'flex';
 }
 // Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -4534,28 +4559,36 @@ function renderTmplExCard(i, n, inSuperset) {
   const sets = ex.defaultSets || [];
   const isExpanded = (tmplExpandedIdx === i);
   const setsPreview = sets.length > 0
-    ? sets.map(s => `${s.weight||0}×${s.reps||0}`).join(', ')
+    ? sets.map(s => `${s.weight||0}\u00d7${s.reps||0}`).join(', ')
     : 'No sets';
-  const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
+
+  // Superset badge
+  const ssGroups = getTmplSupersetGroups();
+  const myGroup = ex.supersetId ? ssGroups.find(g => g.id === ex.supersetId) : null;
+  const myNum = myGroup ? myGroup.num : 0;
+
+  const ssColors = ['var(--accent)','var(--accent-pink)','#f59e0b','#10b981','#06b6d4'];
+  const col = myNum > 0 ? ssColors[(myNum-1) % ssColors.length] : null;
+  const badgeStyle = myNum > 0
+    ? `background:${col};color:#fff;border-color:${col}`
+    : `background:transparent;color:var(--text3);border-color:var(--border2)`;
+  const badgeContent = myNum > 0 ? myNum : `<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/></svg>`;
+
   return `<div style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
-      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0" onclick="event.stopPropagation()">
-        <button class="reorder-btn" onclick="moveTmplEx(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
-        </button>
-        <button class="reorder-btn" onclick="moveTmplEx(${i},1)" ${i===n-1?'disabled style="opacity:0.3"':''}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-      </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' · ' + setsPreview : ''}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' \u00b7 ' + setsPreview : ''}</div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); openTmplSupersetModal(${i})" title="Superset" style="flex-shrink:0;${ssActive}">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); cycleTmplSuperset(${i})"
+        title="Superset group" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid;${badgeStyle};font-size:11px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;padding:0;transition:background 0.15s,border-color 0.15s">
+        ${badgeContent}
+      </button>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); promptMoveTmplEx(${i})" title="Reorder" style="flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); swapTemplateEx(${i})" title="Swap exercise" style="flex-shrink:0">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
       </button>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -4564,6 +4597,7 @@ function renderTmplExCard(i, n, inSuperset) {
     ${isExpanded ? renderTmplSets(i, sets) : ''}
   </div>`;
 }
+
 
 function renderTmplSets(exIdx, sets) {
   const rows = sets.map((s, si) => `
@@ -4630,10 +4664,81 @@ function removeTmplSet(exIdx, setIdx) {
   renderTemplateExercises(tmplExercises);
 }
 
+function promptMoveTmplEx(i) {
+  const n = tmplExercises.length;
+  if (n <= 1) return;
+  const name = escHtml(getVariantDisplayName(tmplExercises[i].variantId));
+  const canUp = i > 0;
+  const canDown = i < n - 1;
+  const acts = [];
+  if (canUp)   acts.push({ label: '\u2191\u00a0 Move Up',   fn: `moveTmplEx(${i},-1)` });
+  if (canDown) acts.push({ label: '\u2193\u00a0 Move Down', fn: `moveTmplEx(${i},1)` });
+  showActionSheet(name, acts);
+}
+
 function moveTmplEx(i, dir) {
   const j = i + dir;
   if (j < 0 || j >= tmplExercises.length) return;
   [tmplExercises[i], tmplExercises[j]] = [tmplExercises[j], tmplExercises[i]];
+  renderTemplateExercises(tmplExercises);
+}
+
+// Returns [{id, num, count}] sorted by num for all active superset groups
+function getTmplSupersetGroups() {
+  const map = {}; // id -> count
+  tmplExercises.forEach(e => { if (e.supersetId) map[e.supersetId] = (map[e.supersetId]||0) + 1; });
+  // Assign stable numbers by order of first appearance
+  const seen = [];
+  tmplExercises.forEach(e => {
+    if (e.supersetId && !seen.includes(e.supersetId)) seen.push(e.supersetId);
+  });
+  return seen.map((id, idx) => ({ id, num: idx + 1, count: map[id] }));
+}
+
+// Returns the next group number that could be created
+function getNextTmplSupersetNum() {
+  const groups = getTmplSupersetGroups();
+  return groups.length + 1;
+}
+
+// Cycle this exercise through superset groups: off → group1 → group2 → ... → off
+function cycleTmplSuperset(i) {
+  const ex = tmplExercises[i];
+  const groups = getTmplSupersetGroups();
+  const myGroup = ex.supersetId ? groups.find(g => g.id === ex.supersetId) : null;
+  const myNum = myGroup ? myGroup.num : 0;
+
+  // Remove from current group first
+  if (ex.supersetId) {
+    const oldId = ex.supersetId;
+    ex.supersetId = null;
+    // Clean up if group now has < 2 members
+    const remaining = tmplExercises.filter(e => e.supersetId === oldId);
+    if (remaining.length <= 1) remaining.forEach(e => e.supersetId = null);
+  }
+
+  // Figure out which group to join next (myNum + 1, or wrap to off if past last valid)
+  const updatedGroups = getTmplSupersetGroups();
+  let nextNum = myNum + 1;
+
+  // Find the group with that number, or create a new one if allowed
+  const targetGroup = updatedGroups.find(g => g.num === nextNum);
+
+  if (targetGroup) {
+    // Join existing group
+    ex.supersetId = targetGroup.id;
+  } else if (nextNum === 1) {
+    // First group: create new
+    ex.supersetId = 'ss_' + Date.now().toString(36);
+  } else {
+    // nextNum > existing groups: only create if previous group has >= 2 members
+    const prevGroup = updatedGroups.find(g => g.num === nextNum - 1);
+    if (prevGroup && prevGroup.count >= 2) {
+      ex.supersetId = 'ss_' + Date.now().toString(36) + '_' + nextNum;
+    }
+    // else stay off (already removed above)
+  }
+
   renderTemplateExercises(tmplExercises);
 }
 
@@ -5625,13 +5730,7 @@ document.getElementById('bw-save-btn').addEventListener('click', async () => {
 });
 
 // Add BW button
-const bwBtn = document.createElement('button');
-bwBtn.className = 'btn btn-secondary btn-sm';
-bwBtn.textContent = '+ Log Weight';
-bwBtn.style.cssText = 'position:absolute;top:16px;right:16px';
-bwBtn.addEventListener('click', () => openBWModal());
-document.querySelector('.bw-chart-wrap').style.position = 'relative';
-document.querySelector('.bw-chart-wrap').appendChild(bwBtn);
+// Log Weight button is now inline in the header row
 
 // ═══════════════════════════════════════════════════════════════
 // SEED DATA
