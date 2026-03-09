@@ -1747,13 +1747,25 @@ textarea { resize: none; }
       </div>
       <!-- BW Chart -->
       <div class="bw-chart-wrap">
-        <div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Bodyweight</div>
-        <div class="bw-chart-container">
-          <div id="bw-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
-          <div class="bw-chart"><svg id="bw-svg"></svg><div class="bw-tooltip" id="bw-tooltip"><div class="bw-tooltip-weight" id="bw-tip-weight"></div><div class="bw-tooltip-date" id="bw-tip-date"></div></div></div>
-          <div id="bw-period-pills" class="period-pills" style="margin-top:8px;padding:0"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:11px;color:var(--text3);font-weight:500">Bodyweight</div>
+          <div style="display:flex;gap:2px;background:var(--bg3);border-radius:8px;padding:2px">
+            <button id="bw-tab-chart" onclick="setBWTab('chart')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:var(--body);font-weight:500">Chart</button>
+            <button id="bw-tab-entries" onclick="setBWTab('entries')" style="font-size:11px;padding:3px 10px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text3);font-family:var(--body);font-weight:500">Entries</button>
+          </div>
         </div>
-        <div id="bw-history-list" style="margin-top:12px;display:flex;flex-direction:column;gap:4px"></div>
+        <!-- Chart view -->
+        <div id="bw-panel-chart">
+          <div class="bw-chart-container">
+            <div id="bw-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
+            <div class="bw-chart"><svg id="bw-svg"></svg><div class="bw-tooltip" id="bw-tooltip"><div class="bw-tooltip-weight" id="bw-tip-weight"></div><div class="bw-tooltip-date" id="bw-tip-date"></div></div></div>
+            <div id="bw-period-pills" class="period-pills" style="margin-top:8px;padding:0"></div>
+          </div>
+        </div>
+        <!-- Entries view -->
+        <div id="bw-panel-entries" style="display:none">
+          <div id="bw-history-list" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto"></div>
+        </div>
       </div>
       <!-- Top Lifts -->
       <div class="section-row">
@@ -5307,6 +5319,18 @@ function setLibMuscle(m) {
 // PROGRESS SCREEN
 // ═══════════════════════════════════════════════════════════════
 let bwPeriod = '3m';
+let bwTab = 'chart';
+
+function setBWTab(tab) {
+  bwTab = tab;
+  document.getElementById('bw-panel-chart').style.display = tab === 'chart' ? '' : 'none';
+  document.getElementById('bw-panel-entries').style.display = tab === 'entries' ? '' : 'none';
+  const chartBtn = document.getElementById('bw-tab-chart');
+  const entriesBtn = document.getElementById('bw-tab-entries');
+  if (chartBtn) { chartBtn.style.background = tab === 'chart' ? 'var(--accent)' : 'transparent'; chartBtn.style.color = tab === 'chart' ? '#fff' : 'var(--text3)'; }
+  if (entriesBtn) { entriesBtn.style.background = tab === 'entries' ? 'var(--accent)' : 'transparent'; entriesBtn.style.color = tab === 'entries' ? '#fff' : 'var(--text3)'; }
+  if (tab === 'entries') renderBWHistoryList();
+}
 
 async function renderProgress() {
   await renderBWChart();
@@ -5351,18 +5375,22 @@ async function renderBWChart() {
 
   // Chart
   renderBWSVG(display);
+}
 
-  // History list (most recent 20, all time)
-  const recent = entries.slice().reverse().slice(0, 20);
+async function renderBWHistoryList() {
+  const entries = await dbGetAll('bodyweight');
+  entries.sort((a,b) => b.date.localeCompare(a.date)); // newest first
   const histEl = document.getElementById('bw-history-list');
   if (!histEl) return;
-  if (recent.length === 0) { histEl.innerHTML = ''; return; }
-  histEl.style.cssText = 'margin-top:12px;display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto';
-  histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px;padding:0 2px">Recent Entries</div>' + recent.map(e => `
+  if (entries.length === 0) {
+    histEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No entries yet</div>';
+    return;
+  }
+  histEl.innerHTML = entries.map(e => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border)">
       <span style="font-size:13px;color:var(--text2)">${e.date}</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:14px;font-weight:600" onclick="editBWEntry('${e.date}', ${e.weight_lbs})" style="cursor:pointer">${e.weight_lbs} <span style="font-size:11px;font-weight:400;color:var(--text3)">lbs</span></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:14px;font-weight:600">${e.weight_lbs} <span style="font-size:11px;font-weight:400;color:var(--text3)">lbs</span></span>
         <button onclick="editBWEntry('${e.date}', ${e.weight_lbs})" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
@@ -5423,7 +5451,7 @@ function renderBWSVG(data) {
   // Crosshair line + active dot (hidden by default)
   const crosshair = `
     <line id="bw-crosshair" x1="0" y1="${pad.top}" x2="0" y2="${pad.top + iH}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none"/>
-    <circle id="bw-active-dot" cx="0" cy="0" r="5" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5" opacity="0" pointer-events="none"/>
+    <circle id="bw-active-dot" cx="0" cy="0" r="6" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5" opacity="0" pointer-events="none"/>
   `;
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -5443,14 +5471,25 @@ function renderBWSVG(data) {
     ${hitTargets}
   `;
 
-  // Wire up interaction
+  // Wire up interaction: hover shows tooltip, click/tap opens edit modal
   svg.querySelectorAll('.bw-hit').forEach(el => {
-    const activate = () => bwChartShowTip(parseInt(el.dataset.idx));
-    el.addEventListener('mouseenter', activate);
-    el.addEventListener('touchstart', e => { e.preventDefault(); activate(); }, {passive: false});
+    const idx = parseInt(el.dataset.idx);
+    el.addEventListener('mouseenter', () => bwChartShowTip(idx));
+    el.addEventListener('click', () => {
+      const d = _bwChartData[idx];
+      if (d) { bwChartHideTip(); editBWEntry(d.date, d.weight_lbs); }
+    });
+    el.addEventListener('touchstart', e => {
+      e.preventDefault();
+      bwChartShowTip(idx);
+    }, {passive: false});
+    el.addEventListener('touchend', e => {
+      e.preventDefault();
+      const d = _bwChartData[idx];
+      if (d) { bwChartHideTip(); editBWEntry(d.date, d.weight_lbs); }
+    }, {passive: false});
   });
   svg.addEventListener('mouseleave', bwChartHideTip);
-  svg.addEventListener('touchend', bwChartHideTip);
 }
 
 function bwChartShowTip(idx) {
@@ -5480,6 +5519,8 @@ function bwChartShowTip(idx) {
 
   document.getElementById('bw-tip-weight').textContent = d.weight_lbs + ' lbs';
   document.getElementById('bw-tip-date').textContent = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  tooltip.title = 'Tap to edit';
+  tooltip.style.cursor = 'pointer';
   tooltip.classList.add('visible');
 }
 
@@ -5553,6 +5594,7 @@ async function deleteBWEntry(date) {
   await dbDelete('bodyweight', date);
   showToast('Entry deleted');
   renderBWChart();
+  if (bwTab === 'entries') renderBWHistoryList();
 }
 
 document.getElementById('bw-stats-row').addEventListener('click', () => openBWModal());
@@ -5565,6 +5607,7 @@ document.getElementById('bw-delete-btn').addEventListener('click', async () => {
   closeModal('modal-bw-entry');
   showToast('Entry deleted');
   renderBWChart();
+  if (bwTab === 'entries') renderBWHistoryList();
 });
 
 document.getElementById('bw-save-btn').addEventListener('click', async () => {
@@ -5575,6 +5618,7 @@ document.getElementById('bw-save-btn').addEventListener('click', async () => {
   closeModal('modal-bw-entry');
   showToast('Weight saved');
   renderBWChart();
+  if (bwTab === 'entries') renderBWHistoryList();
 });
 
 // Add BW button
