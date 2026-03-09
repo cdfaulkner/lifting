@@ -2205,7 +2205,7 @@ async function sbRequest(method, path, body) {
 }
 
 async function sbGetAll(store) {
-  const rows = await sbRequest('GET', `ironlog_${store}?select=data&order=created_at.asc`, null);
+  const rows = await sbRequest('GET', `ironlog_${store}?select=data&order=updated_at.asc`, null);
   return (rows || []).map(r => r.data);
 }
 
@@ -2403,7 +2403,7 @@ function getMusclesForVariant(variantId) {
 
 // ── Standard resistance types (uniform pool, each exercise picks from these) ──
 // "BW" = bodyweight / weighted vest / belt — no external implement required
-const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","Trap Bar","Misc","Belt Lever","Weight Belt"];
+const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","Trap Bar","Misc","Belt"];
 
 // ── All possible variant toggles ──
 const VARIANT_TYPES = [
@@ -2427,15 +2427,15 @@ const EXERCISE_HIERARCHY = [
     resistances:["Dumbbell","Voltra","Band"],
     variants:["Flat","Incline","Decline","Unilateral"] },
   { id:"push_up", name:"Push Up", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["BW","Band","Voltra"],
-    variants:["Incline","Decline","Wide","Narrow","Paused","Harness"] },
+    resistances:["BW","Band"],
+    variants:["Incline","Decline","Wide","Narrow","Paused"] },
   { id:"dip", name:"Dip", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
-    resistances:["BW","Band","Weight Belt","Voltra"],
-    variants:["Bar","Ring","Wide","Narrow","Harness"] },
+    resistances:["BW","Band","Belt"],
+    variants:["Bar","Ring","Wide","Narrow","Harness","Belt"] },
   // ── BACK ──
   { id:"pull_up", name:"Pull Up", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["BW","Band","Weight Belt","Voltra"],
-    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness"] },
+    resistances:["BW","Band"],
+    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness","Belt"] },
   { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["Voltra","Band"],
     variants:["Wide","Narrow","Neutral","Unilateral"] },
@@ -2443,8 +2443,8 @@ const EXERCISE_HIERARCHY = [
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
     variants:["Wide","Narrow","Neutral","Unilateral","Seated","Standing","Incline","Paused"] },
   { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
-    resistances:["BW","Voltra"],
-    variants:["Bar","Ring","Unilateral","Harness"] },
+    resistances:["BW"],
+    variants:["Bar","Ring","Unilateral"] },
   { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
     resistances:["Barbell","Dumbbell","Voltra"],
     variants:["Flat","Incline","Unilateral"] },
@@ -2488,11 +2488,11 @@ const EXERCISE_HIERARCHY = [
     variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip"] },
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW","Belt Lever"],
-    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Cossack","Paused","Band"] },
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW"],
+    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Belt Squat","Belt","Cossack","Paused","Band"] },
   { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
-    resistances:["Barbell","Dumbbell","Voltra","Band","BW","Belt Lever"],
-    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Unilateral"] },
+    resistances:["Barbell","Dumbbell","Voltra","Band","BW"],
+    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Belt","Unilateral"] },
   { id:"leg_extension", name:"Leg Extension", pattern:"isolation", muscles:["quads"], sec:[],
     resistances:["Voltra","Band"],
     variants:["Unilateral"] },
@@ -2530,7 +2530,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["Band","Voltra"],
     variants:["Unilateral"] },
   { id:"calf_raise", name:"Calf Raise", pattern:"isolation", muscles:["calves"], sec:[],
-    resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt Lever","BW","Band"],
+    resistances:["Barbell","Dumbbell","Voltra","Landmine","Belt","BW","Band"],
     variants:["Seated","Standing","Unilateral"] },
   // ── CORE ──
   { id:"crunch", name:"Crunch", pattern:"core", muscles:["core"], sec:[],
@@ -2584,9 +2584,9 @@ EXERCISE_HIERARCHY.forEach(h => {
 // Resistance type abbreviation map for display names
 const RES_ABBREV = {
   "Barbell":"BB","Dumbbell":"DB","Voltra":"Voltra","Landmine":"LM",
-  "BW":"BW","Band":"Band","Trap Bar":"Trap Bar","Misc":"Misc","Belt Lever":"Belt Lever","Weight Belt":"Weight Belt",
+  "BW":"BW","Band":"Band","Trap Bar":"Trap Bar","Misc":"Misc","Belt":"Belt",
   // Legacy compat
-  "BW+":"BW","Goblet":"Goblet","Cable":"Voltra","Plate":"Misc","Belt":"Belt Lever"
+  "BW+":"BW","Goblet":"Goblet","Cable":"Voltra","Plate":"Misc"
 };
 
 // ── Generate a deterministic variant ID from picker selections ──
@@ -6506,14 +6506,7 @@ const LEGACY_ID_MAP = {
   'squat_barbell':             'squat__barbell',
   'squat_dumbbell_goblet':     'squat__dumbbell__goblet',
   'squat_belt_cable':          'squat__voltra__belt_squat',
-  'squat_belt':                'squat__belt_lever',
-  // Belt Lever legacy → new
-  'squat__belt__belt_squat':   'squat__belt_lever',
-  'squat__belt':               'squat__belt_lever',
-  'calf_raise__belt__standing':'calf_raise__belt_lever__standing',
-  'calf_raise__belt':          'calf_raise__belt_lever',
-  'dip__belt':                 'dip__weight_belt',
-  'lunge__belt':               'lunge__belt_lever',
+  'squat_belt':                'squat__belt__belt_squat',
   // Lunge
   'lunge_barbell':             'lunge__barbell',
   'lunge_dumbbell':            'lunge__dumbbell',
@@ -6549,8 +6542,8 @@ const LEGACY_ID_MAP = {
   'pulldown_cable_wide':       'lat_pulldown__voltra__wide',
   // Dip
   'dip_bw':                    'dip__bw',
-  'dip_chest_weighted':        'dip__weight_belt',
-  'dip_weighted':              'dip__weight_belt',
+  'dip_chest_weighted':        'dip__belt',
+  'dip_weighted':              'dip__belt',
   // Isolation — arms
   'curl_barbell':              'bicep_curl__barbell',
   'curl_dumbbell':             'bicep_curl__dumbbell',
@@ -6586,17 +6579,8 @@ const LEGACY_ID_MAP = {
 
 function migrateLegacyId(id) {
   if (!id) return id;
-  if (id.includes('__')) {
-    // Migrate old belt resistance to correct new type
-    if (id.includes('__belt__') || id.endsWith('__belt')) {
-      const migrated = LEGACY_ID_MAP[id];
-      if (migrated) return migrated;
-      const isWeightBelt = id.startsWith('dip__') || id.startsWith('pull_up__');
-      const newRes = isWeightBelt ? 'weight_belt' : 'belt_lever';
-      return id.replace('__belt__', `__${newRes}__`).replace(/__belt$/, `__${newRes}`);
-    }
-    return LEGACY_ID_MAP[id] || id;
-  }
+  // Already new format (has __)
+  if (id.includes('__')) return id;
   return LEGACY_ID_MAP[id] || id;
 }
 
