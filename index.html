@@ -2207,8 +2207,13 @@ async function sbRequest(method, path, body) {
 
 async function sbGetAll(store) {
   const orderBy = store === 'bodyweight' ? 'id.asc' : 'updated_at.asc';
-  const rows = await sbRequest('GET', `ironlog_${store}?select=data&order=` + orderBy + '&limit=10000', null);
-  return (rows || []).map(r => r.data);
+  const PAGE = 1000;
+  let all = [], offset = 0, page;
+  do {
+    page = await sbRequest('GET', `ironlog_${store}?select=data&order=${orderBy}&limit=${PAGE}&offset=${offset}`, null);
+    if (page && page.length) { all = all.concat(page); offset += page.length; }
+  } while (page && page.length === PAGE);
+  return all.map(r => r.data);
 }
 
 async function sbGet(store, key) {
