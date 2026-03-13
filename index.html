@@ -2493,7 +2493,7 @@ const VARIANT_TYPES = [
   // Grip
   "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip",
   // Load position / style
-  "Front","Back","Goblet","Zercher","Hack","Sissy","Harness","Belt Squat",
+  "Front","Back","Goblet","Zercher","Hack","Sissy","Harness","Belt","Belt Squat",
   "Preacher","Bar","Ring","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up",
   // Modifier
   "Unilateral","Band","Paused","Tempo",
@@ -2509,14 +2509,14 @@ const EXERCISE_HIERARCHY = [
     variants:["Flat","Incline","Decline","Unilateral"] },
   { id:"push_up", name:"Push Up", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
     resistances:["BW","Voltra","Band"],
-    variants:["Incline","Decline","Wide","Narrow","Paused","Harness"] },
+    variants:["Incline","Decline","Wide","Narrow","Paused","Harness","Belt"] },
   { id:"dip", name:"Dip", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
     resistances:["BW","Voltra","Band","Weight Belt"],
-    variants:["Bar","Ring","Wide","Narrow","Harness"] },
+    variants:["Bar","Ring","Wide","Narrow","Harness","Belt"] },
   // ── BACK ──
   { id:"pull_up", name:"Pull Up", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["BW","Voltra","Band","Weight Belt"],
-    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness"] },
+    variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness","Belt"] },
   { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["Voltra","Band"],
     variants:["Wide","Narrow","Neutral","Unilateral"] },
@@ -2525,7 +2525,7 @@ const EXERCISE_HIERARCHY = [
     variants:["Wide","Narrow","Neutral","Unilateral","Seated","Standing","Incline","Paused"] },
   { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["BW","Voltra"],
-    variants:["Bar","Ring","Unilateral","Harness"] },
+    variants:["Bar","Ring","Unilateral","Harness","Belt"] },
   { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
     resistances:["Barbell","Dumbbell","Voltra"],
     variants:["Flat","Incline","Unilateral"] },
@@ -2570,10 +2570,10 @@ const EXERCISE_HIERARCHY = [
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW","Belt Lever"],
-    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Cossack","Paused","Band"] },
+    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Belt","Cossack","Paused","Band"] },
   { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Band","BW","Belt Lever"],
-    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Unilateral"] },
+    variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Belt","Unilateral"] },
   { id:"leg_extension", name:"Leg Extension", pattern:"isolation", muscles:["quads"], sec:[],
     resistances:["Voltra","Band"],
     variants:["Unilateral"] },
@@ -2688,7 +2688,7 @@ function buildVariantId(parentId, resistance, variants, mods) {
 function buildExerciseName(parentName, resAbbrev, variants, mods) {
   const varArr = Array.isArray(variants) ? variants : (variants ? [variants] : []);
   const parts = [];
-  if (resAbbrev) parts.push(resAbbrev);
+  if (resAbbrev && resAbbrev !== 'BW') parts.push(resAbbrev);
   if (varArr.length > 0) parts.push(varArr.join(' '));
   parts.push(parentName);
   let name = parts.join(' ');
