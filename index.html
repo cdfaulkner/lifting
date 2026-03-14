@@ -1699,7 +1699,7 @@ textarea { resize: none; }
 </head>
 <body>
 <div id="rest-timer-bar"></div>
-<button id="rest-timer-toast" onclick="skipRestTimer()">
+<button id="rest-timer-toast" onclick="skipRestTimer()" aria-label="Dismiss rest timer">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
   <span id="rest-timer-label">0:00</span>
   <span style="font-size:10px;color:var(--text3)">tap to skip</span>
@@ -1720,7 +1720,7 @@ textarea { resize: none; }
   <!-- ══ ACTIVE SESSION OVERLAY ══ -->
   <div id="active-session">
     <div class="session-header">
-      <button id="session-back-btn" style="background:none;border:none;cursor:pointer;color:var(--text3);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;font-family:inherit;padding:0">
+      <button id="session-back-btn" aria-label="Back to home" style="background:none;border:none;cursor:pointer;color:var(--text3);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;font-family:inherit;padding:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         Back
       </button>
@@ -3252,7 +3252,7 @@ function renderActiveSession() {
     return `<div class="ex-block swipe-item ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
       <div class="swipe-item-inner">
       <div class="ex-block-header">
-        <button class="ex-block-collapse-btn" onclick="toggleExCollapse(${exIdx})" title="Collapse/expand">
+        <button class="ex-block-collapse-btn" onclick="toggleExCollapse(${exIdx})" title="Collapse/expand" aria-label="Collapse or expand exercise">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="ex-drag-handle" title="Drag to reorder">
@@ -3275,7 +3275,7 @@ function renderActiveSession() {
           <button class="btn btn-ghost btn-sm btn-icon" onclick="showExerciseAnalyticsFromSession('${ex.variantId}')" title="History">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </button>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="removeExFromSession(${exIdx})" title="Remove">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="removeExFromSession(${exIdx})" title="Remove" aria-label="Remove exercise">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
@@ -3344,14 +3344,14 @@ function renderSetRow(exIdx, si, set, isVoltra) {
     <div class="set-check">
       <button class="check-btn ${set.completed ? 'done' : ''}"
         onclick="event.stopPropagation(); toggleSetComplete(${exIdx}, ${si})"
-        id="check-${exIdx}-${si}">
+        id="check-${exIdx}-${si}" aria-label="${set.completed ? 'Mark incomplete' : 'Complete set'}">
         ${set.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
       </button>
     </div>
-    <button class="set-copy-btn" onclick="event.stopPropagation(); copySetBelow(${exIdx},${si})" title="Duplicate set">
+    <button class="set-copy-btn" onclick="event.stopPropagation(); copySetBelow(${exIdx},${si})" title="Duplicate set" aria-label="Duplicate set">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
     </button>
-    <button class="set-del-btn" onclick="event.stopPropagation(); deleteSetFromExercise(${exIdx},${si})" title="Delete set">×</button>
+    <button class="set-del-btn" onclick="event.stopPropagation(); deleteSetFromExercise(${exIdx},${si})" title="Delete set" aria-label="Delete set">×</button>
   </div>
   <div class="set-detail" id="set-detail-${exIdx}-${si}">
     <div class="set-detail-row">
@@ -3486,6 +3486,7 @@ function addSetToExercise(exIdx) {
     notes: ''
   });
   // Re-render just the sets area
+  saveSessionDraftDebounced();
   renderActiveSession();
 }
 
