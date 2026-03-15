@@ -1695,6 +1695,18 @@ textarea { resize: none; }
 
 /* ── Swap exercise ── */
 #modal-swap-variant .variant-row { cursor: pointer; }
+/* Sync status dot */
+#sync-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text4);
+  flex-shrink: 0;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+#sync-dot.online { background: #34d399; }
+#sync-dot.offline { background: #f59e0b; }
+#sync-dot.syncing { animation: sync-pulse 0.6s ease; }
+@keyframes sync-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 </style>
 </head>
 <body>
@@ -1751,6 +1763,7 @@ textarea { resize: none; }
         <div class="page-title" style="display:flex;align-items:center;gap:8px">
           <span style="font-size:24px;line-height:1">🦾</span>
           Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span>
+          <span id="sync-dot" title="Checking sync…"></span>
         </div>
         <div class="page-sub" id="home-stats-sub"></div>
       </div>
@@ -2343,24 +2356,43 @@ const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight']);
 
+// Sync status tracking
+let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
+function updateSyncDot(status) {
+  _syncStatus = status;
+  const dot = document.getElementById('sync-dot');
+  if (!dot) return;
+  dot.className = status;
+  dot.title = status === 'online' ? 'Cloud sync active' : status === 'offline' ? 'Offline — using local data' : 'Checking sync…';
+  // Brief pulse animation
+  dot.classList.add('syncing');
+  setTimeout(() => dot.classList.remove('syncing'), 600);
+}
+
 async function sbRequest(method, path, body) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    method,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Range': '0-9999',
-      'Prefer': method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal'
-    },
-    body: body ? JSON.stringify(body) : undefined
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Supabase error: ${err}`);
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Range': '0-9999',
+        'Prefer': method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Supabase error: ${err}`);
+    }
+    if (_syncStatus !== 'online') updateSyncDot('online');
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch (e) {
+    updateSyncDot('offline');
+    throw e;
   }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
 }
 
 async function sbGetAll(store) {
@@ -3788,6 +3820,17 @@ document.getElementById('session-back-btn').addEventListener('click', () => {
   renderHome();
   renderActiveBanner();
 });
+
+// Sync dot: tap to show status
+document.getElementById('sync-dot').addEventListener('click', () => {
+  const msg = _syncStatus === 'online' ? '☁️ Cloud sync active'
+    : _syncStatus === 'offline' ? '⚠️ Offline — data saved locally'
+    : '… Checking connection';
+  showToast(msg);
+});
+// Browser online/offline events
+window.addEventListener('online', () => { if (_syncStatus === 'offline') updateSyncDot('unknown'); });
+window.addEventListener('offline', () => updateSyncDot('offline'));
 
 document.getElementById('session-notes-toggle').addEventListener('click', () => {
   const wrap = document.getElementById('session-notes-wrap');
