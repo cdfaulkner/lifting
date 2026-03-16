@@ -94,7 +94,7 @@ body::after {
   display: flex;
   background: var(--bg2);
   border-top: 1px solid var(--border);
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
@@ -132,7 +132,7 @@ body::after {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(58px + max(env(safe-area-inset-bottom, 0px), 20px));
+  padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -557,7 +557,7 @@ select option { background: var(--bg3); }
 
 .sets-header {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 52px 28px;
+  grid-template-columns: 36px 1fr 1fr 52px 28px 28px;
   padding: 6px 10px;
   background: var(--bg3);
   border-top: 1px solid var(--border);
@@ -585,7 +585,7 @@ select option { background: var(--bg3); }
 .set-row.completed .set-num { color: var(--accent); }
 
 /* ── Voltra eccentric weight column ── */
-.sets-header.voltra { grid-template-columns: 36px 1fr 1fr 1fr 52px 28px; }
+.sets-header.voltra { grid-template-columns: 36px 1fr 1fr 1fr 52px 28px 28px; }
 .set-row.voltra { grid-template-columns: 36px 1fr 1fr 1fr 52px 28px 28px; }
 .set-del-btn {
   background: none;
@@ -3267,6 +3267,7 @@ function renderActiveSession() {
         ${isVoltra ? '<div class="sets-header-cell">ECC</div>' : ''}
         <div class="sets-header-cell">REPS</div>
         <div class="sets-header-cell"></div>
+        <div class="sets-header-cell"></div>
       </div>
       ${(ex.sets || []).map((set, si) => renderSetRow(exIdx, si, set, isVoltra)).join('')}
     `;
@@ -3358,9 +3359,9 @@ function renderActiveSession() {
 }
 
 function renderSetRow(exIdx, si, set, isVoltra) {
-  const w = set.weight || '';
-  const wEcc = set.weightEcc || '';
-  const r = set.reps || '';
+  const w = set.weight != null && set.weight !== '' ? set.weight : '';
+  const wEcc = set.weightEcc != null && set.weightEcc !== '' ? set.weightEcc : '';
+  const r = set.reps != null && set.reps !== '' ? set.reps : '';
   const setLabel = String(si + 1);
   return `<div class="set-row ${set.completed ? 'completed' : ''}${isVoltra ? ' voltra' : ''}" id="set-row-${exIdx}-${si}" onclick="focusSetRow(event, ${exIdx}, ${si})">
     <div class="set-num">${setLabel}</div>
