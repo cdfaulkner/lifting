@@ -1673,7 +1673,7 @@ textarea { resize: none; }
 #session-notes-input:focus { border-color: var(--accent); color: var(--text); }
 
 /* ── Exercise drag handle ── */
-.ex-drag-handle {
+.ex-drag-handle, .tmpl-ex-drag-handle {
   cursor: grab;
   color: var(--text3);
   padding: 4px 6px 4px 0;
@@ -1682,7 +1682,7 @@ textarea { resize: none; }
   display: flex;
   align-items: center;
 }
-.ex-drag-handle:active { cursor: grabbing; color: var(--text); }
+.ex-drag-handle:active, .tmpl-ex-drag-handle:active { cursor: grabbing; color: var(--text); }
 .ex-drag-placeholder {
   border: 1px dashed var(--border2);
   border-radius: var(--r);
@@ -4768,6 +4768,7 @@ function renderTemplateExercises(exercises) {
     }
   }
   list.innerHTML = html;
+  initTmplExDrag();
   saveTmplDraft();
 }
 
@@ -4791,8 +4792,11 @@ function renderTmplExCard(i, n, inSuperset) {
     : `background:transparent;color:var(--text3);border-color:var(--border2)`;
   const badgeContent = myNum > 0 ? myNum : `<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/></svg>`;
 
-  return `<div style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
+  return `<div class="tmpl-ex-card" data-tmpl-ex-idx="${i}" style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
     <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
+      <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' \u00b7 ' + setsPreview : ''}</div>
@@ -4800,9 +4804,6 @@ function renderTmplExCard(i, n, inSuperset) {
       <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); cycleTmplSuperset(${i})"
         title="Superset group" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid;${badgeStyle};font-size:11px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;padding:0;transition:background 0.15s,border-color 0.15s">
         ${badgeContent}
-      </button>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); promptMoveTmplEx(${i})" title="Reorder" style="flex-shrink:0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); swapTemplateEx(${i})" title="Swap exercise" style="flex-shrink:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
@@ -4881,23 +4882,112 @@ function removeTmplSet(exIdx, setIdx) {
   renderTemplateExercises(tmplExercises);
 }
 
-function promptMoveTmplEx(i) {
-  const n = tmplExercises.length;
-  if (n <= 1) return;
-  const name = escHtml(getVariantDisplayName(tmplExercises[i].variantId));
-  const canUp = i > 0;
-  const canDown = i < n - 1;
-  const acts = [];
-  if (canUp)   acts.push({ label: '\u2191\u00a0 Move Up',   fn: `moveTmplEx(${i},-1)` });
-  if (canDown) acts.push({ label: '\u2193\u00a0 Move Down', fn: `moveTmplEx(${i},1)` });
-  showActionSheet(name, acts);
-}
+function initTmplExDrag() {
+  const list = document.getElementById('tmpl-exercises-list');
+  if (!list) return;
+  const allCards = [...list.querySelectorAll('.tmpl-ex-card')];
+  if (allCards.length < 2) return;
 
-function moveTmplEx(i, dir) {
-  const j = i + dir;
-  if (j < 0 || j >= tmplExercises.length) return;
-  [tmplExercises[i], tmplExercises[j]] = [tmplExercises[j], tmplExercises[i]];
-  renderTemplateExercises(tmplExercises);
+  let dragging = null, startY = 0, origTop = 0, placeholder = null;
+  let touchMoveBlocker = null;
+
+  function onPointerDown(e) {
+    const handle = e.target.closest('.tmpl-ex-drag-handle');
+    if (!handle) return;
+    const card = e.target.closest('.tmpl-ex-card');
+    if (!card) return;
+    e.preventDefault();
+
+    dragging = card;
+    startY = e.clientY ?? e.touches?.[0]?.clientY;
+    const rect = card.getBoundingClientRect();
+    origTop = rect.top;
+
+    placeholder = document.createElement('div');
+    placeholder.style.cssText = `height:${card.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);flex-shrink:0`;
+    card.after(placeholder);
+
+    card.style.cssText += `;position:fixed;z-index:999;width:${card.offsetWidth}px;left:${rect.left}px;top:${rect.top}px;opacity:0.92;box-shadow:0 8px 30px rgba(0,0,0,0.4);pointer-events:none;transform:scale(1.02);transition:none`;
+
+    touchMoveBlocker = e2 => e2.preventDefault();
+    document.addEventListener('touchmove', touchMoveBlocker, {passive:false});
+    document.addEventListener('pointermove', onPointerMove, {passive:false});
+    document.addEventListener('pointerup', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    const y = e.clientY ?? e.touches?.[0]?.clientY;
+    const dy = y - startY;
+    dragging.style.top = (origTop + dy) + 'px';
+
+    const allCurrent = [...list.querySelectorAll('.tmpl-ex-card:not([style*="position:fixed"])')];
+    const midY = dragging.getBoundingClientRect().top + dragging.offsetHeight / 2;
+
+    let inserted = false;
+    for (const sib of allCurrent) {
+      if (sib === dragging) continue;
+      const rect = sib.getBoundingClientRect();
+      if (midY < rect.top + rect.height / 2) {
+        sib.before(placeholder);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) {
+      list.appendChild(placeholder);
+    }
+  }
+
+  function onPointerUp() {
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    if (touchMoveBlocker) {
+      document.removeEventListener('touchmove', touchMoveBlocker);
+      touchMoveBlocker = null;
+    }
+    if (!dragging) return;
+
+    dragging.style.cssText = dragging.style.cssText
+      .replace(/position:fixed[^;]*;/g,'')
+      .replace(/z-index:\d+;/g,'')
+      .replace(/width:[^;]+;/g,'')
+      .replace(/left:[^;]+;/g,'')
+      .replace(/top:[^;]+;/g,'')
+      .replace(/opacity:[^;]+;/g,'')
+      .replace(/box-shadow:[^;]+;/g,'')
+      .replace(/pointer-events:[^;]+;/g,'')
+      .replace(/transform:[^;]+;/g,'')
+      .replace(/transition:none[^;]*;/g,'');
+
+    placeholder.replaceWith(dragging);
+    placeholder = null;
+
+    // Read new order from DOM
+    const newOrder = [...list.querySelectorAll('.tmpl-ex-card')].map(el => parseInt(el.dataset.tmplExIdx)).filter(i => !isNaN(i));
+    const oldOrder = tmplExercises.map((_, i) => i);
+
+    if (JSON.stringify(newOrder) !== JSON.stringify(oldOrder) && newOrder.length === oldOrder.length) {
+      const reordered = newOrder.map(i => tmplExercises[i]);
+      tmplExercises = reordered;
+      // Preserve expanded index
+      if (tmplExpandedIdx !== null) {
+        const newExpandedPos = newOrder.indexOf(tmplExpandedIdx);
+        tmplExpandedIdx = newExpandedPos >= 0 ? newExpandedPos : null;
+      }
+      renderTemplateExercises(tmplExercises);
+    }
+
+    dragging = null;
+  }
+
+  allCards.forEach(card => {
+    const handle = card.querySelector('.tmpl-ex-drag-handle');
+    if (handle) {
+      handle.addEventListener('pointerdown', onPointerDown);
+    }
+  });
 }
 
 // Returns [{id, num, count}] sorted by num for all active superset groups
