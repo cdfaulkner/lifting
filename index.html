@@ -3201,9 +3201,30 @@ function startSession(sessionData) {
     endTime: null,
     durationMinutes: null,
     exercises: (sessionData.exercises || []).map(ex => {
+      // Slot exercises (unfilled template placeholders) — pass through as-is
+      if (ex.slotId) {
+        return {
+          slotId: ex.slotId,
+          slotLabel: ex.slotLabel,
+          slotPattern: ex.slotPattern,
+          slotMuscles: ex.slotMuscles || [],
+          sets: (ex.sets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]).map((s, i) => ({
+            index: i,
+            weight: typeof s.weight === 'number' ? s.weight : (parseFloat(s.weight) || 0),
+            weightEcc: typeof s.weightEcc === 'number' ? s.weightEcc : (parseFloat(s.weightEcc) || 0),
+            reps: typeof s.reps === 'number' ? s.reps : (parseInt(s.reps) || 8),
+            completed: s.completed || false,
+            completedAt: s.completedAt || null,
+            rpe: s.rpe || null,
+            restSeconds: s.restSeconds || null,
+            notes: s.notes || ''
+          }))
+        };
+      }
       const rawSets = (ex.sets && ex.sets.length > 0) ? ex.sets : [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
       return {
         variantId: ex.variantId,
+        supersetId: ex.supersetId || null,
         sets: rawSets.map((s, i) => ({
           index: i,
           weight: typeof s.weight === 'number' ? s.weight : (parseFloat(s.weight) || 0),
