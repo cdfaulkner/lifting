@@ -648,51 +648,6 @@ select option { background: var(--bg3); }
 .swipe-delete-bg.revealed { opacity: 1; }
 .swipe-delete-bg svg { flex-shrink: 0; }
 
-/* Quick-add from previous session */
-.quick-add-section {
-  padding: 10px 16px 4px;
-}
-.quick-add-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text3);
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-.quick-add-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.quick-add-chip {
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.12s, background 0.12s;
-  max-width: 200px;
-}
-.quick-add-chip:active { background: var(--bg4); }
-.quick-add-chip-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-  font-weight: 500;
-}
-.quick-add-chip-sets {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text3);
-  flex-shrink: 0;
-}
-
 /* Draft/autosave indicator */
 .autosave-dot {
   width: 6px; height: 6px;
@@ -1748,7 +1703,7 @@ textarea { resize: none; }
     <div id="session-notes-wrap">
       <textarea id="session-notes-input" placeholder="Workout notes…" rows="2"></textarea>
     </div>
-    <div id="quick-add-section"></div>
+
     <div id="session-body" class="session-body"></div>
     <div class="session-footer">
       <button class="btn btn-secondary btn-sm" id="session-add-ex-btn" style="flex:1">+ Add Exercise</button>
@@ -3349,7 +3304,6 @@ function renderActiveSession() {
   attachSetInputListeners();
   initExerciseDrag();
   saveSessionDraft();
-  renderQuickAdd();
 
   // Swipe-to-delete exercise blocks
   initSwipeDelete(body, '.ex-block', (el) => {
@@ -4795,9 +4749,6 @@ function renderTmplExCard(i, n, inSuperset) {
 
   return `<div class="tmpl-ex-card" data-tmpl-ex-idx="${i}" style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
     <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
-      <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' \u00b7 ' + setsPreview : ''}</div>
@@ -4806,6 +4757,9 @@ function renderTmplExCard(i, n, inSuperset) {
         title="Superset group" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid;${badgeStyle};font-size:11px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;padding:0;transition:background 0.15s,border-color 0.15s">
         ${badgeContent}
       </button>
+      <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder" aria-label="Drag to reorder">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); swapTemplateEx(${i})" title="Swap exercise" style="flex-shrink:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
       </button>
@@ -7746,51 +7700,6 @@ function makeSwipeable(el, onDeleteFn) {
 }
 
 // ── Quick-add from last session ──────────────────────────────
-async function renderQuickAdd() {
-  const container = document.getElementById('quick-add-section');
-  if (!container) return;
-  if (!activeSession) { container.innerHTML = ''; return; }
-
-  const sessions = await getSortedSessions();
-  if (sessions.length === 0) { container.innerHTML = ''; return; }
-
-  // Find the last session with the same title, or just the last session
-  const sameTitle = sessions.find(s => s.title === activeSession.title);
-  const lastSession = sameTitle || sessions[0];
-
-  // Get exercises not already in active session
-  const existingIds = new Set(activeSession.exercises.map(e => e.variantId));
-  const candidates = lastSession.exercises.filter(e => !existingIds.has(e.variantId));
-  if (candidates.length === 0) { container.innerHTML = ''; return; }
-
-  const chips = candidates.slice(0, 6).map(ex => {
-    const name = escHtml(getVariantDisplayName(ex.variantId));
-    const completedSets = ex.sets.filter(s => s.completed);
-    const topSet = completedSets.sort((a,b) => b.weight - a.weight)[0];
-    const setsLabel = topSet ? `${topSet.weight}×${topSet.reps}` : `${completedSets.length}s`;
-    return `<button class="quick-add-chip" onclick="quickAddExercise('${ex.variantId}')">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" style="flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="quick-add-chip-name">${name}</span>
-      <span class="quick-add-chip-sets">${setsLabel}</span>
-    </button>`;
-  }).join('');
-
-  const label = sameTitle ? `From last "${escHtml(lastSession.title)}"` : `From last session`;
-  container.innerHTML = `<div class="quick-add-section">
-    <div class="quick-add-label">${label}</div>
-    <div class="quick-add-chips">${chips}</div>
-  </div>`;
-}
-
-async function quickAddExercise(variantId) {
-  if (!activeSession) return;
-  const sets = await buildPrevSets(variantId);
-  activeSession.exercises.push({ variantId, sets });
-  renderActiveSession();
-  renderQuickAdd();
-  showToast('Added ' + getVariantDisplayName(variantId));
-}
-
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
