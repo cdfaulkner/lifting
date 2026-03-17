@@ -207,6 +207,32 @@ body::after {
 .tmpl-set-remove { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
 .tmpl-set-remove:hover { color: var(--red); }
 
+/* ── Pattern slot placeholders ── */
+.slot-placeholder {
+  background: var(--bg3);
+  border: 1.5px dashed var(--accent);
+  border-radius: var(--r);
+  padding: 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.slot-placeholder:active { background: var(--bg4); }
+.slot-placeholder-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(167,139,250,0.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.slot-placeholder-label {
+  font-size: 13px; font-weight: 600; color: var(--accent);
+}
+.slot-placeholder-sub {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+}
+
 /* ── CARDS ── */
 .card {
   background: var(--bg2);
@@ -2003,7 +2029,10 @@ textarea { resize: none; }
         <input id="tmpl-name-input" type="text" placeholder="Push / Pull / Legs…">
       </div>
       <div id="tmpl-exercises-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
-      <button class="btn btn-secondary" id="tmpl-add-ex-btn" style="width:100%">+ Add Exercise</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary" id="tmpl-add-ex-btn" style="flex:1">+ Add Exercise</button>
+        <button class="btn btn-secondary" id="tmpl-add-slot-btn" style="flex:1">+ Add Slot</button>
+      </div>
     </div>
     <div class="modal-footer" style="display:flex;gap:8px">
       <button class="btn btn-danger btn-sm" id="tmpl-delete-btn" style="display:none">Delete</button>
@@ -2723,6 +2752,21 @@ EXERCISE_HIERARCHY.forEach(h => { hierarchyMap[h.id] = h; });
 // ── Derived constants from hierarchy ──
 const MUSCLE_GROUPS = ["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core","forearms"];
 const MOVEMENT_PATTERNS = ["push","pull","squat","hinge","cardio","isolation","core"];
+const PATTERN_SLOTS = [
+  { id: "slot_squat",     label: "Squat Movement",       pattern: "squat",     muscles: [] },
+  { id: "slot_hinge",     label: "Hinge Movement",       pattern: "hinge",     muscles: [] },
+  { id: "slot_push",      label: "Push Movement",        pattern: "push",      muscles: [] },
+  { id: "slot_pull",      label: "Pull Movement",        pattern: "pull",      muscles: [] },
+  { id: "slot_quad_iso",  label: "Quad Isolation",        pattern: "isolation", muscles: ["quads"] },
+  { id: "slot_ham_iso",   label: "Hamstring Isolation",   pattern: "isolation", muscles: ["hamstrings"] },
+  { id: "slot_glute_iso", label: "Glute Isolation",       pattern: "isolation", muscles: ["glutes"] },
+  { id: "slot_calf_iso",  label: "Calf Isolation",        pattern: "isolation", muscles: ["calves"] },
+  { id: "slot_chest_iso", label: "Chest Isolation",       pattern: "isolation", muscles: ["chest"] },
+  { id: "slot_shoulder_iso", label: "Shoulder Isolation",  pattern: "isolation", muscles: ["shoulders"] },
+  { id: "slot_bicep_iso", label: "Bicep Isolation",       pattern: "isolation", muscles: ["biceps"] },
+  { id: "slot_tricep_iso",label: "Tricep Isolation",      pattern: "isolation", muscles: ["triceps"] },
+  { id: "slot_core",      label: "Core Movement",         pattern: "core",      muscles: [] },
+];
 const EQUIPMENT_TYPES = [...new Set(EXERCISE_HIERARCHY.flatMap(h => h.resistances.map(r => r.toLowerCase().replace(/[^a-z0-9+]/g,'_'))))].sort();
 
 // Build parent entries from hierarchy for library screen, analytics, etc.
@@ -3087,6 +3131,20 @@ async function startFromTemplate(templateId) {
   // Build session exercises one at a time so one failure can't block others
   const exercises = [];
   for (const te of (tmpl.exercises || [])) {
+    // Pass through unfilled slots
+    if (te.slotId) {
+      exercises.push({
+        slotId: te.slotId,
+        slotLabel: te.slotLabel,
+        slotPattern: te.slotPattern,
+        slotMuscles: te.slotMuscles || [],
+        sets: (te.defaultSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]).map((s,i) => ({
+          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, reps: s.reps || 8,
+          completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
+        }))
+      });
+      continue;
+    }
     try {
       let lastSets = null;
       try { lastSets = await getLastSetsForVariant(te.variantId); } catch(e) {}
@@ -3197,7 +3255,10 @@ function renderActiveSession() {
 
   exercises.forEach((ex, idx) => {
     if (rendered.has(idx)) return;
-    if (!ex.supersetId) {
+    if (ex.slotId) {
+      items.push({type:'slot', idx});
+      rendered.add(idx);
+    } else if (!ex.supersetId) {
       items.push({type:'solo', idx});
       rendered.add(idx);
     } else {
@@ -3285,6 +3346,7 @@ function renderActiveSession() {
   }
 
   body.innerHTML = items.map(item => {
+    if (item.type === 'slot') return renderSessionSlot(item.idx);
     if (item.type === 'solo') return renderExBlock(item.idx);
     const blocksHtml = item.indices.map((idx, i) =>
       (i > 0 ? `<div class="superset-connector" data-label="then"></div>` : '') + renderExBlock(idx)
@@ -3300,7 +3362,7 @@ function renderActiveSession() {
     </div>`;
   }).join('');
 
-  activeSession.exercises.forEach((ex, idx) => loadPrevBest(ex.variantId, idx));
+  activeSession.exercises.forEach((ex, idx) => { if (ex.variantId) loadPrevBest(ex.variantId, idx); });
   attachSetInputListeners();
   initExerciseDrag();
   saveSessionDraft();
@@ -3310,6 +3372,45 @@ function renderActiveSession() {
     const exIdx = parseInt(el.id.replace('ex-block-', ''));
     if (!isNaN(exIdx)) removeExFromSession(exIdx);
   });
+}
+
+function renderSessionSlot(exIdx) {
+  const slot = activeSession.exercises[exIdx];
+  return `<div class="slot-placeholder" onclick="fillSessionSlot(${exIdx})" style="margin-bottom:8px">
+    <div class="slot-placeholder-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="slot-placeholder-label">${escHtml(slot.slotLabel)}</div>
+      <div class="slot-placeholder-sub">Tap to choose exercise</div>
+    </div>
+    <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeExFromSession(${exIdx})" title="Remove" aria-label="Remove slot">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>`;
+}
+
+function fillSessionSlot(exIdx) {
+  const slot = activeSession.exercises[exIdx];
+  if (!slot || !slot.slotId) return;
+  pendingPickExerciseCallback = async (variantId) => {
+    let lastSets = null;
+    try { lastSets = await getLastSetsForVariant(variantId); } catch(e) {}
+    const rawSets = lastSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
+    activeSession.exercises[exIdx] = {
+      variantId,
+      supersetId: null,
+      sets: rawSets.map((s,i) => ({
+        index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, reps: s.reps || 8,
+        completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
+      }))
+    };
+    renderActiveSession();
+    closeExercisePicker();
+  };
+  document.getElementById('pick-ex-title').textContent = slot.slotLabel;
+  document.getElementById('pick-ex-confirm').textContent = 'Select Exercise';
+  openExercisePicker({ pattern: slot.slotPattern, muscles: slot.slotMuscles || [] });
 }
 
 function renderSetRow(exIdx, si, set, isVoltra) {
@@ -3875,6 +3976,9 @@ document.getElementById('session-finish-btn').addEventListener('click', async ()
   activeSession.endTime = Date.now();
   activeSession.durationMinutes = Math.round((activeSession.endTime - activeSession.startTime) / 60000);
   activeSession.notes = document.getElementById('session-notes-input').value.trim();
+
+  // Remove any unfilled slots before saving
+  activeSession.exercises = activeSession.exercises.filter(ex => !ex.slotId);
 
   await dbPut('sessions', activeSession);
   clearSessionDraft();
@@ -4479,6 +4583,10 @@ async function renderTemplates() {
           const seen = new Set();
           return t.exercises.slice(0,6).map((ex, i) => {
             if (seen.has(i)) return '';
+            if (ex.slotId) {
+              seen.add(i);
+              return `<div class="template-ex" style="color:var(--accent);font-style:italic">${escHtml(ex.slotLabel)}</div>`;
+            }
             const name = escHtml(getVariantDisplayName(ex.variantId));
             if (ex.supersetId) {
               const group = t.exercises.map((e,j) => ({e,j})).filter(({e}) => e.supersetId === ex.supersetId);
@@ -4729,6 +4837,28 @@ function renderTemplateExercises(exercises) {
 
 function renderTmplExCard(i, n, inSuperset) {
   const ex = tmplExercises[i];
+
+  // Slot placeholder
+  if (ex.slotId) {
+    return `<div class="tmpl-ex-card" data-tmpl-ex-idx="${i}" style="overflow:hidden">
+      <div class="slot-placeholder" onclick="fillTmplSlot(${i})">
+        <div class="slot-placeholder-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="slot-placeholder-label">${escHtml(ex.slotLabel)}</div>
+          <div class="slot-placeholder-sub">Tap to choose exercise</div>
+        </div>
+        <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder" aria-label="Drag to reorder">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </div>
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0" aria-label="Remove slot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }
+
   const sets = ex.defaultSets || [];
   const isExpanded = (tmplExpandedIdx === i);
   const setsPreview = sets.length > 0
@@ -4800,6 +4930,19 @@ function renderTmplSets(exIdx, sets) {
 function toggleTmplExSets(i) {
   tmplExpandedIdx = (tmplExpandedIdx === i) ? null : i;
   renderTemplateExercises(tmplExercises);
+}
+
+function fillTmplSlot(i) {
+  const slot = tmplExercises[i];
+  if (!slot || !slot.slotId) return;
+  pendingPickExerciseCallback = (variantId) => {
+    tmplExercises[i] = { variantId, defaultSets: slot.defaultSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] };
+    renderTemplateExercises(tmplExercises);
+    closeExercisePicker();
+  };
+  document.getElementById('pick-ex-title').textContent = slot.slotLabel;
+  document.getElementById('pick-ex-confirm').textContent = 'Select Exercise';
+  openExercisePicker({ pattern: slot.slotPattern, muscles: slot.slotMuscles || [] });
 }
 
 function swapTemplateEx(i) {
@@ -5121,6 +5264,21 @@ document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
   openExercisePicker();
 });
 
+document.getElementById('tmpl-add-slot-btn').addEventListener('click', () => {
+  const acts = PATTERN_SLOTS.map(s => ({
+    label: s.label,
+    fn: `addTmplSlot('${s.id}')`
+  }));
+  showActionSheet('Add Movement Slot', acts);
+});
+
+function addTmplSlot(slotId) {
+  const slot = PATTERN_SLOTS.find(s => s.id === slotId);
+  if (!slot) return;
+  tmplExercises.push({ slotId: slot.id, slotLabel: slot.label, slotPattern: slot.pattern, slotMuscles: slot.muscles, defaultSets: [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] });
+  renderTemplateExercises(tmplExercises);
+}
+
 document.getElementById('tmpl-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('tmpl-name-input').value.trim();
   if (!name) { showToast('Enter a template name'); return; }
@@ -5149,13 +5307,15 @@ document.getElementById('tmpl-delete-btn').addEventListener('click', async () =>
 // EXERCISE PICKER MODAL
 // ═══════════════════════════════════════════════════════════════
 let pickerMuscleFilter = '';
+let pickerSlotFilter = null; // {pattern, muscles} when picker is opened for a slot
 
-function openExercisePicker() {
+function openExercisePicker(slotFilter) {
   pickerMuscleFilter = '';
+  pickerSlotFilter = slotFilter || null;
   pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {other:''}, customName: '' };
   document.getElementById('pick-ex-search').value = '';
   document.getElementById('pick-ex-search').style.display = '';
-  document.getElementById('pick-ex-filters').style.display = '';
+  document.getElementById('pick-ex-filters').style.display = pickerSlotFilter ? 'none' : '';
   document.getElementById('pick-ex-steps').style.display = 'none';
   document.getElementById('pick-ex-back').style.display = 'none';
   document.getElementById('pick-ex-footer').style.display = 'none';
@@ -5257,6 +5417,14 @@ function renderPickerLiftList() {
   const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
 
   EXERCISE_HIERARCHY.forEach(h => {
+    // Slot filter: restrict to matching pattern + muscles
+    if (pickerSlotFilter) {
+      if (h.pattern !== pickerSlotFilter.pattern) return;
+      if (pickerSlotFilter.muscles.length > 0) {
+        const allMuscles = [...h.muscles, ...(h.sec||[])];
+        if (!pickerSlotFilter.muscles.some(m => allMuscles.includes(m))) return;
+      }
+    }
     if (pickerMuscleFilter) {
       if (!h.muscles.includes(pickerMuscleFilter) && !(h.sec||[]).includes(pickerMuscleFilter)) return;
     }
@@ -6067,6 +6235,7 @@ async function migrateTemplateIds() {
   for (const t of templates) {
     let fixed = false;
     const newExercises = t.exercises.map(ex => {
+      if (ex.slotId || !ex.variantId) return ex;
       const newId = migrateLegacyId(ex.variantId);
       if (newId !== ex.variantId) { fixed = true; return { ...ex, variantId: newId }; }
       return ex;
@@ -6095,7 +6264,7 @@ async function migrateTemplateIds() {
 }
 
 async function seedSkeletonTemplates() {
-  const KEEPER_NAMES = ['Lower', 'Upper A', 'Upper B'];
+  const KEEPER_NAMES = ['Lower', 'Upper A', 'Upper B', 'Lower Flex A', 'Lower Flex B'];
 
   function V(parentId, resistance, variantArr=[]) {
     const resPart = resistance.toLowerCase().replace(/[^a-z0-9]/g,'_');
@@ -6138,6 +6307,28 @@ async function seedSkeletonTemplates() {
         makeEx(V('tricep_extension',      'Voltra',  ['Standing']),   3, 12),
         makeEx(V('bicep_curl',            'Dumbbell',['Incline']),    3, 12),
       ]
+    },
+    {
+      name: 'Lower Flex A',
+      exercises: [
+        { slotId:'slot_squat',   slotLabel:'Squat Movement',     slotPattern:'squat',     slotMuscles:[], defaultSets:[{weight:0,reps:5},{weight:0,reps:5},{weight:0,reps:5},{weight:0,reps:5}] },
+        { slotId:'slot_hinge',   slotLabel:'Hinge Movement',     slotPattern:'hinge',     slotMuscles:[], defaultSets:[{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] },
+        { slotId:'slot_quad_iso',slotLabel:'Quad Isolation',      slotPattern:'isolation', slotMuscles:['quads'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
+        { slotId:'slot_ham_iso', slotLabel:'Hamstring Isolation',  slotPattern:'isolation', slotMuscles:['hamstrings'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
+        makeEx(V('calf_raise','Voltra',['Standing']), 3, 15),
+        makeEx(V('crunch','Voltra',[]),                3, 12),
+      ]
+    },
+    {
+      name: 'Lower Flex B',
+      exercises: [
+        { slotId:'slot_squat',   slotLabel:'Squat Movement',     slotPattern:'squat',     slotMuscles:[], defaultSets:[{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] },
+        { slotId:'slot_hinge',   slotLabel:'Hinge Movement',     slotPattern:'hinge',     slotMuscles:[], defaultSets:[{weight:0,reps:6},{weight:0,reps:6},{weight:0,reps:6},{weight:0,reps:6}] },
+        { slotId:'slot_quad_iso',slotLabel:'Quad Isolation',      slotPattern:'isolation', slotMuscles:['quads'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
+        { slotId:'slot_ham_iso', slotLabel:'Hamstring Isolation',  slotPattern:'isolation', slotMuscles:['hamstrings'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
+        makeEx(V('calf_raise','Voltra',['Standing']), 3, 15),
+        makeEx(V('crunch','Voltra',[]),                3, 12),
+      ]
     }
   ];
 
@@ -6165,6 +6356,7 @@ async function seedSkeletonTemplates() {
       await dbPut('templates', { id: uid(), ...def });
     } else {
       const hasBadIds = match.exercises.some(ex => {
+        if (ex.slotId) return false; // slots have no variantId
         const parts = ex.variantId.split('__');
         return parts.length < 2 || /[A-Z]/.test(parts[1]);
       });
