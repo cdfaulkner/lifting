@@ -1418,6 +1418,37 @@ select option { background: var(--bg3); }
   color: #fff;
   border-color: var(--accent);
 }
+.lifts-search-wrap {
+  position: relative;
+  margin-bottom: 8px;
+}
+.lifts-search-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px 8px 32px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.lifts-search-wrap input:focus { border-color: var(--accent); }
+.lifts-search-wrap input::placeholder { color: var(--text3); }
+.lifts-search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); font-size: 14px; pointer-events: none;
+}
+.lifts-breadcrumb {
+  display: flex; align-items: center; gap: 4px; margin-bottom: 6px;
+  font-size: 11px; color: var(--text3); font-weight: 500;
+}
+.lifts-breadcrumb span { cursor: pointer; text-transform: capitalize; }
+.lifts-breadcrumb span:hover { color: var(--accent); }
+.lifts-breadcrumb .bc-sep { cursor: default; color: var(--text3); opacity: 0.5; }
+.lifts-breadcrumb .bc-sep:hover { color: var(--text3); }
 .bw-chart-wrap {
   padding: 16px;
 }
@@ -1844,6 +1875,11 @@ textarea { resize: none; }
       <!-- ── Lifts Sub-screen ── -->
       <div id="progress-panel-lifts" class="progress-panel" style="display:none">
         <div style="padding:12px 16px 8px">
+          <div class="lifts-search-wrap">
+            <span class="lifts-search-icon">🔍</span>
+            <input type="text" id="lifts-search-input" placeholder="Search exercises…" oninput="onLiftsSearch(this.value)" />
+          </div>
+          <div id="lifts-breadcrumb" class="lifts-breadcrumb" style="display:none"></div>
           <div class="lifts-filter-bar" id="lifts-filter-bar"></div>
         </div>
         <div id="top-lifts-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
@@ -5912,6 +5948,8 @@ function setLibMuscle(m) {
 let bwPeriod = '3m';
 let progressTab = 'bodyweight';
 let liftsPatternFilter = 'all';
+let liftsParentFilter = null;   // null = show pattern pills; string = show variants for this parent
+let liftsSearchQuery = '';
 
 function setProgressTab(tab) {
   progressTab = tab;
@@ -6131,6 +6169,20 @@ function getMovementPatternForVariant(variantId) {
   return h ? h.pattern : 'other';
 }
 
+function getParentIdForVariant(variantId) {
+  return variantId.split('__')[0];
+}
+
+function getParentNameForId(parentId) {
+  const h = hierarchyMap[parentId];
+  return h ? h.name : parentId;
+}
+
+function onLiftsSearch(q) {
+  liftsSearchQuery = q.trim().toLowerCase();
+  renderLiftsTab();
+}
+
 async function renderLiftsTab() {
   const sessions = await dbGetAll('sessions');
   const best1RM = {};
@@ -6146,40 +6198,105 @@ async function renderLiftsTab() {
     });
   });
 
-  // Build filter pills — only show patterns that have data
-  const patternCounts = {};
-  Object.keys(best1RM).forEach(vid => {
-    const p = getMovementPatternForVariant(vid);
-    patternCounts[p] = (patternCounts[p] || 0) + 1;
-  });
-
   const filterBar = document.getElementById('lifts-filter-bar');
-  const availablePatterns = MOVEMENT_PATTERNS.filter(p => patternCounts[p]);
-  filterBar.innerHTML = [
-    `<button class="lifts-filter-pill ${liftsPatternFilter === 'all' ? 'active' : ''}" onclick="setLiftsFilter('all')">All</button>`,
-    ...availablePatterns.map(p =>
-      `<button class="lifts-filter-pill ${liftsPatternFilter === p ? 'active' : ''}" onclick="setLiftsFilter('${p}')">${p} (${patternCounts[p]})</button>`)
-  ].join('');
+  const breadcrumb = document.getElementById('lifts-breadcrumb');
+  const isSearching = liftsSearchQuery.length > 0;
 
-  // Filter and sort
-  let sorted = Object.entries(best1RM)
-    .sort((a,b) => b[1].rm - a[1].rm);
+  // ── Search mode: hide pills, show all matches ──
+  if (isSearching) {
+    filterBar.style.display = 'none';
+    breadcrumb.style.display = 'none';
 
-  if (liftsPatternFilter !== 'all') {
-    sorted = sorted.filter(([vid]) => getMovementPatternForVariant(vid) === liftsPatternFilter);
-  } else {
-    sorted = sorted.slice(0, 10);
-  }
+    let sorted = Object.entries(best1RM)
+      .filter(([vid]) => getVariantDisplayName(vid).toLowerCase().includes(liftsSearchQuery))
+      .sort((a,b) => b[1].rm - a[1].rm);
 
-  const list = document.getElementById('top-lifts-list');
-  if (sorted.length === 0) {
-    list.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">Log workouts to see your lifts</div>`;
+    renderLiftsCards(sorted, `Search results · ${sorted.length} match${sorted.length !== 1 ? 'es' : ''}`);
     return;
   }
 
-  const heading = liftsPatternFilter === 'all'
-    ? '<div style="font-size:11px;color:var(--text3);font-weight:500;padding-bottom:4px">Top 10 by Est. 1RM</div>'
-    : `<div style="font-size:11px;color:var(--text3);font-weight:500;padding-bottom:4px;text-transform:capitalize">${liftsPatternFilter} exercises · ${sorted.length} total</div>`;
+  filterBar.style.display = 'flex';
+
+  // ── Level 0: Pattern pills ──
+  if (liftsParentFilter === null) {
+    breadcrumb.style.display = 'none';
+
+    const patternCounts = {};
+    Object.keys(best1RM).forEach(vid => {
+      const p = getMovementPatternForVariant(vid);
+      patternCounts[p] = (patternCounts[p] || 0) + 1;
+    });
+
+    const availablePatterns = MOVEMENT_PATTERNS.filter(p => patternCounts[p]);
+    filterBar.innerHTML = [
+      `<button class="lifts-filter-pill ${liftsPatternFilter === 'all' ? 'active' : ''}" onclick="setLiftsFilter('all')">All</button>`,
+      ...availablePatterns.map(p =>
+        `<button class="lifts-filter-pill ${liftsPatternFilter === p ? 'active' : ''}" onclick="setLiftsFilter('${p}')">${p} (${patternCounts[p]})</button>`)
+    ].join('');
+
+    let sorted = Object.entries(best1RM).sort((a,b) => b[1].rm - a[1].rm);
+
+    if (liftsPatternFilter !== 'all') {
+      sorted = sorted.filter(([vid]) => getMovementPatternForVariant(vid) === liftsPatternFilter);
+
+      // Check how many parent exercises exist with data in this pattern
+      const parentIds = new Set(sorted.map(([vid]) => getParentIdForVariant(vid)));
+      if (parentIds.size > 1) {
+        // Show sub-pills for parent exercises
+        const parentCounts = {};
+        sorted.forEach(([vid]) => {
+          const pid = getParentIdForVariant(vid);
+          parentCounts[pid] = (parentCounts[pid] || 0) + 1;
+        });
+        breadcrumb.style.display = 'flex';
+        breadcrumb.innerHTML = `<span onclick="setLiftsFilter('all');liftsParentFilter=null;renderLiftsTab()">All</span><span class="bc-sep">›</span><span style="color:var(--text)">${liftsPatternFilter}</span>`;
+
+        // Build parent-level sub-pills
+        const parentPills = Object.entries(parentCounts)
+          .sort((a,b) => b[1] - a[1])
+          .map(([pid, cnt]) =>
+            `<button class="lifts-filter-pill" onclick="drillToParent('${pid}')" style="font-size:10px;padding:4px 10px">${getParentNameForId(pid)} (${cnt})</button>`)
+          .join('');
+        filterBar.innerHTML += `<div style="width:100%;display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${parentPills}</div>`;
+      }
+
+      const heading = `${liftsPatternFilter} exercises · ${sorted.length} total`;
+      renderLiftsCards(sorted, heading);
+    } else {
+      renderLiftsCards(sorted.slice(0, 10), 'Top 10 by Est. 1RM');
+    }
+    return;
+  }
+
+  // ── Level 1: Drilled into a specific parent exercise ──
+  const parentPattern = hierarchyMap[liftsParentFilter]?.pattern || liftsPatternFilter;
+  breadcrumb.style.display = 'flex';
+  breadcrumb.innerHTML = `<span onclick="setLiftsFilter('all');liftsParentFilter=null;renderLiftsTab()">All</span><span class="bc-sep">›</span><span onclick="liftsParentFilter=null;renderLiftsTab()">${parentPattern || liftsPatternFilter}</span><span class="bc-sep">›</span><span style="color:var(--text)">${getParentNameForId(liftsParentFilter)}</span>`;
+
+  let sorted = Object.entries(best1RM)
+    .filter(([vid]) => getParentIdForVariant(vid) === liftsParentFilter)
+    .sort((a,b) => b[1].rm - a[1].rm);
+
+  // Show variant sub-pills if more than one
+  if (sorted.length > 1) {
+    filterBar.innerHTML = sorted.map(([vid]) =>
+      `<button class="lifts-filter-pill" onclick="showExerciseAnalytics('${vid}')" style="font-size:10px;padding:4px 10px">${escHtml(getVariantDisplayName(vid))}</button>`
+    ).join('');
+  } else {
+    filterBar.innerHTML = '';
+  }
+
+  renderLiftsCards(sorted, `${getParentNameForId(liftsParentFilter)} variants · ${sorted.length} total`);
+}
+
+function renderLiftsCards(sorted, headingText) {
+  const list = document.getElementById('top-lifts-list');
+  if (sorted.length === 0) {
+    list.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">${liftsSearchQuery ? 'No matches' : 'Log workouts to see your lifts'}</div>`;
+    return;
+  }
+
+  const heading = `<div style="font-size:11px;color:var(--text3);font-weight:500;padding-bottom:4px;text-transform:capitalize">${headingText}</div>`;
 
   list.innerHTML = heading + sorted.map(([variantId, data], idx) => {
     const name = getVariantDisplayName(variantId);
@@ -6189,7 +6306,7 @@ async function renderLiftsTab() {
       <div style="min-width:22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">${idx + 1}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${data.weight}×${data.reps} · ${date}${liftsPatternFilter === 'all' ? ' · <span style="text-transform:capitalize">' + pattern + '</span>' : ''}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${data.weight}×${data.reps} · ${date} · <span style="text-transform:capitalize">${pattern}</span></div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--accent)">${Math.round(data.rm)}</div>
@@ -6199,8 +6316,14 @@ async function renderLiftsTab() {
   }).join('');
 }
 
+function drillToParent(parentId) {
+  liftsParentFilter = parentId;
+  renderLiftsTab();
+}
+
 function setLiftsFilter(pattern) {
   liftsPatternFilter = pattern;
+  liftsParentFilter = null;
   renderLiftsTab();
 }
 
