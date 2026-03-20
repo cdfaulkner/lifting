@@ -509,6 +509,34 @@ select option { background: var(--bg3); }
   color: var(--accent);
   min-width: 60px;
   text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.session-timer.paused { color: var(--text3); }
+.session-timer.paused .timer-text { opacity: 0.6; }
+.pause-btn {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: inherit; display: flex; align-items: center;
+}
+.time-edit-row {
+  display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border);
+  align-items: center; background: var(--bg2);
+}
+.time-edit-row label {
+  font-size: 10px; color: var(--text3); font-family: var(--mono);
+  min-width: 32px;
+}
+.time-edit-row input[type="datetime-local"] {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-family: var(--mono);
+  font-size: 12px; padding: 4px 6px;
+}
+.time-edit-row .time-save-btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer;
+  font-family: var(--body);
 }
 .session-body {
   flex: 1;
@@ -1756,7 +1784,13 @@ textarea { resize: none; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         <div id="autosave-dot" title="Saved"></div>
-      <div id="session-timer" class="session-timer">0:00</div>
+      <div id="session-timer" class="session-timer" onclick="toggleSessionPause()">
+        <button class="pause-btn" id="pause-btn" aria-label="Pause timer">
+          <svg id="pause-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          <svg id="play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
+        </button>
+        <span class="timer-text">0:00</span>
+      </div>
       </div>
     </div>
     <div id="session-notes-wrap">
@@ -2558,7 +2592,14 @@ function dbDelete(store, key) {
 }
 function dbGetAll(store, indexName, query) {
   if (!SUPABASE_STORES.has(store)) return idbGetAll(store, indexName, query);
-  return sbGetAll(store).catch(() => idbGetAll(store, indexName, query));
+  return sbGetAll(store)
+    .then(async rows => {
+      if (rows && rows.length > 0) return rows;
+      // Supabase returned empty — check IDB as fallback
+      const local = await idbGetAll(store, indexName, query);
+      return (local && local.length > 0) ? local : rows;
+    })
+    .catch(() => idbGetAll(store, indexName, query));
 }
 
 function uid() {
@@ -2970,6 +3011,8 @@ function getHierarchicalDisplayName(variantId) {
 let activeSession = null;
 let sessionTimerInterval = null;
 let sessionStartEpoch = null;
+let sessionPausedAt = null;      // timestamp when paused, null when running
+let sessionPausedTotal = 0;      // accumulated pause ms
 let collapsedExercises = new Set();
 
 let editingTemplateId = null;
@@ -3238,6 +3281,8 @@ async function getLastSetsForVariant(variantId) {
 // ═══════════════════════════════════════════════════════════════
 function startSession(sessionData) {
   sessionStartEpoch = Date.now();
+  sessionPausedAt = null;
+  sessionPausedTotal = 0;
   collapsedExercises = new Set();
   activeSession = {
     id: uid(),
@@ -3295,16 +3340,57 @@ function startSession(sessionData) {
 
 function startTimer() {
   clearInterval(sessionTimerInterval);
-  sessionTimerInterval = setInterval(updateTimer, 1000);
+  if (!sessionPausedAt) {
+    sessionTimerInterval = setInterval(updateTimer, 1000);
+  }
   updateTimer();
+  updatePauseUI();
+}
+
+function getSessionElapsed() {
+  if (!sessionStartEpoch) return 0;
+  const now = sessionPausedAt || Date.now();
+  return Math.floor((now - sessionStartEpoch - sessionPausedTotal) / 1000);
 }
 
 function updateTimer() {
   if (!sessionStartEpoch) return;
-  const elapsed = Math.floor((Date.now() - sessionStartEpoch) / 1000);
+  const elapsed = getSessionElapsed();
   const m = Math.floor(elapsed / 60);
   const s = elapsed % 60;
-  document.getElementById('session-timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  document.querySelector('#session-timer .timer-text').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function toggleSessionPause() {
+  if (!activeSession) return;
+  if (sessionPausedAt) {
+    // Resume
+    sessionPausedTotal += Date.now() - sessionPausedAt;
+    sessionPausedAt = null;
+    sessionTimerInterval = setInterval(updateTimer, 1000);
+  } else {
+    // Pause
+    sessionPausedAt = Date.now();
+    clearInterval(sessionTimerInterval);
+  }
+  updateTimer();
+  updatePauseUI();
+  saveSessionDraftDebounced();
+}
+
+function updatePauseUI() {
+  const timerEl = document.getElementById('session-timer');
+  const pauseIcon = document.getElementById('pause-icon');
+  const playIcon = document.getElementById('play-icon');
+  if (sessionPausedAt) {
+    timerEl.classList.add('paused');
+    pauseIcon.style.display = 'none';
+    playIcon.style.display = '';
+  } else {
+    timerEl.classList.remove('paused');
+    pauseIcon.style.display = '';
+    playIcon.style.display = 'none';
+  }
 }
 
 function renderActiveSession() {
@@ -3959,6 +4045,10 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
 
 // Session back
 document.getElementById('session-back-btn').addEventListener('click', () => {
+  // Auto-pause when navigating away
+  if (!sessionPausedAt && activeSession) {
+    toggleSessionPause();
+  }
   document.getElementById('active-session').classList.remove('open');
   renderHome();
   renderActiveBanner();
@@ -3989,15 +4079,16 @@ document.getElementById('session-notes-input').addEventListener('input', saveSes
 function renderActiveBanner() {
   const banner = document.getElementById('active-banner');
   if (!activeSession) { banner.innerHTML = ''; return; }
-  const elapsed = Math.floor((Date.now() - sessionStartEpoch) / 1000);
+  const elapsed = getSessionElapsed();
   const m = Math.floor(elapsed / 60);
   const completedSets = activeSession.exercises.reduce((a, ex) => a + ex.sets.filter(s=>s.completed).length, 0);
-  banner.innerHTML = `<button class="session-bar" onclick="document.getElementById('active-session').classList.add('open')" style="border:none;width:100%;text-align:left;font-family:inherit;color:inherit">
+  const pauseLabel = sessionPausedAt ? '⏸ Paused' : 'Resume →';
+  banner.innerHTML = `<button class="session-bar" onclick="document.getElementById('active-session').classList.add('open');startTimer()" style="border:none;width:100%;text-align:left;font-family:inherit;color:inherit">
     <div>
       <div class="session-bar-title">${escHtml(activeSession.title)}</div>
       <div style="font-size:11px;font-family:var(--mono)">${completedSets} sets completed</div>
     </div>
-    <div class="session-bar-time">${m}m • Resume →</div>
+    <div class="session-bar-time">${m}m • ${pauseLabel}</div>
   </button>`;
 }
 
@@ -4010,6 +4101,8 @@ function saveSessionDraft() {
   localStorage.setItem(SESSION_DRAFT_KEY, JSON.stringify({
     session: activeSession,
     epoch: sessionStartEpoch,
+    pausedAt: sessionPausedAt,
+    pausedTotal: sessionPausedTotal,
     notes: document.getElementById('session-notes-input')?.value || ''
   }));
   // Flash autosave indicator if present
@@ -4025,17 +4118,20 @@ async function loadSessionDraft() {
   try {
     const raw = localStorage.getItem(SESSION_DRAFT_KEY);
     if (!raw) return false;
-    const {session, epoch, notes} = JSON.parse(raw);
+    const {session, epoch, notes, pausedAt, pausedTotal} = JSON.parse(raw);
     if (!session) return false;
     // Restore
     activeSession = session;
     sessionStartEpoch = epoch;
+    sessionPausedTotal = pausedTotal || 0;
+    // If it was paused when saved, keep it paused
+    sessionPausedAt = pausedAt || null;
     collapsedExercises = new Set();
     document.getElementById('session-notes-input').value = notes || '';
     renderActiveSession();
     document.getElementById('active-session').classList.add('open');
     startTimer();
-    showToast('Resumed in-progress workout');
+    showToast(sessionPausedAt ? 'Resumed workout (paused)' : 'Resumed in-progress workout');
     return true;
   } catch(e) { return false; }
 }
@@ -4061,7 +4157,9 @@ document.getElementById('session-finish-btn').addEventListener('click', async ()
   clearInterval(sessionTimerInterval);
   skipRestTimer();
   activeSession.endTime = Date.now();
-  activeSession.durationMinutes = Math.round((activeSession.endTime - activeSession.startTime) / 60000);
+  // If still paused at finish, count pause time up to now
+  const finalPaused = sessionPausedAt ? sessionPausedTotal + (Date.now() - sessionPausedAt) : sessionPausedTotal;
+  activeSession.durationMinutes = Math.round((activeSession.endTime - activeSession.startTime - finalPaused) / 60000);
   activeSession.notes = document.getElementById('session-notes-input').value.trim();
 
   // Remove any unfilled slots before saving
@@ -4070,6 +4168,8 @@ document.getElementById('session-finish-btn').addEventListener('click', async ()
   await dbPut('sessions', activeSession);
   clearSessionDraft();
   activeSession = null;
+  sessionPausedAt = null;
+  sessionPausedTotal = 0;
   document.getElementById('active-session').classList.remove('open');
   document.getElementById('active-banner').innerHTML = '';
   document.getElementById('session-notes-input').value = '';
@@ -4106,12 +4206,23 @@ async function viewWorkoutDetail(sessionId) {
   const body = document.getElementById('ex-detail-body');
   const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
   document.getElementById('ex-detail-name').textContent = session.title;
-  document.getElementById('ex-detail-sub').textContent = `${date} · ${session.durationMinutes || '?'}m${bwStr}`;
+  document.getElementById('ex-detail-sub').innerHTML = `${date} · ${session.durationMinutes || '?'}m${bwStr} <span onclick="toggleWorkoutTimeEdit()" style="cursor:pointer;opacity:0.5;font-size:11px">✏️</span>`;
 
   // Show repeat button
   repeatWorkoutSessionId = sessionId;
   document.getElementById('ex-detail-filter-bar').style.display = 'none';
   document.getElementById('ex-detail-footer').style.display = '';
+
+  // Build time-edit row (hidden by default)
+  const startDT = toLocalDatetimeStr(session.startTime);
+  const endDT = session.endTime ? toLocalDatetimeStr(session.endTime) : '';
+  const timeEditHtml = `<div id="workout-time-edit" class="time-edit-row" style="display:none">
+    <label>Start</label>
+    <input type="datetime-local" id="edit-start-time" value="${startDT}">
+    <label>End</label>
+    <input type="datetime-local" id="edit-end-time" value="${endDT}">
+    <button class="time-save-btn" onclick="saveWorkoutTimeEdit()">Save</button>
+  </div>`;
 
   const notesHtml = session.notes
     ? `<div style="padding:10px 16px 0;font-size:13px;color:var(--text2);font-style:italic;border-top:1px solid var(--border)">${escHtml(session.notes)}</div>`
@@ -4121,7 +4232,7 @@ async function viewWorkoutDetail(sessionId) {
   const totalVol = session.exercises.reduce((n, ex) =>
     n + ex.sets.filter(s => s.completed).reduce((v, s) => v + (s.weight||0)*(s.reps||0), 0), 0);
 
-  body.innerHTML = `
+  body.innerHTML = timeEditHtml + `
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--border)">
       <div style="padding:12px 14px;border-right:1px solid var(--border)">
         <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Exercises</div>
@@ -7247,6 +7358,42 @@ function initExerciseDrag() {
 let repeatWorkoutSessionId = null;
 let editingPastSessionId = null;
 
+function toLocalDatetimeStr(epoch) {
+  const d = new Date(epoch);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toggleWorkoutTimeEdit() {
+  const el = document.getElementById('workout-time-edit');
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function saveWorkoutTimeEdit() {
+  const sid = editingPastSessionId || repeatWorkoutSessionId;
+  if (!sid) return;
+  const session = await dbGet('sessions', sid);
+  if (!session) return;
+
+  const startVal = document.getElementById('edit-start-time').value;
+  const endVal = document.getElementById('edit-end-time').value;
+  if (!startVal) { showToast('Start time is required'); return; }
+
+  const newStart = new Date(startVal).getTime();
+  const newEnd = endVal ? new Date(endVal).getTime() : null;
+
+  if (newEnd && newEnd <= newStart) { showToast('End must be after start'); return; }
+
+  session.startTime = newStart;
+  session.endTime = newEnd;
+  session.durationMinutes = newEnd ? Math.round((newEnd - newStart) / 60000) : null;
+
+  await dbPut('sessions', session);
+  showToast('Times updated');
+  viewWorkoutDetail(sid);
+  renderHome();
+}
+
 async function editPastSet(sessionId, exIdx, setIdx, field, value) {
   const session = await dbGet('sessions', sessionId);
   if (!session || !session.exercises[exIdx]) return;
@@ -7332,11 +7479,14 @@ document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
   };
 
   sessionStartEpoch = activeSession.startTime;
+  sessionPausedAt = null;
+  sessionPausedTotal = 0;
   document.getElementById('active-session').classList.add('open');
   document.getElementById('session-notes-input').value = '';
   clearInterval(sessionTimerInterval);
   sessionTimerInterval = setInterval(updateTimer, 1000);
   renderActiveSession();
+  updatePauseUI();
   showToast('Repeating workout');
 });
 
