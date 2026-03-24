@@ -38,7 +38,7 @@
   --r2: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
-  --nav-height: calc(58px + env(safe-area-inset-bottom, 20px));
+  --nav-height: calc(58px + env(safe-area-inset-bottom, 0px));
   --gradient: linear-gradient(135deg, #7c3aed, #db2777);
   --gradient-soft: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(219,39,119,0.1));
   --ss-color-1: #a78bfa;
@@ -553,7 +553,7 @@ select option { background: var(--bg3); }
   display: flex;
   gap: 8px;
   flex-shrink: 0;
-  padding-bottom: calc(90px + var(--safe-bot));
+  padding-bottom: calc(12px + var(--safe-bot));
 }
 
 /* Exercise block in active session */
@@ -2726,7 +2726,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["Voltra","Band"],
     variants:["Unilateral"] },
   { id:"back_extension", name:"Back Extension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["BW","Misc","Band"],
+    resistances:["BW","Voltra","Misc","Band"],
     variants:["Unilateral"] },
   { id:"reverse_hyper", name:"Reverse Hyperextension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
     resistances:["BW","Band"],
@@ -2790,7 +2790,7 @@ const EXERCISE_HIERARCHY = [
     variants:[] },
   { id:"ham_curl", name:"Ham Curl", pattern:"isolation", muscles:["hamstrings"], sec:[],
     resistances:["Voltra","Band"],
-    variants:["Unilateral","Seated","Lying"] },
+    variants:["Unilateral","Seated","Lying","Standing"] },
   { id:"hip_thrust", name:"Hip Thrust", pattern:"hinge", muscles:["glutes"], sec:["hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Band","BW"],
     variants:["Unilateral","Paused","Band"] },
