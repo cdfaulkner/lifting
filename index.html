@@ -38,7 +38,7 @@
   --r2: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
-  --nav-height: calc(48px + max(0px, calc(env(safe-area-inset-bottom, 0px) - 10px)));
+  --nav-height: 40px;
   --gradient: linear-gradient(135deg, #7c3aed, #db2777);
   --gradient-soft: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(219,39,119,0.1));
   --ss-color-1: #a78bfa;
@@ -95,7 +95,7 @@ body::after {
   display: flex;
   background: var(--bg2);
   border-top: 1px solid var(--border);
-  padding-bottom: max(0px, calc(env(safe-area-inset-bottom, 0px) - 10px));
+  padding-bottom: 0;
   flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
@@ -110,8 +110,8 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 7px 4px 5px;
+  gap: 1px;
+  padding: 5px 4px 3px;
   background: none;
   border: none;
   color: var(--text3);
@@ -133,11 +133,11 @@ body::after {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(48px + max(0px, calc(env(safe-area-inset-bottom, 0px) - 10px)));
+  padding-bottom: 40px;
 }
 
 .screen { display: none; min-height: 100%; }
-.nav-spacer { height: calc(60px + max(0px, calc(var(--safe-bot) - 10px))); flex-shrink: 0; }
+.nav-spacer { height: 44px; flex-shrink: 0; }
 .screen.active { display: block; }
 
 /* ── HEADER ── */
