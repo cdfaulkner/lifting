@@ -104,6 +104,14 @@ body::after {
   left: 0;
   right: 0;
 }
+#nav-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -100px;
+  height: 100px;
+  background: var(--bg2);
+}
 
 .nav-btn {
   flex: 1;
@@ -639,8 +647,8 @@ select option { background: var(--bg3); }
 .set-row.completed .set-num { color: var(--accent); }
 
 /* ── Voltra eccentric weight column ── */
-.sets-header.voltra { grid-template-columns: 36px 1fr 1fr 1fr 52px 28px 28px; }
-.set-row.voltra { grid-template-columns: 36px 1fr 1fr 1fr 52px 28px 28px; }
+.sets-header.voltra { grid-template-columns: 32px 1fr 1fr 1fr 1fr 44px 24px 24px; }
+.set-row.voltra { grid-template-columns: 32px 1fr 1fr 1fr 1fr 44px 24px 24px; }
 .set-del-btn {
   background: none;
   border: none;
@@ -2034,6 +2042,10 @@ textarea { resize: none; }
             <div class="input-label">Eccentric (lbs)</div>
             <input id="detail-weightEcc" type="number" step="0.5" placeholder="0">
           </div>
+          <div class="input-group" style="flex:1" id="detail-chains-group" hidden>
+            <div class="input-label">Chains (lbs)</div>
+            <input id="detail-weightChains" type="number" step="0.5" placeholder="0">
+          </div>
           <div class="input-group" style="flex:1">
             <div class="input-label">Reps</div>
             <input id="detail-reps" type="number" placeholder="0">
@@ -3228,7 +3240,7 @@ async function startFromTemplate(templateId) {
         slotPattern: te.slotPattern,
         slotMuscles: te.slotMuscles || [],
         sets: (te.defaultSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]).map((s,i) => ({
-          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, reps: s.reps || 8,
+          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
           completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
         }))
       });
@@ -3246,6 +3258,7 @@ async function startFromTemplate(templateId) {
           index: i,
           weight: s.weight || 0,
           weightEcc: s.weightEcc || 0,
+          weightChains: s.weightChains || 0,
           reps: s.reps || 8,
           completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
         }))
@@ -3271,7 +3284,7 @@ async function getLastSetsForVariant(variantId) {
   for (const s of sorted) {
     const ex = s.exercises.find(e => e.variantId === variantId);
     if (ex && ex.sets.some(st => st.completed)) {
-      return ex.sets.filter(st => st.completed).map(st => ({weight: st.weight, weightEcc: st.weightEcc || 0, reps: st.reps}));
+      return ex.sets.filter(st => st.completed).map(st => ({weight: st.weight, weightEcc: st.weightEcc || 0, weightChains: st.weightChains || 0, reps: st.reps}));
     }
   }
   return [{weight: 0, reps: 8}, {weight: 0, reps: 8}, {weight: 0, reps: 8}];
@@ -3303,6 +3316,7 @@ function startSession(sessionData) {
             index: i,
             weight: typeof s.weight === 'number' ? s.weight : (parseFloat(s.weight) || 0),
             weightEcc: typeof s.weightEcc === 'number' ? s.weightEcc : (parseFloat(s.weightEcc) || 0),
+            weightChains: typeof s.weightChains === 'number' ? s.weightChains : (parseFloat(s.weightChains) || 0),
             reps: typeof s.reps === 'number' ? s.reps : (parseInt(s.reps) || 8),
             completed: s.completed || false,
             completedAt: s.completedAt || null,
@@ -3320,6 +3334,7 @@ function startSession(sessionData) {
           index: i,
           weight: typeof s.weight === 'number' ? s.weight : (parseFloat(s.weight) || 0),
           weightEcc: typeof s.weightEcc === 'number' ? s.weightEcc : (parseFloat(s.weightEcc) || 0),
+          weightChains: typeof s.weightChains === 'number' ? s.weightChains : (parseFloat(s.weightChains) || 0),
           reps: typeof s.reps === 'number' ? s.reps : (parseInt(s.reps) || 8),
           completed: s.completed || false,
           completedAt: s.completedAt || null,
@@ -3437,7 +3452,7 @@ function renderActiveSession() {
       <div class="sets-header${isVoltra ? ' voltra' : ''}">
         <div class="sets-header-cell">#</div>
         <div class="sets-header-cell">LBS</div>
-        ${isVoltra ? '<div class="sets-header-cell">ECC</div>' : ''}
+        ${isVoltra ? '<div class="sets-header-cell">ECC</div><div class="sets-header-cell">CHN</div>' : ''}
         <div class="sets-header-cell">REPS</div>
         <div class="sets-header-cell"></div>
         <div class="sets-header-cell"></div>
@@ -3558,7 +3573,7 @@ function fillSessionSlot(exIdx) {
       variantId,
       supersetId: null,
       sets: rawSets.map((s,i) => ({
-        index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, reps: s.reps || 8,
+        index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
         completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
       }))
     };
@@ -3573,6 +3588,7 @@ function fillSessionSlot(exIdx) {
 function renderSetRow(exIdx, si, set, isVoltra) {
   const w = set.weight != null && set.weight !== '' ? set.weight : '';
   const wEcc = set.weightEcc != null && set.weightEcc !== '' ? set.weightEcc : '';
+  const wChains = set.weightChains != null && set.weightChains !== '' ? set.weightChains : '';
   const r = set.reps != null && set.reps !== '' ? set.reps : '';
   const setLabel = String(si + 1);
   return `<div class="set-row ${set.completed ? 'completed' : ''}${isVoltra ? ' voltra' : ''}" id="set-row-${exIdx}-${si}" onclick="focusSetRow(event, ${exIdx}, ${si})">
@@ -3582,6 +3598,9 @@ function renderSetRow(exIdx, si, set, isVoltra) {
       inputmode="decimal">
     ${isVoltra ? `<input class="set-cell-input" type="number" step="0.5" value="${wEcc}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="weightEcc"
+      inputmode="decimal">
+    <input class="set-cell-input" type="number" step="0.5" value="${wChains}" placeholder="0"
+      data-ex="${exIdx}" data-set="${si}" data-field="weightChains"
       inputmode="decimal">` : ''}
     <input class="set-cell-input" type="number" value="${r}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="reps"
@@ -3696,9 +3715,11 @@ function toggleSetComplete(exIdx, si) {
   // Read current input values before toggling
   const wInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weight"]`);
   const wEccInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightEcc"]`);
+  const wChainsInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightChains"]`);
   const rInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="reps"]`);
   if (wInput) set.weight = parseFloat(wInput.value) || 0;
   if (wEccInput) set.weightEcc = parseFloat(wEccInput.value) || 0;
+  if (wChainsInput) set.weightChains = parseFloat(wChainsInput.value) || 0;
   if (rInput) set.reps = parseInt(rInput.value) || 0;
 
   set.completed = !set.completed;
@@ -3740,6 +3761,7 @@ function addSetToExercise(exIdx) {
     index: ex.sets.length,
     weight: lastSet.weight,
     weightEcc: lastSet.weightEcc || 0,
+    weightChains: lastSet.weightChains || 0,
     reps: lastSet.reps,
     completed: false,
     completedAt: null,
@@ -3911,6 +3933,7 @@ async function buildPrevSets(variantId) {
   return raw.map(s => ({
     weight: s.weight || 0,
     weightEcc: s.weightEcc || 0,
+    weightChains: s.weightChains || 0,
     reps: s.reps || 8,
     completed: false,
     completedAt: null,
@@ -3988,12 +4011,18 @@ function openSetDetailModal(exIdx, si) {
   // Show/hide ECC weight field
   const eccGroup = document.getElementById('detail-ecc-group');
   const eccInput = document.getElementById('detail-weightEcc');
+  const chainsGroup = document.getElementById('detail-chains-group');
+  const chainsInput = document.getElementById('detail-weightChains');
   if (isVoltra) {
     eccGroup.hidden = false;
     eccInput.value = set.weightEcc || '';
+    chainsGroup.hidden = false;
+    chainsInput.value = set.weightChains || '';
   } else {
     eccGroup.hidden = true;
     eccInput.value = '';
+    chainsGroup.hidden = true;
+    chainsInput.value = '';
   }
 
   const tsEl = document.getElementById('detail-timestamp');
@@ -4013,6 +4042,7 @@ document.getElementById('detail-save-btn').addEventListener('click', () => {
   const set = activeSession.exercises[exIdx].sets[si];
   set.weight = parseFloat(document.getElementById('detail-weight').value) || 0;
   set.weightEcc = parseFloat(document.getElementById('detail-weightEcc').value) || 0;
+  set.weightChains = parseFloat(document.getElementById('detail-weightChains').value) || 0;
   set.reps = parseInt(document.getElementById('detail-reps').value) || 0;
   set.rpe = parseFloat(document.getElementById('detail-rpe').value) || null;
   set.restSeconds = parseInt(document.getElementById('detail-rest').value) || null;
@@ -4021,9 +4051,11 @@ document.getElementById('detail-save-btn').addEventListener('click', () => {
   // Update inline inputs
   const wInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weight"]`);
   const wEccInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightEcc"]`);
+  const wChainsInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightChains"]`);
   const rInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="reps"]`);
   if (wInput) wInput.value = set.weight || '';
   if (wEccInput) wEccInput.value = set.weightEcc || '';
+  if (wChainsInput) wChainsInput.value = set.weightChains || '';
   if (rInput) rInput.value = set.reps || '';
 
   closeModal('modal-set-detail');
@@ -4254,7 +4286,7 @@ async function viewWorkoutDetail(sessionId) {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
     const pastIsVoltra = isVoltraVariant(ex.variantId);
-    const pastGridCols = pastIsVoltra ? '20px 1fr 1fr 1fr 28px' : '20px 1fr 1fr 28px';
+    const pastGridCols = pastIsVoltra ? '20px 1fr 1fr 1fr 1fr 28px' : '20px 1fr 1fr 28px';
     return `<div style="margin-bottom:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);overflow:hidden">
       <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border)">
         <div style="font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</div>
@@ -4265,14 +4297,15 @@ async function viewWorkoutDetail(sessionId) {
       </div>
       <div style="padding:6px 10px">
         <div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;padding:2px 0 4px;font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center">
-          <div></div><div>LBS</div>${pastIsVoltra ? '<div>ECC</div>' : ''}<div>REPS</div><div></div>
+          <div></div><div>LBS</div>${pastIsVoltra ? '<div>ECC</div><div>CHN</div>' : ''}<div>REPS</div><div></div>
         </div>
         ${sets.map((s, i) => {
           const origIdx = ex.sets.indexOf(s);
           return `<div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;align-items:center;padding:2px 0;border-top:1px solid var(--border)">
             <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
             <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
-            ${pastIsVoltra ? `<input type="number" step="0.5" value="${s.weightEcc || ''}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weightEcc',this.value)">` : ''}
+            ${pastIsVoltra ? `<input type="number" step="0.5" value="${s.weightEcc || ''}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weightEcc',this.value)">
+            <input type="number" step="0.5" value="${s.weightChains || ''}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weightChains',this.value)">` : ''}
             <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
             <button onclick="deletePastSet('${session.id}',${exI},${origIdx})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
           </div>`;
@@ -7409,7 +7442,7 @@ async function addSetToPastWorkout(sessionId, exIdx) {
   if (!session || !session.exercises[exIdx]) return;
   const sets = session.exercises[exIdx].sets;
   const last = sets.filter(s => s.completed).pop() || sets[sets.length - 1] || {weight: 0, reps: 8};
-  sets.push({weight: last.weight, weightEcc: last.weightEcc || 0, reps: last.reps, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''});
+  sets.push({weight: last.weight, weightEcc: last.weightEcc || 0, weightChains: last.weightChains || 0, reps: last.reps, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''});
   await dbPut('sessions', session);
   viewWorkoutDetail(sessionId);
 }
@@ -7462,6 +7495,7 @@ document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
     sets: ex.sets.map(s => ({
       weight: s.weight || 0,
       weightEcc: s.weightEcc || 0,
+      weightChains: s.weightChains || 0,
       reps: s.reps || 0,
       completed: false,
       completedAt: null,
