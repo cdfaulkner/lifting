@@ -856,7 +856,7 @@ select option { background: var(--bg3); }
 .prev-best span { color: var(--text2); }
 
 /* ════════════════════════════════════
-   TEMPLATES SCREEN
+   PLANNED WORKOUTS SCREEN
 ════════════════════════════════════ */
 #screen-templates .template-list {
   padding: 12px 16px;
@@ -1838,11 +1838,11 @@ textarea { resize: none; }
       <div id="recent-workouts" class="workout-list"></div>
     </div>
 
-    <!-- ══ TEMPLATES ══ -->
+    <!-- ══ PLANNED WORKOUTS ══ -->
     <div id="screen-templates" class="screen">
       <div class="page-header">
-        <div class="page-title">Templates</div>
-        <button class="btn btn-primary btn-sm" id="new-template-btn">+ New</button>
+        <div class="page-title">Planned Workouts</div>
+        <button class="btn btn-primary btn-sm" id="new-template-btn">+ Plan</button>
       </div>
       <div id="template-list" class="template-list"></div>
     </div>
@@ -1884,48 +1884,23 @@ textarea { resize: none; }
       </div>
     </div>
 
-    <!-- ══ PROGRESS ══ -->
+    <!-- ══ BODY ══ -->
     <div id="screen-progress" class="screen">
-      <div class="page-header">
-        <div class="page-title">Progress</div>
+      <div class="page-header" style="justify-content:space-between">
+        <div class="page-title">Body</div>
+        <button onclick="openMeasModal()" class="btn btn-primary btn-sm">+ Log</button>
       </div>
-      <!-- Sub-tabs -->
-      <div class="progress-tabs">
-        <button class="progress-tab active" id="ptab-bodyweight" onclick="setProgressTab('bodyweight')">Body Weight</button>
-        <button class="progress-tab" id="ptab-lifts" onclick="setProgressTab('lifts')">Lifts</button>
-      </div>
-
-      <!-- ── Body Weight Sub-screen ── -->
-      <div id="progress-panel-bodyweight" class="progress-panel">
-        <div class="bw-chart-wrap">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-size:11px;color:var(--text3);font-weight:500">Trend</div>
-            <button id="bw-log-btn" onclick="openBWModal()" class="btn btn-secondary btn-sm">+ Log Weight</button>
-          </div>
-          <div class="bw-chart-container">
-            <div id="bw-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
-            <div class="bw-chart"><svg id="bw-svg"></svg><div class="bw-tooltip" id="bw-tooltip"><div class="bw-tooltip-weight" id="bw-tip-weight"></div><div class="bw-tooltip-date" id="bw-tip-date"></div></div></div>
-            <div id="bw-period-pills" class="period-pills" style="margin-top:8px;padding:0"></div>
-          </div>
-        </div>
-        <!-- Entries always visible below chart -->
-        <div style="padding:0 16px 16px">
-          <div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Entries</div>
-          <div id="bw-history-list" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto"></div>
+      <div class="bw-chart-wrap">
+        <div id="meas-metric-pills" class="period-pills" style="margin-bottom:8px;padding:0"></div>
+        <div class="bw-chart-container">
+          <div id="meas-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
+          <div class="bw-chart"><svg id="meas-svg"></svg><div class="bw-tooltip" id="meas-tooltip"><div class="bw-tooltip-weight" id="meas-tip-val"></div><div class="bw-tooltip-date" id="meas-tip-date"></div></div></div>
+          <div id="meas-period-pills" class="period-pills" style="margin-top:8px;padding:0"></div>
         </div>
       </div>
-
-      <!-- ── Lifts Sub-screen ── -->
-      <div id="progress-panel-lifts" class="progress-panel" style="display:none">
-        <div style="padding:12px 16px 8px">
-          <div class="lifts-search-wrap">
-            <span class="lifts-search-icon">🔍</span>
-            <input type="text" id="lifts-search-input" placeholder="Search exercises…" oninput="onLiftsSearch(this.value)" />
-          </div>
-          <div id="lifts-breadcrumb" class="lifts-breadcrumb" style="display:none"></div>
-          <div class="lifts-filter-bar" id="lifts-filter-bar"></div>
-        </div>
-        <div id="top-lifts-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="padding:0 16px 16px">
+        <div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Entries</div>
+        <div id="meas-history-list" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto"></div>
       </div>
     </div>
 
@@ -1983,7 +1958,7 @@ textarea { resize: none; }
     </button>
     <button class="nav-btn" data-screen="templates">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Templates
+      Plan
     </button>
     <button class="nav-btn" data-screen="library">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -1991,7 +1966,7 @@ textarea { resize: none; }
     </button>
     <button class="nav-btn" data-screen="progress">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Progress
+      Body
     </button>
     <button class="nav-btn" data-screen="mobility">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M12 11v4M8 17c0-2.2 1.8-4 4-4s4 1.8 4 4"/><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
@@ -2016,7 +1991,7 @@ textarea { resize: none; }
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-primary" id="start-empty-btn" style="width:100%">Start Empty Workout</button>
       </div>
-      <div style="margin:16px 0 8px;font-size:12px;color:var(--text3);font-weight:500">From template</div>
+      <div style="margin:16px 0 8px;font-size:12px;color:var(--text3);font-weight:500">From planned workouts</div>
       <div id="modal-template-list" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
   </div>
@@ -2106,19 +2081,19 @@ textarea { resize: none; }
   </div>
 </div>
 
-<!-- Template Editor -->
+<!-- Workout Planner -->
 <div class="modal-overlay" id="modal-template-editor">
   <div class="modal" style="max-height:95vh">
     <div class="modal-header">
-      <div style="display:flex;align-items:center;gap:8px"><div class="modal-title" id="tmpl-editor-title">New Template</div><div id="tmpl-autosave-dot" class="autosave-dot" title="Saved"></div></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="modal-title" id="tmpl-editor-title">Plan Workout</div><div id="tmpl-autosave-dot" class="autosave-dot" title="Saved"></div></div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-template-editor')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="input-group" style="margin-bottom:12px">
-        <div class="input-label">Template Name</div>
-        <input id="tmpl-name-input" type="text" placeholder="Push / Pull / Legs…">
+        <div class="input-label">Workout Name</div>
+        <input id="tmpl-name-input" type="text" placeholder="e.g., Monday Upper, Heavy Legs…">
       </div>
       <div id="tmpl-exercises-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
       <div style="display:flex;gap:6px">
@@ -2128,35 +2103,52 @@ textarea { resize: none; }
     </div>
     <div class="modal-footer" style="display:flex;gap:8px">
       <button class="btn btn-danger btn-sm" id="tmpl-delete-btn" style="display:none">Delete</button>
-      <button class="btn btn-primary" id="tmpl-save-btn" style="flex:1">Save Template</button>
+      <button class="btn btn-primary" id="tmpl-save-btn" style="flex:1">Save Plan</button>
     </div>
   </div>
 </div>
 
-<!-- BW Entry -->
-<div class="modal-overlay" id="modal-bw-entry">
+<!-- Measurement Entry -->
+<div class="modal-overlay" id="modal-meas-entry">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Log Weight</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-bw-entry')">
+      <div class="modal-title" id="meas-modal-title">Log Measurements</div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-meas-entry')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <div class="input-row">
-        <div class="input-group" style="flex:1">
-          <div class="input-label">Date</div>
-          <input id="bw-date-input" type="date">
-        </div>
-        <div class="input-group" style="flex:1">
+      <div class="input-group" style="margin-bottom:10px">
+        <div class="input-label">Date</div>
+        <input id="meas-date-input" type="date">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="input-group" style="grid-column:span 2">
           <div class="input-label">Weight (lbs)</div>
-          <input id="bw-weight-input" type="number" step="0.1" placeholder="180.0">
+          <input id="meas-weight" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Neck (in)</div>
+          <input id="meas-neck" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Bicep (in)</div>
+          <input id="meas-bicep" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Waist (in)</div>
+          <input id="meas-waist" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Thigh (in)</div>
+          <input id="meas-thigh" type="number" step="0.1" placeholder="—">
         </div>
       </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">Bicep & thigh = left side</div>
     </div>
     <div class="modal-footer" style="display:flex;gap:8px">
-      <button class="btn btn-danger btn-sm" id="bw-delete-btn" style="display:none">Delete</button>
-      <button class="btn btn-primary" id="bw-save-btn" style="flex:1">Save</button>
+      <button class="btn btn-danger btn-sm" id="meas-delete-btn" style="display:none">Delete</button>
+      <button class="btn btn-primary" id="meas-save-btn" style="flex:1">Save</button>
     </div>
   </div>
 </div>
@@ -2430,7 +2422,7 @@ textarea { resize: none; }
 // ═══════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
-const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight']);
+const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -2472,7 +2464,7 @@ async function sbRequest(method, path, body) {
 }
 
 async function sbGetAll(store) {
-  const orderBy = store === 'bodyweight' ? 'id.asc' : 'updated_at.asc';
+  const orderBy = (store === 'bodyweight' || store === 'measurements') ? 'id.asc' : 'updated_at.asc';
   const PAGE = 1000;
   let all = [], offset = 0, page;
   do {
@@ -2502,7 +2494,7 @@ async function sbDelete(store, key) {
 }
 
 const DB_NAME = 'ironlog';
-const DB_VER = 4;
+const DB_VER = 5;
 let db;
 
 function openDB() {
@@ -2547,6 +2539,9 @@ function openDB() {
       }
       if (!d.objectStoreNames.contains('pr_records')) {
         d.createObjectStore('pr_records', { keyPath: 'variantId' });
+      }
+      if (!d.objectStoreNames.contains('measurements')) {
+        d.createObjectStore('measurements', { keyPath: 'date' });
       }
     };
     req.onsuccess = e => { db = e.target.result; res(db); };
@@ -3163,8 +3158,8 @@ async function renderHome() {
   const bwMap = {};
   await Promise.all(cards.map(async ({s}) => {
     const d = new Date(s.startTime).toISOString().split('T')[0];
-    const bw = await dbGet('bodyweight', d);
-    if (bw) bwMap[s.id] = bw.weight_lbs;
+    const m = await dbGet('measurements', d);
+    if (m && m.weight) bwMap[s.id] = m.weight;
   }));
 
   list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
@@ -3213,7 +3208,7 @@ async function openNewWorkoutModal() {
       <span style="font-size:12px;color:var(--text3)">${t.exercises.length} exercises</span>
     </button>`).join('');
   if (templates.length === 0) {
-    list.innerHTML = `<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">No templates yet</div>`;
+    list.innerHTML = `<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">No planned workouts</div>`;
   }
   openModal('modal-new-workout');
 }
@@ -3227,7 +3222,7 @@ async function startFromTemplate(templateId) {
   closeModal('modal-new-workout');
   let tmpl = null;
   try { tmpl = await dbGet('templates', templateId); } catch(e) {}
-  if (!tmpl) { showToast('Template not found'); return; }
+  if (!tmpl) { showToast('Plan not found'); return; }
   
   // Build session exercises one at a time so one failure can't block others
   const exercises = [];
@@ -3276,6 +3271,10 @@ async function startFromTemplate(templateId) {
     }
   }
   startSession({title: tmpl.name, exercises});
+  
+  // Single-use: delete the plan after launching
+  try { await dbDelete('templates', templateId); } catch(e) {}
+  renderTemplates();
 }
 
 async function getLastSetsForVariant(variantId) {
@@ -4233,8 +4232,8 @@ async function viewWorkoutDetail(sessionId) {
 
   // Look up bodyweight for that day
   const sessionDate = new Date(session.startTime).toISOString().split('T')[0];
-  const bwEntry = await dbGet('bodyweight', sessionDate);
-  const bwStr = bwEntry ? ` · ${bwEntry.weight_lbs} lbs` : '';
+  const measEntry = await dbGet('measurements', sessionDate);
+  const bwStr = measEntry && measEntry.weight ? ` · ${measEntry.weight} lbs` : '';
 
   const body = document.getElementById('ex-detail-body');
   const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
@@ -4776,9 +4775,9 @@ function renderSparkline(values) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TEMPLATES
+// PLANNED WORKOUTS
 // ═══════════════════════════════════════════════════════════════
-let templateOrder = []; // ordered list of template IDs
+let templateOrder = []; // ordered list of plan IDs
 
 async function renderTemplates() {
   const templates = await dbGetAll('templates');
@@ -4786,8 +4785,8 @@ async function renderTemplates() {
   if (templates.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon">📋</div>
-      <div class="empty-state-title">No templates yet</div>
-      <div class="empty-state-sub">Create templates to start workouts quickly</div>
+      <div class="empty-state-title">No planned workouts</div>
+      <div class="empty-state-sub">Plan workouts ahead of time and start them when you're ready</div>
     </div>`;
     return;
   }
@@ -4806,7 +4805,10 @@ async function renderTemplates() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
         </div>
         <div class="template-name">${escHtml(t.name)}</div>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="openTemplateEditor('${t.id}')">
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="duplicatePlan('${t.id}')" title="Duplicate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="openTemplateEditor('${t.id}')" title="Edit">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
       </div>
@@ -4833,32 +4835,47 @@ async function renderTemplates() {
         ${t.exercises.length > 6 ? `<div style="font-size:11px;color:var(--text3)">+${t.exercises.length-6} more</div>` : ''}
       </div>
       <div class="template-actions">
-        <button class="btn btn-primary btn-sm" onclick="startFromTemplate('${t.id}')">Start Workout</button>
+        <button class="btn btn-primary btn-sm" onclick="startFromTemplate('${t.id}')">Start</button>
       </div>
     </div>`).join('');
 
   initTemplateDrag();
 
-  // Swipe to delete templates
+  // Swipe to delete planned workouts
   const tmplList = document.getElementById('template-list');
   [...tmplList.querySelectorAll('.template-card')].forEach(card => {
     const tid = card.dataset.tid;
     makeSwipeable(card, async (el) => {
       await dbDelete('templates', tid);
-      showToast('Template deleted');
+      showToast('Plan deleted');
       renderTemplates();
     });
   });
   initSwipeDelete(tmplList, '.template-card', async (el) => {
     const tid = el.dataset.tid;
     await dbDelete('templates', tid);
-    showToast('Template deleted');
+    showToast('Plan deleted');
     renderTemplates();
   });
 }
 
 function saveTemplateOrder() {
   localStorage.setItem('tmpl_order', JSON.stringify(templateOrder));
+}
+
+async function duplicatePlan(templateId) {
+  try {
+    const tmpl = await dbGet('templates', templateId);
+    if (!tmpl) return;
+    const copy = {
+      id: uid(),
+      name: tmpl.name + ' (copy)',
+      exercises: JSON.parse(JSON.stringify(tmpl.exercises))
+    };
+    await dbPut('templates', copy);
+    showToast('Plan duplicated');
+    renderTemplates();
+  } catch(e) { showToast('Failed to duplicate'); }
 }
 
 function initTemplateDrag() {
@@ -4996,7 +5013,7 @@ async function openTemplateEditor(templateId) {
   if (templateId) {
     const tmpl = await dbGet('templates', templateId);
     if (!tmpl) return;
-    document.getElementById('tmpl-editor-title').textContent = 'Edit Template';
+    document.getElementById('tmpl-editor-title').textContent = 'Edit Plan';
     if (hasDraft) {
       document.getElementById('tmpl-name-input').value = draft.name;
       renderTemplateExercises(draft.exercises);
@@ -5007,7 +5024,7 @@ async function openTemplateEditor(templateId) {
     }
     deleteBtn.style.display = '';
   } else {
-    document.getElementById('tmpl-editor-title').textContent = 'New Template';
+    document.getElementById('tmpl-editor-title').textContent = 'Plan Workout';
     if (hasDraft) {
       document.getElementById('tmpl-name-input').value = draft.name;
       renderTemplateExercises(draft.exercises);
@@ -5491,7 +5508,7 @@ document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
     renderTemplateExercises(tmplExercises);
     closeExercisePicker();
   };
-  document.getElementById('pick-ex-title').textContent = 'Add to Template';
+  document.getElementById('pick-ex-title').textContent = 'Add to Plan';
   document.getElementById('pick-ex-confirm').textContent = 'Add Exercise';
   openExercisePicker();
 });
@@ -5513,7 +5530,7 @@ function addTmplSlot(slotId) {
 
 document.getElementById('tmpl-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('tmpl-name-input').value.trim();
-  if (!name) { showToast('Enter a template name'); return; }
+  if (!name) { showToast('Enter a workout name'); return; }
   const tmpl = {
     id: editingTemplateId || uid(),
     name,
@@ -5521,17 +5538,17 @@ document.getElementById('tmpl-save-btn').addEventListener('click', async () => {
   };
   await dbPut('templates', tmpl);
   closeModal('modal-template-editor');
-  showToast('Template saved');
+  showToast('Plan saved');
   renderTemplates();
 });
 
 document.getElementById('tmpl-delete-btn').addEventListener('click', async () => {
   if (!editingTemplateId) return;
-  if (!confirm('Delete this template?')) return;
+  if (!confirm('Delete this planned workout?')) return;
   await dbDelete('templates', editingTemplateId);
   clearTmplDraft();
   closeModal('modal-template-editor');
-  showToast('Template deleted');
+  showToast('Plan deleted');
   renderTemplates();
 });
 
@@ -6088,108 +6105,89 @@ function setLibMuscle(m) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PROGRESS SCREEN
+// BODY SCREEN
 // ═══════════════════════════════════════════════════════════════
-let bwPeriod = '3m';
-let progressTab = 'bodyweight';
 let liftsPatternFilter = 'all';
 let liftsParentFilter = null;   // null = show pattern pills; string = show variants for this parent
 let liftsSearchQuery = '';
 
-function setProgressTab(tab) {
-  progressTab = tab;
-  document.getElementById('progress-panel-bodyweight').style.display = tab === 'bodyweight' ? '' : 'none';
-  document.getElementById('progress-panel-lifts').style.display = tab === 'lifts' ? '' : 'none';
-  document.getElementById('ptab-bodyweight').classList.toggle('active', tab === 'bodyweight');
-  document.getElementById('ptab-lifts').classList.toggle('active', tab === 'lifts');
-  if (tab === 'bodyweight') { renderBWChart(); renderBWHistoryList(); }
-  if (tab === 'lifts') renderLiftsTab();
-}
-
 async function renderProgress() {
-  if (progressTab === 'bodyweight') {
-    await renderBWChart();
-    await renderBWHistoryList();
-  } else {
-    await renderLiftsTab();
-  }
+  await renderMeasurementsTab();
 }
 
-const BW_PERIODS = {'1m':30,'3m':90,'6m':180,'1y':365,'all':99999};
+// ═══════════════════════════════════════════════════════════════
+// MEASUREMENTS
+// ═══════════════════════════════════════════════════════════════
+const MEAS_METRICS = [
+  { key: 'weight',  label: 'Weight', unit: 'lbs', color: 'var(--accent)',      down_good: true },
+  { key: 'neck',    label: 'Neck',   unit: 'in',  color: 'var(--green)',       down_good: false },
+  { key: 'bicep',   label: 'Bicep',  unit: 'in',  color: 'var(--accent-pink)', down_good: false },
+  { key: 'waist',   label: 'Waist',  unit: 'in',  color: 'var(--accent-blue)', down_good: true },
+  { key: 'thigh',   label: 'Thigh',  unit: 'in',  color: 'var(--blue)',        down_good: false },
+];
+let measMetric = 'weight';
+let measPeriod = 'all';
+const MEAS_PERIODS = {'3m':90,'6m':180,'1y':365,'all':99999};
 
-async function renderBWChart() {
-  const entries = await dbGetAll('bodyweight');
-  entries.sort((a,b) => a.date.localeCompare(b.date));
+let _measChartData = [];
+let _measChartLayout = null;
 
-  const cutoff = Date.now() - BW_PERIODS[bwPeriod] * 86400000;
+async function renderMeasurementsTab() {
+  await renderMeasChart();
+  await renderMeasHistory();
+}
+
+async function renderMeasChart() {
+  const allEntries = await dbGetAll('measurements');
+  allEntries.sort((a,b) => a.date.localeCompare(b.date));
+
+  const metric = MEAS_METRICS.find(m => m.key === measMetric);
+
+  // Metric pills
+  const metricPillsEl = document.getElementById('meas-metric-pills');
+  metricPillsEl.innerHTML = MEAS_METRICS.map(m => `
+    <button class="period-pill ${measMetric === m.key ? 'active' : ''}" onclick="setMeasMetric('${m.key}')">${m.label}</button>`).join('');
+
+  // Filter to entries that have this metric
+  const entries = allEntries.filter(e => e[measMetric] != null && e[measMetric] > 0);
+  const cutoff = Date.now() - MEAS_PERIODS[measPeriod] * 86400000;
   const filtered = entries.filter(e => new Date(e.date).getTime() >= cutoff);
   const display = filtered.length > 0 ? filtered : entries.slice(-30);
 
   // Stats
-  const statsRow = document.getElementById('bw-stats-row');
+  const statsRow = document.getElementById('meas-stats-row');
   if (display.length > 0) {
     const latest = display[display.length - 1];
     const oldest = display[0];
-    const change = latest.weight_lbs - oldest.weight_lbs;
+    const latestVal = latest[measMetric];
+    const change = latestVal - oldest[measMetric];
     const changeStr = (change >= 0 ? '+' : '') + change.toFixed(1);
-    const changeColor = change <= 0 ? 'var(--green)' : 'var(--red)';
+    // Color: green if change is in desired direction
+    const changeColor = metric.down_good ? (change <= 0 ? 'var(--green)' : 'var(--red)') : (change >= 0 ? 'var(--green)' : 'var(--red)');
     statsRow.innerHTML = `
       <div>
-        <div style="font-size:10px;color:var(--text3)">Current</div>
-        <div style="font-family:var(--display);font-size:22px;font-weight:600">${latest.weight_lbs} <span style="font-size:13px;font-weight:400;color:var(--text2)">lbs</span></div>
+        <div style="font-size:10px;color:var(--text3)">Latest</div>
+        <div style="font-family:var(--display);font-size:22px;font-weight:600">${latestVal} <span style="font-size:13px;font-weight:400;color:var(--text2)">${metric.unit}</span></div>
       </div>
       <div>
         <div style="font-size:10px;color:var(--text3)">Change</div>
         <div style="font-family:var(--display);font-size:22px;font-weight:600;color:${changeColor}">${changeStr}</div>
       </div>`;
   } else {
-    statsRow.innerHTML = `<div style="color:var(--text3);font-size:13px">No data</div>`;
+    statsRow.innerHTML = `<div style="color:var(--text3);font-size:13px">No ${metric.label} data yet</div>`;
   }
 
   // Period pills
-  const pillsEl = document.getElementById('bw-period-pills');
-  pillsEl.innerHTML = Object.keys(BW_PERIODS).map(p => `
-    <button class="period-pill ${bwPeriod === p ? 'active' : ''}" onclick="setBWPeriod('${p}')">${p}</button>`).join('');
+  const periodEl = document.getElementById('meas-period-pills');
+  periodEl.innerHTML = Object.keys(MEAS_PERIODS).map(p => `
+    <button class="period-pill ${measPeriod === p ? 'active' : ''}" onclick="setMeasPeriod('${p}')">${p}</button>`).join('');
 
   // Chart
-  renderBWSVG(display);
+  renderMeasSVG(display, metric);
 }
 
-async function renderBWHistoryList() {
-  const entries = await dbGetAll('bodyweight');
-  entries.sort((a,b) => b.date.localeCompare(a.date)); // newest first
-  const histEl = document.getElementById('bw-history-list');
-  if (!histEl) return;
-  if (entries.length === 0) {
-    histEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No entries yet</div>';
-    return;
-  }
-  histEl.innerHTML = entries.map(e => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border)">
-      <span style="font-size:13px;color:var(--text2)">${e.date}</span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:14px;font-weight:600">${e.weight_lbs} <span style="font-size:11px;font-weight:400;color:var(--text3)">lbs</span></span>
-        <button onclick="editBWEntry('${e.date}', ${e.weight_lbs})" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button onclick="deleteBWEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Delete" style="opacity:0.6;color:var(--red)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-        </button>
-      </div>
-    </div>`).join('');
-}
-
-function setBWPeriod(p) {
-  bwPeriod = p;
-  renderBWChart();
-}
-
-// Store chart data for tooltip interaction
-let _bwChartData = [];
-let _bwChartLayout = null;
-
-function renderBWSVG(data) {
-  const svg = document.getElementById('bw-svg');
+function renderMeasSVG(data, metric) {
+  const svg = document.getElementById('meas-svg');
   if (!data.length) { svg.innerHTML = ''; return; }
 
   const W = svg.parentElement.clientWidth || 300;
@@ -6198,96 +6196,89 @@ function renderBWSVG(data) {
   const iW = W - pad.left - pad.right;
   const iH = H - pad.top - pad.bottom;
 
-  const weights = data.map(d => d.weight_lbs);
-  const minW = Math.min(...weights) - 2;
-  const maxW = Math.max(...weights) + 2;
+  const vals = data.map(d => d[measMetric]);
+  const minV = Math.min(...vals) - 0.5;
+  const maxV = Math.max(...vals) + 0.5;
 
   const toX = i => pad.left + (data.length === 1 ? iW / 2 : (i / (data.length - 1)) * iW);
-  const toY = w => pad.top + iH - ((w - minW) / (maxW - minW)) * iH;
+  const toY = v => pad.top + iH - ((v - minV) / (maxV - minV)) * iH;
 
-  _bwChartData = data;
-  _bwChartLayout = { W, H, pad, iW, iH, minW, maxW, toX, toY };
+  _measChartData = data;
+  _measChartLayout = { W, H, pad, iW, iH, minV, maxV, toX, toY };
 
-  const linePoints = data.map((d, i) => `${toX(i)},${toY(d.weight_lbs)}`).join(' ');
+  const linePoints = data.map((d, i) => `${toX(i)},${toY(d[measMetric])}`).join(' ');
   const areaPoints = `${pad.left},${pad.top + iH} ${linePoints} ${pad.left + iW},${pad.top + iH}`;
 
   const ySteps = 4;
   const yLabels = Array.from({length: ySteps+1}, (_, i) => {
-    const val = minW + (i/ySteps) * (maxW - minW);
+    const val = minV + (i/ySteps) * (maxV - minV);
     const y = toY(val);
-    return `<text x="${pad.left - 4}" y="${y + 4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="DM Mono, monospace">${Math.round(val)}</text>`;
+    return `<text x="${pad.left - 4}" y="${y + 4}" text-anchor="end" fill="var(--text3)" font-size="9" font-family="DM Mono, monospace">${val.toFixed(1)}</text>`;
   }).join('');
 
-  // Hit-target rects per data point for precise touch targeting
   const hitTargets = data.map((d, i) => {
     const x = toX(i);
     const slotW = data.length > 1 ? iW / (data.length - 1) : iW;
     const hx = x - slotW / 2;
-    return `<rect x="${hx}" y="${pad.top}" width="${slotW}" height="${iH}" fill="transparent" data-idx="${i}" class="bw-hit"/>`;
+    return `<rect x="${hx}" y="${pad.top}" width="${slotW}" height="${iH}" fill="transparent" data-idx="${i}" class="meas-hit"/>`;
   }).join('');
 
-  // Crosshair line + active dot (hidden by default)
   const crosshair = `
-    <line id="bw-crosshair" x1="0" y1="${pad.top}" x2="0" y2="${pad.top + iH}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none"/>
-    <circle id="bw-active-dot" cx="0" cy="0" r="6" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5" opacity="0" pointer-events="none"/>
+    <line id="meas-crosshair" x1="0" y1="${pad.top}" x2="0" y2="${pad.top + iH}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3" opacity="0" pointer-events="none"/>
+    <circle id="meas-active-dot" cx="0" cy="0" r="6" fill="var(--bg)" stroke="${metric.color}" stroke-width="2.5" opacity="0" pointer-events="none"/>
   `;
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = `
     <defs>
-      <linearGradient id="bwg" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.25"/>
-        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+      <linearGradient id="measg" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="${metric.color}" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="${metric.color}" stop-opacity="0"/>
       </linearGradient>
     </defs>
     ${yLabels}
     <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + iH}" stroke="var(--border)" stroke-width="1"/>
-    <polygon points="${areaPoints}" fill="url(#bwg)"/>
-    <polyline points="${linePoints}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${toX(data.length-1)}" cy="${toY(data[data.length-1].weight_lbs)}" r="4" fill="var(--accent)"/>
+    <polygon points="${areaPoints}" fill="url(#measg)"/>
+    <polyline points="${linePoints}" fill="none" stroke="${metric.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${toX(data.length-1)}" cy="${toY(data[data.length-1][measMetric])}" r="4" fill="${metric.color}"/>
     ${crosshair}
     ${hitTargets}
   `;
 
-  // Wire up interaction: hover shows tooltip, click/tap opens edit modal
-  svg.querySelectorAll('.bw-hit').forEach(el => {
+  svg.querySelectorAll('.meas-hit').forEach(el => {
     const idx = parseInt(el.dataset.idx);
-    el.addEventListener('mouseenter', () => bwChartShowTip(idx));
+    el.addEventListener('mouseenter', () => measChartShowTip(idx));
     el.addEventListener('click', () => {
-      const d = _bwChartData[idx];
-      if (d) { bwChartHideTip(); editBWEntry(d.date, d.weight_lbs); }
+      const d = _measChartData[idx];
+      if (d) { measChartHideTip(); editMeasEntry(d.date); }
     });
-    el.addEventListener('touchstart', e => {
-      e.preventDefault();
-      bwChartShowTip(idx);
-    }, {passive: false});
+    el.addEventListener('touchstart', e => { e.preventDefault(); measChartShowTip(idx); }, {passive: false});
     el.addEventListener('touchend', e => {
       e.preventDefault();
-      const d = _bwChartData[idx];
-      if (d) { bwChartHideTip(); editBWEntry(d.date, d.weight_lbs); }
+      const d = _measChartData[idx];
+      if (d) { measChartHideTip(); editMeasEntry(d.date); }
     }, {passive: false});
   });
-  svg.addEventListener('mouseleave', bwChartHideTip);
+  svg.addEventListener('mouseleave', measChartHideTip);
 }
 
-function bwChartShowTip(idx) {
-  if (!_bwChartData[idx] || !_bwChartLayout) return;
-  const d = _bwChartData[idx];
-  const { toX, toY, W, pad } = _bwChartLayout;
+function measChartShowTip(idx) {
+  if (!_measChartData[idx] || !_measChartLayout) return;
+  const d = _measChartData[idx];
+  const { toX, toY, W, pad } = _measChartLayout;
   const x = toX(idx);
-  const y = toY(d.weight_lbs);
+  const y = toY(d[measMetric]);
+  const metric = MEAS_METRICS.find(m => m.key === measMetric);
 
-  // Update crosshair + dot
-  const crosshair = document.getElementById('bw-crosshair');
-  const dot = document.getElementById('bw-active-dot');
+  const crosshair = document.getElementById('meas-crosshair');
+  const dot = document.getElementById('meas-active-dot');
   if (crosshair) { crosshair.setAttribute('x1', x); crosshair.setAttribute('x2', x); crosshair.setAttribute('opacity', '1'); }
   if (dot) { dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('opacity', '1'); }
 
-  // Position tooltip — clamp so it doesn't overflow edges
-  const tooltip = document.getElementById('bw-tooltip');
+  const tooltip = document.getElementById('meas-tooltip');
   const container = tooltip.parentElement;
   const containerW = container.clientWidth;
-  const tipW = 100; // approx
+  const tipW = 100;
   const frac = x / W;
   let leftPx = frac * containerW;
   leftPx = Math.max(tipW/2 + 4, Math.min(containerW - tipW/2 - 4, leftPx));
@@ -6295,18 +6286,115 @@ function bwChartShowTip(idx) {
   tooltip.style.left = leftPx + 'px';
   tooltip.style.top = '4px';
 
-  document.getElementById('bw-tip-weight').textContent = d.weight_lbs + ' lbs';
-  document.getElementById('bw-tip-date').textContent = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-  tooltip.title = 'Tap to edit';
-  tooltip.style.cursor = 'pointer';
+  document.getElementById('meas-tip-val').textContent = d[measMetric] + ' ' + metric.unit;
+  document.getElementById('meas-tip-date').textContent = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
   tooltip.classList.add('visible');
 }
 
-function bwChartHideTip() {
-  document.getElementById('bw-tooltip')?.classList.remove('visible');
-  document.getElementById('bw-crosshair')?.setAttribute('opacity', '0');
-  document.getElementById('bw-active-dot')?.setAttribute('opacity', '0');
+function measChartHideTip() {
+  document.getElementById('meas-tooltip')?.classList.remove('visible');
+  document.getElementById('meas-crosshair')?.setAttribute('opacity', '0');
+  document.getElementById('meas-active-dot')?.setAttribute('opacity', '0');
 }
+
+function setMeasMetric(key) {
+  measMetric = key;
+  renderMeasChart();
+}
+
+function setMeasPeriod(p) {
+  measPeriod = p;
+  renderMeasChart();
+}
+
+async function renderMeasHistory() {
+  const entries = await dbGetAll('measurements');
+  entries.sort((a,b) => b.date.localeCompare(a.date));
+  const histEl = document.getElementById('meas-history-list');
+  if (!histEl) return;
+  if (entries.length === 0) {
+    histEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No entries yet</div>';
+    return;
+  }
+  histEl.innerHTML = entries.map(e => {
+    const parts = MEAS_METRICS.filter(m => e[m.key] != null && e[m.key] > 0)
+      .map(m => `<span style="white-space:nowrap">${m.label} <b>${e[m.key]}</b></span>`);
+    return `<div style="padding:8px 12px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:2px">${e.date}</div>
+        <div style="font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:6px">${parts.join('')}</div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button onclick="editMeasEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button onclick="deleteMeasEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Delete" style="opacity:0.6;color:var(--red)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openMeasModal(existingDate) {
+  const editing = existingDate !== undefined;
+  document.getElementById('meas-modal-title').textContent = editing ? 'Edit Measurements' : 'Log Measurements';
+  document.getElementById('meas-date-input').value = existingDate || new Date().toISOString().split('T')[0];
+  document.getElementById('meas-date-input').readOnly = editing;
+  document.getElementById('meas-date-input').style.opacity = editing ? '0.6' : '1';
+  const delBtn = document.getElementById('meas-delete-btn');
+  delBtn.style.display = editing ? '' : 'none';
+  delBtn._date = editing ? existingDate : null;
+
+  const fields = ['weight','neck','bicep','waist','thigh'];
+  if (editing) {
+    dbGet('measurements', existingDate).then(entry => {
+      if (!entry) return;
+      fields.forEach(f => document.getElementById('meas-' + f).value = entry[f] || '');
+    });
+  } else {
+    fields.forEach(f => document.getElementById('meas-' + f).value = '');
+  }
+  openModal('modal-meas-entry');
+}
+
+async function editMeasEntry(date) {
+  openMeasModal(date);
+}
+
+async function deleteMeasEntry(date) {
+  if (!confirm(`Delete measurements for ${date}?`)) return;
+  await dbDelete('measurements', date);
+  showToast('Entry deleted');
+  renderMeasurementsTab();
+}
+
+document.getElementById('meas-delete-btn').addEventListener('click', async () => {
+  const date = document.getElementById('meas-delete-btn')._date;
+  if (!date) return;
+  if (!confirm(`Delete measurements for ${date}?`)) return;
+  await dbDelete('measurements', date);
+  closeModal('modal-meas-entry');
+  showToast('Entry deleted');
+  renderMeasurementsTab();
+});
+
+document.getElementById('meas-save-btn').addEventListener('click', async () => {
+  const date = document.getElementById('meas-date-input').value;
+  if (!date) { showToast('Enter a date'); return; }
+  const weight = parseFloat(document.getElementById('meas-weight').value) || null;
+  const neck = parseFloat(document.getElementById('meas-neck').value) || null;
+  const bicep = parseFloat(document.getElementById('meas-bicep').value) || null;
+  const waist = parseFloat(document.getElementById('meas-waist').value) || null;
+  const thigh = parseFloat(document.getElementById('meas-thigh').value) || null;
+  if (!weight && !neck && !bicep && !waist && !thigh) {
+    showToast('Enter at least one measurement'); return;
+  }
+  await dbPut('measurements', { date, weight, neck, bicep, waist, thigh });
+  closeModal('modal-meas-entry');
+  showToast('Saved');
+  renderMeasurementsTab();
+});
 
 function getMovementPatternForVariant(variantId) {
   const parentId = variantId.split('__')[0];
@@ -6476,57 +6564,6 @@ function setLiftsFilter(pattern) {
 async function renderTopLifts() { await renderLiftsTab(); }
 
 // Log BW button
-function openBWModal(date, weight) {
-  const editing = date !== undefined;
-  document.querySelector('#modal-bw-entry .modal-title').textContent = editing ? 'Edit Weight' : 'Log Weight';
-  document.getElementById('bw-date-input').value = date || new Date().toISOString().split('T')[0];
-  document.getElementById('bw-weight-input').value = weight !== undefined ? weight : '';
-  document.getElementById('bw-date-input').readOnly = editing;
-  document.getElementById('bw-date-input').style.opacity = editing ? '0.6' : '1';
-  const delBtn = document.getElementById('bw-delete-btn');
-  delBtn.style.display = editing ? '' : 'none';
-  delBtn._date = editing ? date : null;
-  openModal('modal-bw-entry');
-}
-
-function editBWEntry(date, weight) {
-  openBWModal(date, weight);
-}
-
-async function deleteBWEntry(date) {
-  if (!confirm(`Delete entry for ${date}?`)) return;
-  await dbDelete('bodyweight', date);
-  showToast('Entry deleted');
-  renderBWChart();
-  renderBWHistoryList();
-}
-
-document.getElementById('bw-stats-row').addEventListener('click', () => openBWModal());
-
-document.getElementById('bw-delete-btn').addEventListener('click', async () => {
-  const date = document.getElementById('bw-delete-btn')._date;
-  if (!date) return;
-  if (!confirm(`Delete entry for ${date}?`)) return;
-  await dbDelete('bodyweight', date);
-  closeModal('modal-bw-entry');
-  showToast('Entry deleted');
-  renderBWChart();
-  renderBWHistoryList();
-});
-
-document.getElementById('bw-save-btn').addEventListener('click', async () => {
-  const date = document.getElementById('bw-date-input').value;
-  const weight = parseFloat(document.getElementById('bw-weight-input').value);
-  if (!date || !weight) { showToast('Enter date and weight'); return; }
-  await dbPut('bodyweight', {date, weight_lbs: weight});
-  closeModal('modal-bw-entry');
-  showToast('Weight saved');
-  renderBWChart();
-  renderBWHistoryList();
-});
-
-// Add BW button
-// Log Weight button is now inline in the header row
 
 // ═══════════════════════════════════════════════════════════════
 // SEED DATA
@@ -6549,7 +6586,35 @@ async function seedBWData() {
   }
 }
 
-// ── Skeleton template seeding ──────────────────────────────────
+// ── Migrate bodyweight entries into measurements store ──────────
+async function migrateBWToMeasurements() {
+  if (localStorage.getItem('bw_meas_migrated')) return;
+  const bwEntries = await dbGetAll('bodyweight');
+  if (bwEntries.length === 0) { localStorage.setItem('bw_meas_migrated', '1'); return; }
+
+  const existing = await dbGetAll('measurements');
+  const existingDates = new Set(existing.map(e => e.date));
+
+  let migrated = 0;
+  for (const bw of bwEntries) {
+    if (existingDates.has(bw.date)) {
+      // Merge: add weight to existing measurement if missing
+      const m = existing.find(e => e.date === bw.date);
+      if (m && !m.weight) {
+        m.weight = bw.weight_lbs;
+        await dbPut('measurements', m);
+        migrated++;
+      }
+    } else {
+      await dbPut('measurements', { date: bw.date, weight: bw.weight_lbs });
+      migrated++;
+    }
+  }
+  localStorage.setItem('bw_meas_migrated', '1');
+  if (migrated > 0) console.log(`Migrated ${migrated} bodyweight entries to measurements`);
+}
+
+// ── Legacy template ID migration ──────────────────────────────
 async function migrateTemplateIds() {
   const templates = await dbGetAll('templates');
   let anyFixed = false;
@@ -6582,109 +6647,6 @@ async function migrateTemplateIds() {
     }
   }
   if (anyFixed) console.log('Legacy ID migration complete');
-}
-
-async function seedSkeletonTemplates() {
-  const KEEPER_NAMES = ['Lower', 'Upper A', 'Upper B', 'Lower Flex A', 'Lower Flex B'];
-
-  function V(parentId, resistance, variantArr=[]) {
-    const resPart = resistance.toLowerCase().replace(/[^a-z0-9]/g,'_');
-    if (variantArr.length === 0) return `${parentId}__${resPart}`;
-    const varPart = variantArr.map(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_')).sort().join('_');
-    return `${parentId}__${resPart}__${varPart}`;
-  }
-  function makeEx(variantId, sets=3, reps=8) {
-    return { variantId, defaultSets: Array(sets).fill(null).map(() => ({weight:0, reps})) };
-  }
-
-  const skeletonDefs = [
-    {
-      name: 'Lower',
-      exercises: [
-        makeEx(V('squat',        'Barbell',  ['Back']),       4, 5),
-        makeEx(V('lunge',        'Dumbbell', ['BSS']),        3, 10),
-        makeEx(V('rdl',          'Barbell',  []),             3, 8),
-        makeEx(V('leg_extension','Voltra',   ['Unilateral']), 3, 12),
-        makeEx(V('ham_curl',     'Voltra',   ['Lying']),      3, 12),
-        makeEx(V('calf_raise',   'BW',       ['Standing']),   3, 15),
-      ]
-    },
-    {
-      name: 'Upper A',
-      exercises: [
-        makeEx(V('chest_press',    'Barbell',  ['Flat']),      4, 5),
-        makeEx(V('row',            'Barbell',  ['Neutral']),   4, 6),
-        makeEx(V('chest_fly',      'Voltra',   ['Incline']),   3, 12),
-        makeEx(V('shoulder_raise', 'Dumbbell', ['Standing']),  3, 15),
-        makeEx(V('tricep_extension','Voltra',  ['Overhead']),  3, 12),
-      ]
-    },
-    {
-      name: 'Upper B',
-      exercises: [
-        makeEx(V('pull_up',               'BW',      ['Supinated']),  4, 6),
-        makeEx(V('overhead_press',        'Barbell', ['Standing']),   4, 5),
-        makeEx(V('straight_arm_pulldown', 'Voltra',  ['Unilateral']), 3, 12),
-        makeEx(V('tricep_extension',      'Voltra',  ['Standing']),   3, 12),
-        makeEx(V('bicep_curl',            'Dumbbell',['Incline']),    3, 12),
-      ]
-    },
-    {
-      name: 'Lower Flex A',
-      exercises: [
-        { slotId:'slot_squat',   slotLabel:'Squat Movement',     slotPattern:'squat',     slotMuscles:[], defaultSets:[{weight:0,reps:5},{weight:0,reps:5},{weight:0,reps:5},{weight:0,reps:5}] },
-        { slotId:'slot_hinge',   slotLabel:'Hinge Movement',     slotPattern:'hinge',     slotMuscles:[], defaultSets:[{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] },
-        { slotId:'slot_quad_iso',slotLabel:'Quad Isolation',      slotPattern:'isolation', slotMuscles:['quads'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
-        { slotId:'slot_ham_iso', slotLabel:'Hamstring Isolation',  slotPattern:'isolation', slotMuscles:['hamstrings'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
-        makeEx(V('calf_raise','Voltra',['Standing']), 3, 15),
-        makeEx(V('crunch','Voltra',[]),                3, 12),
-      ]
-    },
-    {
-      name: 'Lower Flex B',
-      exercises: [
-        { slotId:'slot_squat',   slotLabel:'Squat Movement',     slotPattern:'squat',     slotMuscles:[], defaultSets:[{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}] },
-        { slotId:'slot_hinge',   slotLabel:'Hinge Movement',     slotPattern:'hinge',     slotMuscles:[], defaultSets:[{weight:0,reps:6},{weight:0,reps:6},{weight:0,reps:6},{weight:0,reps:6}] },
-        { slotId:'slot_quad_iso',slotLabel:'Quad Isolation',      slotPattern:'isolation', slotMuscles:['quads'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
-        { slotId:'slot_ham_iso', slotLabel:'Hamstring Isolation',  slotPattern:'isolation', slotMuscles:['hamstrings'], defaultSets:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}] },
-        makeEx(V('calf_raise','Voltra',['Standing']), 3, 15),
-        makeEx(V('crunch','Voltra',[]),                3, 12),
-      ]
-    }
-  ];
-
-  // Purge any template not in the keeper list, and deduplicate by name
-  const all = await dbGetAll('templates');
-  const seen = {};
-  for (const t of all) {
-    if (!KEEPER_NAMES.includes(t.name)) {
-      await dbDelete('templates', t.id);
-      console.log('Purged old template:', t.name);
-    } else if (seen[t.name]) {
-      // Duplicate keeper name — delete the extra
-      await dbDelete('templates', t.id);
-      console.log('Removed duplicate template:', t.name);
-    } else {
-      seen[t.name] = true;
-    }
-  }
-
-  // Seed or repair keepers
-  const remaining = await dbGetAll('templates');
-  for (const def of skeletonDefs) {
-    const match = remaining.find(t => t.name === def.name);
-    if (!match) {
-      await dbPut('templates', { id: uid(), ...def });
-    } else {
-      const hasBadIds = match.exercises.some(ex => {
-        if (ex.slotId) return false; // slots have no variantId
-        const parts = ex.variantId.split('__');
-        return parts.length < 2 || /[A-Z]/.test(parts[1]);
-      });
-      if (hasBadIds) await dbPut('templates', { ...match, exercises: def.exercises });
-    }
-  }
-  console.log('Templates ready: Lower, Upper A, Upper B');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7558,7 +7520,7 @@ document.getElementById('export-copy-btn').addEventListener('click', () => {
 
 // ── JSON Backup / Import ──
 const BACKUP_STORES = [
-  'sessions', 'templates', 'bodyweight', 'exercises',
+  'sessions', 'templates', 'bodyweight', 'measurements', 'exercises',
   'variant_overrides', 'custom_variants', 'custom_parents', 'custom_equipment_types',
   'exercise_notes', 'pr_records', 'mobility_exercises', 'mobility_checks'
 ];
@@ -7625,9 +7587,10 @@ document.getElementById('import-file-input').addEventListener('change', async (e
 
 async function buildClaudeExport() {
   const sessions = await getSortedSessions();
-  const bwEntries = await dbGetAll('bodyweight');
-  bwEntries.sort((a,b) => a.date.localeCompare(b.date));
-  const latestBW = bwEntries.length ? bwEntries[bwEntries.length - 1] : null;
+  const measEntries = await dbGetAll('measurements');
+  measEntries.sort((a,b) => a.date.localeCompare(b.date));
+  const weightEntries = measEntries.filter(e => e.weight);
+  const latestBW = weightEntries.length ? weightEntries[weightEntries.length - 1] : null;
 
   const lines = [];
   const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
@@ -7635,12 +7598,18 @@ async function buildClaudeExport() {
   lines.push(`# IronLog Training Summary`);
   lines.push(`Generated: ${today}`);
   if (latestBW) {
-    lines.push(`Bodyweight: ${latestBW.weight_lbs} lbs (${latestBW.date})`);
-    // BW trend over last 2 weeks
-    const bw2w = bwEntries.filter(e => new Date(e.date) >= new Date(Date.now() - 14*86400000));
+    lines.push(`Bodyweight: ${latestBW.weight} lbs (${latestBW.date})`);
+    const bw2w = weightEntries.filter(e => new Date(e.date) >= new Date(Date.now() - 14*86400000));
     if (bw2w.length >= 2) {
-      const change = bw2w[bw2w.length-1].weight_lbs - bw2w[0].weight_lbs;
+      const change = bw2w[bw2w.length-1].weight - bw2w[0].weight;
       lines.push(`Bodyweight trend (14d): ${change >= 0 ? '+' : ''}${change.toFixed(1)} lbs`);
+    }
+  }
+  if (measEntries.length > 0) {
+    const latest = measEntries[measEntries.length - 1];
+    const parts = MEAS_METRICS.filter(m => m.key !== 'weight' && latest[m.key]).map(m => `${m.label}: ${latest[m.key]} ${m.unit}`);
+    if (parts.length > 0) {
+      lines.push(`Measurements (${latest.date}): ${parts.join(', ')}`);
     }
   }
   lines.push('');
@@ -7677,8 +7646,8 @@ async function buildClaudeExport() {
     const date = new Date(s.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
     const dur = s.durationMinutes ? ` · ${s.durationMinutes}m` : '';
     const bwDate = new Date(s.startTime).toISOString().split('T')[0];
-    const bw = bwEntries.find(e => e.date === bwDate);
-    const bwStr = bw ? ` · ${bw.weight_lbs} lbs` : '';
+    const bw = measEntries.find(e => e.date === bwDate && e.weight);
+    const bwStr = bw ? ` · ${bw.weight} lbs` : '';
     lines.push(`### ${s.title} — ${date}${dur}${bwStr}`);
     if (s.notes) lines.push(`*${s.notes}*`);
 
@@ -7768,7 +7737,7 @@ async function buildClaudeExport() {
   // ── Templates ──
   const templates = await dbGetAll('templates');
   if (templates.length > 0) {
-    lines.push(`## Templates`);
+    lines.push(`## Planned Workouts`);
     lines.push('');
     templates.forEach(t => {
       const exNames = t.exercises.map(e => getVariantInfo(e.variantId).displayName).join(', ');
@@ -7936,8 +7905,8 @@ async function init() {
     loadExerciseNotes(),
   ]);
   await seedBWData().catch(e => console.warn('seedBW skipped:', e));
+  await migrateBWToMeasurements().catch(e => console.warn('BW migration skipped:', e));
   await migrateTemplateIds().catch(e => console.warn('Template ID migration skipped:', e));
-  await seedSkeletonTemplates().catch(e => console.warn('seedTemplates skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
