@@ -2599,10 +2599,12 @@ function dbGet(store, key) {
   return sbGet(store, key).catch(() => idbGet(store, key));
 }
 function dbPut(store, val) {
+  if (store === 'sessions') invalidateSessionCache();
   if (!SUPABASE_STORES.has(store)) return idbPut(store, val);
   return sbPut(store, val).catch(() => idbPut(store, val));
 }
 function dbDelete(store, key) {
+  if (store === 'sessions') invalidateSessionCache();
   if (!SUPABASE_STORES.has(store)) return idbDelete(store, key);
   return sbDelete(store, key).catch(() => idbDelete(store, key));
 }
@@ -3037,9 +3039,21 @@ let editingSetContext = null; // {sessionExIndex, setIndex}
 
 
 // ── Convenience: get sessions sorted newest-first ──
+// Session cache — avoids redundant DB/network calls when multiple functions
+// need sessions in rapid succession (template launch, prev-best loading, etc.)
+let _sessionCache = null;
+let _sessionCacheTime = 0;
+const SESSION_CACHE_TTL = 3000; // 3 seconds
+
+function invalidateSessionCache() { _sessionCache = null; _sessionCacheTime = 0; if (typeof _prevBestHtmlCache !== 'undefined') for (const k in _prevBestHtmlCache) delete _prevBestHtmlCache[k]; }
+
 async function getSortedSessions() {
+  const now = Date.now();
+  if (_sessionCache && (now - _sessionCacheTime) < SESSION_CACHE_TTL) return _sessionCache;
   const sessions = await dbGetAll('sessions');
-  return sessions.sort((a, b) => b.startTime - a.startTime);
+  _sessionCache = sessions.sort((a, b) => b.startTime - a.startTime);
+  _sessionCacheTime = now;
+  return _sessionCache;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3208,8 +3222,10 @@ document.getElementById('new-workout-btn').addEventListener('click', () => {
 });
 
 async function openNewWorkoutModal() {
-  const templates = await dbGetAll('templates');
   const list = document.getElementById('modal-template-list');
+  list.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">Loading…</div>';
+  openModal('modal-new-workout');
+  const templates = await dbGetAll('templates');
   list.innerHTML = templates.map(t => `
     <button class="btn btn-secondary" style="width:100%;text-align:left;justify-content:space-between" onclick="startFromTemplate('${t.id}')">
       <span style="font-size:14px;font-weight:500">${escHtml(t.name)}</span>
@@ -3218,7 +3234,6 @@ async function openNewWorkoutModal() {
   if (templates.length === 0) {
     list.innerHTML = `<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">No planned workouts</div>`;
   }
-  openModal('modal-new-workout');
 }
 
 document.getElementById('start-empty-btn').addEventListener('click', () => {
@@ -3233,6 +3248,8 @@ async function startFromTemplate(templateId) {
   if (!tmpl) { showToast('Plan not found'); return; }
   
   // Build session exercises one at a time so one failure can't block others
+  // Pre-warm session cache so all getLastSetsForVariant calls reuse one fetch
+  await getSortedSessions();
   const exercises = [];
   for (const te of (tmpl.exercises || [])) {
     // Pass through unfilled slots
@@ -3950,9 +3967,14 @@ async function buildPrevSets(variantId) {
   }));
 }
 
+// Cache prev-best HTML per variantId to avoid recomputing on every render
+const _prevBestHtmlCache = {};
+
 async function loadPrevBest(variantId, idx) {
   const el = document.getElementById(`prev-best-${idx}`);
   if (!el) return;
+  // Use cached HTML if available (cleared on session cache invalidation)
+  if (_prevBestHtmlCache[variantId]) { el.innerHTML = _prevBestHtmlCache[variantId]; return; }
   const sessions = await getSortedSessions();
 
   // Collect last 5 sessions that have this exercise with completed sets
@@ -3967,7 +3989,7 @@ async function loadPrevBest(variantId, idx) {
     if (history.length >= 5) break;
   }
 
-  if (history.length === 0) { el.innerHTML = `<span style="color:var(--text3)">First time</span>`; return; }
+  if (history.length === 0) { const h = `<span style="color:var(--text3)">First time</span>`; _prevBestHtmlCache[variantId] = h; el.innerHTML = h; return; }
 
   const last = history[0];
   const top = last.top;
@@ -3996,7 +4018,9 @@ async function loadPrevBest(variantId, idx) {
     }
   }
 
-  el.innerHTML = `<span style="color:var(--text3);font-size:11px">Prev</span> <span>${top.weight}×${top.reps}</span> <span style="color:var(--text3);font-size:11px">${date}</span>${suggestion ? ' ' + suggestion : ''}`;
+  const html = `<span style="color:var(--text3);font-size:11px">Prev</span> <span>${top.weight}×${top.reps}</span> <span style="color:var(--text3);font-size:11px">${date}</span>${suggestion ? ' ' + suggestion : ''}`;
+  _prevBestHtmlCache[variantId] = html;
+  el.innerHTML = html;
 }
 
 // Set detail modal
@@ -5576,11 +5600,14 @@ function openExercisePicker(slotFilter) {
   document.getElementById('pick-ex-steps').style.display = 'none';
   document.getElementById('pick-ex-back').style.display = 'none';
   document.getElementById('pick-ex-footer').style.display = 'none';
-  renderPickerFilters();
-  renderPickerStep();
+  // Show modal immediately, defer heavy list rendering to next frame
   const overlay = document.getElementById('modal-pick-exercise');
   overlay.classList.add('open', 'elevated');
   document.getElementById('modal-backdrop').classList.add('show');
+  requestAnimationFrame(() => {
+    renderPickerFilters();
+    renderPickerStep();
+  });
 }
 
 function closeExercisePicker() {
@@ -6669,6 +6696,7 @@ async function migrateTemplateIds() {
     });
     if (fixed) {
       await idbPut('sessions', { ...s, exercises: newExercises });
+      invalidateSessionCache();
       anyFixed = true;
     }
   }
