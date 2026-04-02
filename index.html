@@ -2132,6 +2132,14 @@ textarea { resize: none; }
           <input id="meas-neck" type="number" step="0.1" placeholder="—">
         </div>
         <div class="input-group">
+          <div class="input-label">Shoulders (in)</div>
+          <input id="meas-shoulders" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Chest (in)</div>
+          <input id="meas-chest" type="number" step="0.1" placeholder="—">
+        </div>
+        <div class="input-group">
           <div class="input-label">Bicep (in)</div>
           <input id="meas-bicep" type="number" step="0.1" placeholder="—">
         </div>
@@ -6119,11 +6127,13 @@ async function renderProgress() {
 // MEASUREMENTS
 // ═══════════════════════════════════════════════════════════════
 const MEAS_METRICS = [
-  { key: 'weight',  label: 'Weight', unit: 'lbs', color: 'var(--accent)',      down_good: true },
-  { key: 'neck',    label: 'Neck',   unit: 'in',  color: 'var(--green)',       down_good: false },
-  { key: 'bicep',   label: 'Bicep',  unit: 'in',  color: 'var(--accent-pink)', down_good: false },
-  { key: 'waist',   label: 'Waist',  unit: 'in',  color: 'var(--accent-blue)', down_good: true },
-  { key: 'thigh',   label: 'Thigh',  unit: 'in',  color: 'var(--blue)',        down_good: false },
+  { key: 'weight',    label: 'Weight',    unit: 'lbs', color: 'var(--accent)',       down_good: true },
+  { key: 'neck',      label: 'Neck',      unit: 'in',  color: 'var(--green)',        down_good: false },
+  { key: 'shoulders', label: 'Shoulders', unit: 'in',  color: 'var(--ss-color-3)',   down_good: false },
+  { key: 'chest',     label: 'Chest',     unit: 'in',  color: 'var(--ss-color-4)',   down_good: false },
+  { key: 'bicep',     label: 'Bicep',     unit: 'in',  color: 'var(--accent-pink)',  down_good: false },
+  { key: 'waist',     label: 'Waist',     unit: 'in',  color: 'var(--accent-blue)',  down_good: true },
+  { key: 'thigh',     label: 'Thigh',     unit: 'in',  color: 'var(--blue)',         down_good: false },
 ];
 let measMetric = 'weight';
 let measPeriod = 'all';
@@ -6346,7 +6356,7 @@ function openMeasModal(existingDate) {
   delBtn.style.display = editing ? '' : 'none';
   delBtn._date = editing ? existingDate : null;
 
-  const fields = ['weight','neck','bicep','waist','thigh'];
+  const fields = ['weight','neck','shoulders','chest','bicep','waist','thigh'];
   if (editing) {
     dbGet('measurements', existingDate).then(entry => {
       if (!entry) return;
@@ -6384,13 +6394,15 @@ document.getElementById('meas-save-btn').addEventListener('click', async () => {
   if (!date) { showToast('Enter a date'); return; }
   const weight = parseFloat(document.getElementById('meas-weight').value) || null;
   const neck = parseFloat(document.getElementById('meas-neck').value) || null;
+  const shoulders = parseFloat(document.getElementById('meas-shoulders').value) || null;
+  const chest = parseFloat(document.getElementById('meas-chest').value) || null;
   const bicep = parseFloat(document.getElementById('meas-bicep').value) || null;
   const waist = parseFloat(document.getElementById('meas-waist').value) || null;
   const thigh = parseFloat(document.getElementById('meas-thigh').value) || null;
-  if (!weight && !neck && !bicep && !waist && !thigh) {
+  if (!weight && !neck && !shoulders && !chest && !bicep && !waist && !thigh) {
     showToast('Enter at least one measurement'); return;
   }
-  await dbPut('measurements', { date, weight, neck, bicep, waist, thigh });
+  await dbPut('measurements', { date, weight, neck, shoulders, chest, bicep, waist, thigh });
   closeModal('modal-meas-entry');
   showToast('Saved');
   renderMeasurementsTab();
@@ -6584,6 +6596,20 @@ async function seedBWData() {
     await new Promise(res => { tx.oncomplete = res; });
     showToast(`Imported ${bwData.length} bodyweight entries`);
   }
+}
+
+// ── Seed initial measurements ──────────────────────────────────
+async function seedInitialMeasurements() {
+  if (localStorage.getItem('meas_initial_seeded')) return;
+  const today = new Date().toISOString().split('T')[0];
+  const existing = await dbGet('measurements', today).catch(() => null);
+  if (!existing) {
+    await dbPut('measurements', {
+      date: today, weight: 185, neck: 15.5, shoulders: 48.5,
+      chest: 42, bicep: 15, waist: 32, thigh: 23
+    });
+  }
+  localStorage.setItem('meas_initial_seeded', '1');
 }
 
 // ── Migrate bodyweight entries into measurements store ──────────
@@ -7906,6 +7932,7 @@ async function init() {
   ]);
   await seedBWData().catch(e => console.warn('seedBW skipped:', e));
   await migrateBWToMeasurements().catch(e => console.warn('BW migration skipped:', e));
+  await seedInitialMeasurements().catch(e => console.warn('Meas seed skipped:', e));
   await migrateTemplateIds().catch(e => console.warn('Template ID migration skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
