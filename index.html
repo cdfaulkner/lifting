@@ -1799,6 +1799,12 @@ textarea { resize: none; }
           <svg id="play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
         <span class="timer-text">0:00</span>
+        <span id="session-start-time" style="font-size:10px;color:var(--text3);cursor:pointer;margin-left:4px" onclick="event.stopPropagation();toggleActiveTimeEdit()" title="Edit start time"></span>
+      </div>
+      <div id="active-time-edit" style="display:none;padding:6px 16px;border-top:1px solid var(--border);gap:8px;align-items:center">
+        <label style="font-size:11px;color:var(--text3);white-space:nowrap">Started</label>
+        <input type="datetime-local" id="active-start-input" style="flex:1;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
+        <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px" onclick="saveActiveStartTime()">Save</button>
       </div>
       </div>
     </div>
@@ -1893,31 +1899,40 @@ textarea { resize: none; }
       <div class="bw-chart-wrap">
         <div id="meas-metric-pills" class="period-pills" style="margin-bottom:8px;padding:0"></div>
         <div class="bw-chart-container">
-          <div id="meas-stats-row" style="display:flex;gap:20px;margin-bottom:12px"></div>
+          <div id="meas-stats-row" style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap"></div>
           <div class="bw-chart"><svg id="meas-svg"></svg><div class="bw-tooltip" id="meas-tooltip"><div class="bw-tooltip-weight" id="meas-tip-val"></div><div class="bw-tooltip-date" id="meas-tip-date"></div></div></div>
           <div id="meas-period-pills" class="period-pills" style="margin-top:8px;padding:0"></div>
         </div>
       </div>
       <div style="padding:0 16px 16px">
-        <div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Entries</div>
+        <div id="meas-entries-label" style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px">Entries</div>
         <div id="meas-history-list" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto"></div>
       </div>
     </div>
 
     <!-- ══ MOBILITY ══ -->
     <div id="screen-mobility" class="screen">
-      <div class="page-header">
-        <div class="page-title">Mobility</div>
-        <div class="page-sub" id="mobility-date-sub"></div>
-      </div>
-      <div style="padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:12px;color:var(--text3);font-weight:500">Daily checklist</div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" id="mobility-reset-btn">Reset</button>
-          <button class="btn btn-primary btn-sm" id="mobility-add-btn">+ Add</button>
+      <div class="page-header" style="justify-content:space-between">
+        <div>
+          <div class="page-title">Mobility</div>
+          <div class="page-sub" id="mobility-date-sub"></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-ghost btn-sm" id="mobility-reset-btn" aria-label="Reset today's checklist">Reset</button>
+          <button class="btn btn-ghost btn-sm" id="mobility-edit-btn" aria-label="Edit exercises">Edit</button>
         </div>
       </div>
-      <div id="mobility-list" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:6px"></div>
+      <div style="padding:0 16px 8px;display:flex;align-items:center;gap:8px">
+        <div id="mobility-day-pills" style="display:flex;gap:6px"></div>
+        <div style="flex:1"></div>
+        <div id="mobility-progress-text" style="font-family:var(--mono);font-size:12px;color:var(--text3)"></div>
+      </div>
+      <div style="padding:0 16px 4px">
+        <div style="height:4px;background:var(--bg3);border-radius:99px;overflow:hidden">
+          <div id="mobility-progress-bar" style="height:100%;width:0%;background:var(--gradient);border-radius:99px;transition:width .3s"></div>
+        </div>
+      </div>
+      <div id="mobility-list" style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
 
@@ -2161,11 +2176,11 @@ textarea { resize: none; }
   </div>
 </div>
 
-<!-- Add Mobility Exercise Modal -->
+<!-- Edit Mobility Exercise Modal -->
 <div class="modal-overlay" id="modal-mobility-add">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="mobility-modal-title">Add Mobility Exercise</div>
+      <div class="modal-title" id="mobility-modal-title">Edit Exercise</div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-mobility-add')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -2173,17 +2188,49 @@ textarea { resize: none; }
     <div class="modal-body">
       <div class="input-group" style="margin-bottom:12px">
         <div class="input-label">Exercise Name</div>
-        <input id="mobility-name-input" type="text" placeholder="e.g. Hip Flexor Stretch, Cat-Cow…">
+        <input id="mobility-name-input" type="text" placeholder="e.g. Deep Squat Hold">
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <div class="input-group" style="flex:1">
+          <div class="input-label">Target (seconds)</div>
+          <input id="mobility-dur-input" type="number" inputmode="numeric" value="30" min="5" max="300">
+        </div>
+        <div class="input-group" style="flex:1">
+          <div class="input-label">Day</div>
+          <select id="mobility-day-input" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text);font-size:14px">
+            <option value="A">Day A</option>
+            <option value="B">Day B</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group" style="margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2)">
+          <input type="checkbox" id="mobility-bilateral-input" style="width:18px;height:18px;accent-color:var(--accent)">
+          Bilateral (track each side separately)
+        </label>
       </div>
       <div class="input-group">
-        <div class="input-label">Notes (optional)</div>
-        <textarea id="mobility-notes-input" rows="2" placeholder="Duration, sets, cues…"></textarea>
+        <div class="input-label">Cues / Notes (optional)</div>
+        <textarea id="mobility-notes-input" rows="2" placeholder="Form cues, progressions…"></textarea>
       </div>
     </div>
     <div class="modal-footer" style="display:flex;gap:8px">
       <button class="btn btn-danger btn-sm" id="mobility-delete-btn" style="display:none">Delete</button>
       <button class="btn btn-primary" id="mobility-save-btn" style="flex:1">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Mobility History Modal -->
+<div class="modal-overlay" id="modal-mobility-history">
+  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <div class="modal-title" id="mobility-history-title">History</div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-mobility-history')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="mobility-history-body" style="overflow-y:auto;padding:0 20px 20px"></div>
   </div>
 </div>
 
@@ -3431,6 +3478,48 @@ function updatePauseUI() {
     pauseIcon.style.display = '';
     playIcon.style.display = 'none';
   }
+  updateActiveStartTimeDisplay();
+}
+
+function updateActiveStartTimeDisplay() {
+  const el = document.getElementById('session-start-time');
+  if (!el || !sessionStartEpoch) return;
+  const d = new Date(sessionStartEpoch);
+  el.textContent = d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+}
+
+function toggleActiveTimeEdit() {
+  const el = document.getElementById('active-time-edit');
+  if (!el) return;
+  const showing = el.style.display !== 'none';
+  if (showing) {
+    el.style.display = 'none';
+  } else {
+    document.getElementById('active-start-input').value = toLocalDatetimeStr(sessionStartEpoch);
+    el.style.display = 'flex';
+  }
+}
+
+function saveActiveStartTime() {
+  const val = document.getElementById('active-start-input').value;
+  if (!val) { showToast('Enter a valid time'); return; }
+  const newEpoch = new Date(val).getTime();
+  if (isNaN(newEpoch)) { showToast('Invalid date'); return; }
+  if (newEpoch > Date.now()) { showToast('Start can\'t be in the future'); return; }
+
+  // Adjust paused total to keep elapsed time consistent with the new start
+  const oldElapsed = getSessionElapsed();
+  sessionStartEpoch = newEpoch;
+  if (activeSession) activeSession.startTime = newEpoch;
+  // Recalculate pausedTotal so the displayed elapsed stays correct relative to new start
+  const rawElapsed = ((sessionPausedAt || Date.now()) - newEpoch) / 1000;
+  sessionPausedTotal = Math.max(0, Math.round((rawElapsed - oldElapsed) * 1000));
+
+  document.getElementById('active-time-edit').style.display = 'none';
+  updateTimer();
+  updateActiveStartTimeDisplay();
+  saveSessionDraftDebounced();
+  showToast('Start time updated');
 }
 
 function renderActiveSession() {
@@ -3590,19 +3679,28 @@ function fillSessionSlot(exIdx) {
   const slot = activeSession.exercises[exIdx];
   if (!slot || !slot.slotId) return;
   pendingPickExerciseCallback = async (variantId) => {
-    let lastSets = null;
-    try { lastSets = await getLastSetsForVariant(variantId); } catch(e) {}
-    const rawSets = lastSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
+    closeExercisePicker();
+    const defaultSets = [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}];
     activeSession.exercises[exIdx] = {
       variantId,
       supersetId: null,
-      sets: rawSets.map((s,i) => ({
-        index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
+      sets: defaultSets.map((s,i) => ({
+        index: i, weight: 0, weightEcc: 0, weightChains: 0, reps: 8,
         completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
       }))
     };
     renderActiveSession();
-    closeExercisePicker();
+    // Backfill with prev sets in background
+    try {
+      const lastSets = await getLastSetsForVariant(variantId);
+      if (lastSets && activeSession && activeSession.exercises[exIdx] && activeSession.exercises[exIdx].variantId === variantId) {
+        activeSession.exercises[exIdx].sets = lastSets.map((s,i) => ({
+          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
+          completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
+        }));
+        renderActiveSession();
+      }
+    } catch(e) {}
   };
   document.getElementById('pick-ex-title').textContent = slot.slotLabel;
   document.getElementById('pick-ex-confirm').textContent = 'Select Exercise';
@@ -4097,10 +4195,23 @@ document.getElementById('detail-save-btn').addEventListener('click', () => {
 document.getElementById('session-add-ex-btn').addEventListener('click', () => {
   pendingPickExerciseCallback = async (variantId) => {
     if (!activeSession) return;
-    const sets = await buildPrevSets(variantId);
-    activeSession.exercises.push({ variantId, sets });
-    renderActiveSession();
     closeExercisePicker();
+    // Add immediately with default sets, render, then backfill prev sets
+    const defaultSets = [{index:0,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+                         {index:1,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+                         {index:2,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''}];
+    const exIdx = activeSession.exercises.length;
+    activeSession.exercises.push({ variantId, sets: defaultSets });
+    collapsedExercises.delete(exIdx);
+    renderActiveSession();
+    // Backfill with prev sets in background
+    try {
+      const prevSets = await buildPrevSets(variantId);
+      if (activeSession && activeSession.exercises[exIdx] && activeSession.exercises[exIdx].variantId === variantId) {
+        activeSession.exercises[exIdx].sets = prevSets.map((s,i) => ({...s, index:i}));
+        renderActiveSession();
+      }
+    } catch(e) {}
   };
   document.getElementById('pick-ex-title').textContent = 'Add Exercise';
   document.getElementById('pick-ex-confirm').textContent = 'Add Exercise';
@@ -4270,7 +4381,8 @@ async function viewWorkoutDetail(sessionId) {
   const body = document.getElementById('ex-detail-body');
   const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
   document.getElementById('ex-detail-name').textContent = session.title;
-  document.getElementById('ex-detail-sub').innerHTML = `${date} · ${session.durationMinutes || '?'}m${bwStr} <span onclick="toggleWorkoutTimeEdit()" style="cursor:pointer;opacity:0.5;font-size:11px">✏️</span>`;
+  const startTimeStr = new Date(session.startTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  document.getElementById('ex-detail-sub').innerHTML = `${date} · ${startTimeStr} · <span onclick="toggleWorkoutTimeEdit()" style="cursor:pointer;text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px">${session.durationMinutes || '?'}m</span>${bwStr}`;
 
   // Show repeat button
   repeatWorkoutSessionId = sessionId;
@@ -4280,12 +4392,24 @@ async function viewWorkoutDetail(sessionId) {
   // Build time-edit row (hidden by default)
   const startDT = toLocalDatetimeStr(session.startTime);
   const endDT = session.endTime ? toLocalDatetimeStr(session.endTime) : '';
-  const timeEditHtml = `<div id="workout-time-edit" class="time-edit-row" style="display:none">
-    <label>Start</label>
-    <input type="datetime-local" id="edit-start-time" value="${startDT}">
-    <label>End</label>
-    <input type="datetime-local" id="edit-end-time" value="${endDT}">
-    <button class="time-save-btn" onclick="saveWorkoutTimeEdit()">Save</button>
+  const durVal = session.durationMinutes || '';
+  const timeEditHtml = `<div id="workout-time-edit" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3)">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <label style="font-size:11px;color:var(--text3);min-width:40px">Duration</label>
+      <input type="number" id="edit-duration" value="${durVal}" placeholder="min" inputmode="numeric" min="1"
+        style="width:70px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text);text-align:center">
+      <span style="font-size:11px;color:var(--text3)">min</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px" onclick="saveWorkoutTimeEdit()">Save</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="font-size:11px;color:var(--text3);min-width:40px">Start</label>
+      <input type="datetime-local" id="edit-start-time" value="${startDT}" style="flex:1;padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+      <label style="font-size:11px;color:var(--text3);min-width:40px">End</label>
+      <input type="datetime-local" id="edit-end-time" value="${endDT}" style="flex:1;padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
+    </div>
   </div>`;
 
   const notesHtml = session.notes
@@ -6162,7 +6286,7 @@ const MEAS_METRICS = [
   { key: 'waist',     label: 'Waist',     unit: 'in',  color: 'var(--accent-blue)',  down_good: true },
   { key: 'thigh',     label: 'Thigh',     unit: 'in',  color: 'var(--blue)',         down_good: false },
 ];
-let measMetric = 'weight';
+let measMetric = null;
 let measPeriod = 'all';
 const MEAS_PERIODS = {'3m':90,'6m':180,'1y':365,'all':99999};
 
@@ -6178,28 +6302,76 @@ async function renderMeasChart() {
   const allEntries = await dbGetAll('measurements');
   allEntries.sort((a,b) => a.date.localeCompare(b.date));
 
-  const metric = MEAS_METRICS.find(m => m.key === measMetric);
-
-  // Metric pills
+  // Metric pills — null = overview, clicking active pill deselects
   const metricPillsEl = document.getElementById('meas-metric-pills');
   metricPillsEl.innerHTML = MEAS_METRICS.map(m => `
     <button class="period-pill ${measMetric === m.key ? 'active' : ''}" onclick="setMeasMetric('${m.key}')">${m.label}</button>`).join('');
 
-  // Filter to entries that have this metric
+  const statsRow = document.getElementById('meas-stats-row');
+  const periodEl = document.getElementById('meas-period-pills');
+  const svg = document.getElementById('meas-svg');
+
+  // ── Overview mode (no metric selected) ──
+  if (!measMetric) {
+    periodEl.innerHTML = '';
+    svg.innerHTML = '';
+    _measChartData = [];
+    _measChartLayout = null;
+    document.getElementById('meas-tooltip')?.classList.remove('visible');
+
+    if (allEntries.length === 0) {
+      statsRow.style.display = 'flex';
+      statsRow.style.gridTemplateColumns = '';
+      statsRow.innerHTML = '<div style="color:var(--text3);font-size:13px">No measurements logged yet</div>';
+      return;
+    }
+
+    // Build dashboard cards — latest value + date for each metric
+    const latestByMetric = {};
+    for (let i = allEntries.length - 1; i >= 0; i--) {
+      const e = allEntries[i];
+      for (const m of MEAS_METRICS) {
+        if (!latestByMetric[m.key] && e[m.key] != null && e[m.key] > 0) {
+          latestByMetric[m.key] = { val: e[m.key], date: e.date };
+        }
+      }
+      if (Object.keys(latestByMetric).length === MEAS_METRICS.length) break;
+    }
+
+    statsRow.style.display = 'grid';
+    statsRow.style.gridTemplateColumns = 'repeat(auto-fill, minmax(80px, 1fr))';
+    statsRow.innerHTML = MEAS_METRICS.map(m => {
+      const info = latestByMetric[m.key];
+      if (!info) return `<div style="text-align:center;padding:8px 4px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${m.label}</div>
+        <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text3)">—</div>
+      </div>`;
+      const dateStr = new Date(info.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      return `<div style="text-align:center;padding:8px 4px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);cursor:pointer" onclick="setMeasMetric('${m.key}')">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${m.label}</div>
+        <div style="font-family:var(--display);font-size:18px;font-weight:600">${info.val}<span style="font-size:11px;font-weight:400;color:var(--text2)"> ${m.unit}</span></div>
+        <div style="font-size:9px;color:var(--text3)">${dateStr}</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── Specific metric selected ──
+  statsRow.style.display = 'flex';
+  statsRow.style.gridTemplateColumns = '';
+  const metric = MEAS_METRICS.find(m => m.key === measMetric);
+
   const entries = allEntries.filter(e => e[measMetric] != null && e[measMetric] > 0);
   const cutoff = Date.now() - MEAS_PERIODS[measPeriod] * 86400000;
   const filtered = entries.filter(e => new Date(e.date).getTime() >= cutoff);
   const display = filtered.length > 0 ? filtered : entries.slice(-30);
 
-  // Stats
-  const statsRow = document.getElementById('meas-stats-row');
   if (display.length > 0) {
     const latest = display[display.length - 1];
     const oldest = display[0];
     const latestVal = latest[measMetric];
     const change = latestVal - oldest[measMetric];
     const changeStr = (change >= 0 ? '+' : '') + change.toFixed(1);
-    // Color: green if change is in desired direction
     const changeColor = metric.down_good ? (change <= 0 ? 'var(--green)' : 'var(--red)') : (change >= 0 ? 'var(--green)' : 'var(--red)');
     statsRow.innerHTML = `
       <div>
@@ -6214,12 +6386,9 @@ async function renderMeasChart() {
     statsRow.innerHTML = `<div style="color:var(--text3);font-size:13px">No ${metric.label} data yet</div>`;
   }
 
-  // Period pills
-  const periodEl = document.getElementById('meas-period-pills');
   periodEl.innerHTML = Object.keys(MEAS_PERIODS).map(p => `
     <button class="period-pill ${measPeriod === p ? 'active' : ''}" onclick="setMeasPeriod('${p}')">${p}</button>`).join('');
 
-  // Chart
   renderMeasSVG(display, metric);
 }
 
@@ -6335,13 +6504,13 @@ function measChartHideTip() {
 }
 
 function setMeasMetric(key) {
-  measMetric = key;
-  renderMeasChart();
+  measMetric = (measMetric === key) ? null : key;
+  renderMeasurementsTab();
 }
 
 function setMeasPeriod(p) {
   measPeriod = p;
-  renderMeasChart();
+  renderMeasurementsTab();
 }
 
 async function renderMeasHistory() {
@@ -6349,17 +6518,42 @@ async function renderMeasHistory() {
   entries.sort((a,b) => b.date.localeCompare(a.date));
   const histEl = document.getElementById('meas-history-list');
   if (!histEl) return;
-  if (entries.length === 0) {
-    histEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No entries yet</div>';
+
+  // Update section label
+  const labelEl = document.getElementById('meas-entries-label');
+  if (labelEl) {
+    const metricLabel = measMetric ? MEAS_METRICS.find(m => m.key === measMetric)?.label : null;
+    labelEl.textContent = metricLabel ? `${metricLabel} History` : 'All Entries';
+  }
+
+  // Filter entries when a specific metric is selected
+  const filtered = measMetric
+    ? entries.filter(e => e[measMetric] != null && e[measMetric] > 0)
+    : entries;
+
+  if (filtered.length === 0) {
+    const metricLabel = measMetric ? MEAS_METRICS.find(m => m.key === measMetric)?.label || measMetric : '';
+    histEl.innerHTML = `<div style="text-align:center;color:var(--text3);padding:24px;font-size:13px">No ${metricLabel} entries yet</div>`;
     return;
   }
-  histEl.innerHTML = entries.map(e => {
-    const parts = MEAS_METRICS.filter(m => e[m.key] != null && e[m.key] > 0)
-      .map(m => `<span style="white-space:nowrap">${m.label} <b>${e[m.key]}</b></span>`);
+
+  histEl.innerHTML = filtered.map(e => {
+    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+    let partsHtml;
+    if (measMetric) {
+      // Single metric selected — show just that value prominently
+      const m = MEAS_METRICS.find(m => m.key === measMetric);
+      partsHtml = `<span style="font-family:var(--display);font-size:15px;font-weight:600">${e[measMetric]}</span> <span style="font-size:12px;color:var(--text3)">${m.unit}</span>`;
+    } else {
+      // Overview — show all measurements for this entry
+      const parts = MEAS_METRICS.filter(m => e[m.key] != null && e[m.key] > 0)
+        .map(m => `<span style="white-space:nowrap">${m.label} <b>${e[m.key]}</b></span>`);
+      partsHtml = `<div style="font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:6px">${parts.join('')}</div>`;
+    }
     return `<div style="padding:8px 12px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;color:var(--text2);margin-bottom:2px">${e.date}</div>
-        <div style="font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:6px">${parts.join('')}</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:2px">${dateStr}</div>
+        ${partsHtml}
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0">
         <button onclick="editMeasEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
@@ -6714,20 +6908,91 @@ function escHtml(str) {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY CHECKLIST
 // ═══════════════════════════════════════════════════════════════
-let mobilityExercises = []; // persisted in IDB store 'mobility_exercises'
-let mobilityChecks = {}; // {exerciseId: bool} — reset daily, stored in 'mobility_checks'
+const DEFAULT_MOBILITY_EXERCISES = [
+  { id:'mob_deep_squat',   name:'Deep Squat Hold',             targetSeconds:30, bilateral:false, day:'A', order:0 },
+  { id:'mob_wgs',          name:"World's Greatest Stretch",    targetSeconds:30, bilateral:true,  day:'A', order:1 },
+  { id:'mob_dead_hang',    name:'Dead Hang',                   targetSeconds:30, bilateral:false, day:'A', order:2 },
+  { id:'mob_back_ext',     name:'Back Extension Hold',         targetSeconds:30, bilateral:false, day:'A', order:3 },
+  { id:'mob_dead_bugs',    name:'Dead Bugs',                   targetSeconds:30, bilateral:false, day:'A', order:4 },
+  { id:'mob_split_squat',  name:'Split Squat Hold',            targetSeconds:30, bilateral:true,  day:'B', order:5 },
+  { id:'mob_9090',         name:'90/90 Hip Rotation',          targetSeconds:30, bilateral:true,  day:'B', order:6 },
+  { id:'mob_shoulder_rot', name:'Shoulder Rotations',          targetSeconds:30, bilateral:true,  day:'B', order:7 },
+  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetSeconds:30, bilateral:true, day:'B', order:8 },
+  { id:'mob_tspine',       name:'T-Spine Rotation',            targetSeconds:30, bilateral:true,  day:'B', order:9 },
+];
+
+let mobilityExercises = [];
+// checks shape: { date, day, checks: { exId: { done, durationL, durationR, notes, ts } } }
+let mobilityChecks = {};
+let mobilityDay = null; // 'A' or 'B'
+let mobilityEditMode = false;
+let mobilityTimers = {}; // { exId_side: { interval, remaining, running } }
+let editingMobilityId = null;
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 
+function getMobilityDay() {
+  // Auto-alternate based on last completed day, or manual override
+  const saved = localStorage.getItem('mobility_day_override');
+  const savedDate = localStorage.getItem('mobility_day_override_date');
+  if (saved && savedDate === todayStr()) return saved;
+  // Check yesterday's day and alternate
+  const lastDay = localStorage.getItem('mobility_last_day');
+  const lastDate = localStorage.getItem('mobility_last_date');
+  if (lastDay && lastDate) {
+    // If we already did a day today, keep it
+    if (lastDate === todayStr()) return lastDay;
+    return lastDay === 'A' ? 'B' : 'A';
+  }
+  return 'A';
+}
+
+function setMobilityDay(day) {
+  mobilityDay = day;
+  localStorage.setItem('mobility_day_override', day);
+  localStorage.setItem('mobility_day_override_date', todayStr());
+  renderMobility();
+}
+
+async function seedMobilityExercises() {
+  const existing = await dbGetAll('mobility_exercises');
+  if (existing.length > 0) return;
+  for (const ex of DEFAULT_MOBILITY_EXERCISES) {
+    await dbPut('mobility_exercises', { ...ex });
+  }
+}
+
 async function loadMobility() {
+  await seedMobilityExercises();
   const exList = await dbGetAll('mobility_exercises');
   mobilityExercises = exList.sort((a,b) => (a.order||0) - (b.order||0));
+  mobilityDay = getMobilityDay();
   const checkData = await dbGet('mobility_checks', todayStr());
-  mobilityChecks = checkData ? checkData.checks : {};
+  mobilityChecks = (checkData && checkData.day === mobilityDay) ? (checkData.checks || {}) : {};
 }
 
 async function saveMobilityChecks() {
-  await dbPut('mobility_checks', {date: todayStr(), checks: mobilityChecks});
+  await dbPut('mobility_checks', { date: todayStr(), day: mobilityDay, checks: mobilityChecks });
+  // Record which day we did today
+  localStorage.setItem('mobility_last_day', mobilityDay);
+  localStorage.setItem('mobility_last_date', todayStr());
+}
+
+function getDayExercises(day) {
+  return mobilityExercises.filter(ex => ex.day === (day || mobilityDay));
+}
+
+function isMobExDone(ex) {
+  const c = mobilityChecks[ex.id];
+  if (!c || !c.done) return false;
+  if (ex.bilateral) return c.doneL && c.doneR;
+  return true;
+}
+
+function fmtTimer(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}:${sec.toString().padStart(2,'0')}` : `${sec}`;
 }
 
 async function renderMobility() {
@@ -6736,60 +7001,224 @@ async function renderMobility() {
   const today = new Date();
   subEl.textContent = today.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
 
-  const list = document.getElementById('mobility-list');
-  const completedCount = mobilityExercises.filter(ex => mobilityChecks[ex.id]).length;
+  // Day pills
+  const dayPills = document.getElementById('mobility-day-pills');
+  dayPills.innerHTML = ['A','B'].map(d =>
+    `<button class="period-pill ${mobilityDay === d ? 'active' : ''}" onclick="setMobilityDay('${d}')">Day ${d}</button>`
+  ).join('');
 
-  if (mobilityExercises.length === 0) {
+  const dayExercises = getDayExercises();
+  const completedCount = dayExercises.filter(ex => isMobExDone(ex)).length;
+  const total = dayExercises.length;
+  const allDone = total > 0 && completedCount === total;
+
+  document.getElementById('mobility-progress-text').textContent =
+    allDone ? '✓ All done!' : `${completedCount}/${total}`;
+  document.getElementById('mobility-progress-bar').style.width =
+    total ? `${(completedCount/total*100)}%` : '0%';
+
+  const list = document.getElementById('mobility-list');
+  if (dayExercises.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon" style="font-size:36px">🧘</div>
-      <div class="empty-state-title">No Mobility Exercises</div>
-      <div class="empty-state-sub">Tap + Add to build your daily mobility checklist</div>
+      <div class="empty-state-title">No exercises on Day ${mobilityDay}</div>
     </div>`;
     return;
   }
 
-  const allDone = completedCount === mobilityExercises.length;
-  list.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px">
-      <div style="font-family:var(--mono);font-size:12px;color:var(--text3)">${completedCount}/${mobilityExercises.length} complete</div>
-      ${allDone ? `<div style="font-size:12px;color:var(--accent);font-weight:600">✓ All done!</div>` : ''}
-    </div>
-    <div style="height:4px;background:var(--bg3);border-radius:99px;margin-bottom:14px;overflow:hidden">
-      <div style="height:100%;width:${mobilityExercises.length ? (completedCount/mobilityExercises.length*100) : 0}%;background:var(--gradient);border-radius:99px;transition:width .3s"></div>
-    </div>
-    ${mobilityExercises.map(ex => {
-      const done = !!mobilityChecks[ex.id];
-      return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid ${done ? 'var(--accent)' : 'var(--border)'};border-radius:var(--r2);transition:all .15s;${done ? 'opacity:0.7' : ''}">
-        <button style="width:26px;height:26px;border-radius:50%;border:2px solid ${done ? 'transparent' : 'var(--border2)'};background:${done ? 'var(--gradient)' : 'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s"
-          onclick="toggleMobilityCheck('${ex.id}')">
-          ${done ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
-        </button>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:500;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
-          ${ex.notes ? `<div style="font-size:12px;color:var(--text3);margin-top:2px">${escHtml(ex.notes)}</div>` : ''}
-        </div>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="openMobilityEdit('${ex.id}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </div>`;
-    }).join('')}`;
+  list.innerHTML = dayExercises.map(ex => renderMobExCard(ex)).join('') +
+    (mobilityEditMode ? `<button class="btn btn-secondary" style="width:100%;margin-top:4px" onclick="openMobilityAdd()">+ Add Exercise</button>` : '');
 }
 
-async function toggleMobilityCheck(exId) {
-  mobilityChecks[exId] = !mobilityChecks[exId];
+function renderMobExCard(ex) {
+  const c = mobilityChecks[ex.id] || {};
+  const done = isMobExDone(ex);
+  const editBtns = mobilityEditMode ? `
+    <button class="btn btn-ghost btn-sm btn-icon" onclick="openMobilityEdit('${ex.id}')" aria-label="Edit exercise">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>` : '';
+
+  const histBtn = !mobilityEditMode ? `
+    <button class="btn btn-ghost btn-sm btn-icon" onclick="openMobilityHistory('${ex.id}')" aria-label="View history" style="opacity:0.5">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>` : '';
+
+  let timerSection;
+  if (ex.bilateral) {
+    timerSection = `
+      <div style="display:flex;gap:6px;margin-top:8px">
+        ${renderSideTimer(ex, 'L', 'Left', c)}
+        ${renderSideTimer(ex, 'R', 'Right', c)}
+      </div>`;
+  } else {
+    timerSection = `<div style="margin-top:8px">${renderSideTimer(ex, 'L', null, c)}</div>`;
+  }
+
+  // Notes
+  const noteVal = c.notes || '';
+  const notesSection = `
+    <div style="margin-top:6px">
+      <input type="text" placeholder="Notes…" value="${escHtml(noteVal)}"
+        style="width:100%;padding:5px 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg);color:var(--text);font-family:var(--body)"
+        onchange="saveMobNote('${ex.id}', this.value)">
+    </div>`;
+
+  return `<div style="padding:12px 14px;background:var(--bg2);border:1px solid ${done ? 'var(--accent)' : 'var(--border)'};border-radius:var(--r2);transition:border-color .15s;${done ? 'opacity:0.75' : ''}">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:500;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
+        ${ex.cues ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">${escHtml(ex.cues)}</div>` : ''}
+      </div>
+      ${histBtn}${editBtns}
+    </div>
+    ${timerSection}
+    ${notesSection}
+  </div>`;
+}
+
+function renderSideTimer(ex, side, label, c) {
+  const key = `${ex.id}_${side}`;
+  const timer = mobilityTimers[key];
+  const sideDone = side === 'L' ? (ex.bilateral ? c.doneL : c.done) : c.doneR;
+  const sideTime = side === 'L' ? (c.durationL || 0) : (c.durationR || 0);
+  const target = ex.targetSeconds || 30;
+
+  if (sideDone && !timer) {
+    // Completed
+    return `<div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--accent)">
+      ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span style="font-family:var(--mono);font-size:13px;color:var(--accent)">${fmtTimer(sideTime)}s</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px" onclick="resetMobSide('${ex.id}','${side}')">Redo</button>
+    </div>`;
+  }
+
+  const remaining = timer ? timer.remaining : target;
+  const running = timer ? timer.running : false;
+  const canEdit = !timer;
+
+  // Editable target: tap the time when no timer is active to change duration
+  const timerDisplay = canEdit
+    ? `<input type="number" inputmode="numeric" value="${target}" min="5" max="300" style="font-family:var(--mono);font-size:20px;font-weight:600;width:52px;text-align:center;border:none;border-bottom:1px dashed var(--text3);background:transparent;color:var(--text);padding:0"
+        onchange="updateMobTarget('${ex.id}',this.value)" onclick="this.select()">`
+    : `<div style="font-family:var(--mono);font-size:20px;font-weight:600;min-width:42px;text-align:center;${remaining <= 5 && running ? 'color:var(--accent)' : ''}" id="mob-timer-${key}">${fmtTimer(remaining)}</div>`;
+
+  return `<div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--border)">
+    ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
+    ${timerDisplay}
+    ${canEdit ? '<span style="font-size:10px;color:var(--text3)">s</span>' : ''}
+    <div style="flex:1"></div>
+    <button class="btn ${running ? 'btn-ghost' : 'btn-primary'} btn-sm" style="padding:4px 12px;font-size:12px"
+      onclick="toggleMobTimer('${ex.id}','${side}')">
+      ${running ? 'Pause' : (timer ? 'Resume' : 'Start')}
+    </button>
+  </div>`;
+}
+
+function toggleMobTimer(exId, side) {
+  const key = `${exId}_${side}`;
+  const ex = mobilityExercises.find(e => e.id === exId);
+  if (!ex) return;
+  const target = ex.targetSeconds || 30;
+  let timer = mobilityTimers[key];
+
+  if (!timer) {
+    // Start new timer
+    timer = { remaining: target, running: true, started: target };
+    mobilityTimers[key] = timer;
+    timer.interval = setInterval(() => tickMobTimer(exId, side), 1000);
+  } else if (timer.running) {
+    // Pause
+    clearInterval(timer.interval);
+    timer.running = false;
+  } else {
+    // Resume
+    timer.running = true;
+    timer.interval = setInterval(() => tickMobTimer(exId, side), 1000);
+  }
+  renderMobility();
+}
+
+function tickMobTimer(exId, side) {
+  const key = `${exId}_${side}`;
+  const timer = mobilityTimers[key];
+  if (!timer || !timer.running) return;
+
+  timer.remaining--;
+  const el = document.getElementById(`mob-timer-${key}`);
+  if (el) {
+    el.textContent = fmtTimer(Math.max(0, timer.remaining));
+    if (timer.remaining <= 5 && timer.remaining > 0) el.style.color = 'var(--accent)';
+  }
+
+  if (timer.remaining <= 0) {
+    clearInterval(timer.interval);
+    timer.running = false;
+    // Mark side complete
+    completeMobSide(exId, side, timer.started);
+  }
+}
+
+async function completeMobSide(exId, side, duration) {
+  const ex = mobilityExercises.find(e => e.id === exId);
+  if (!ex) return;
+  if (!mobilityChecks[exId]) mobilityChecks[exId] = {};
+  const c = mobilityChecks[exId];
+  if (side === 'L') {
+    if (ex.bilateral) { c.doneL = true; c.durationL = duration; }
+    else { c.done = true; c.doneL = true; c.durationL = duration; }
+  } else {
+    c.doneR = true; c.durationR = duration;
+  }
+  c.ts = Date.now();
+  // Clear timer state
+  delete mobilityTimers[`${exId}_${side}`];
+  // Play a short beep
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 880; gain.gain.value = 0.3;
+    osc.start(); osc.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
   await saveMobilityChecks();
   renderMobility();
 }
 
-let editingMobilityId = null;
+async function resetMobSide(exId, side) {
+  const c = mobilityChecks[exId];
+  if (!c) return;
+  if (side === 'L') { c.doneL = false; c.durationL = 0; c.done = false; }
+  else { c.doneR = false; c.durationR = 0; }
+  delete mobilityTimers[`${exId}_${side}`];
+  await saveMobilityChecks();
+  renderMobility();
+}
 
-function openMobilityAdd() {
-  editingMobilityId = null;
-  document.getElementById('mobility-modal-title').textContent = 'Add Mobility Exercise';
-  document.getElementById('mobility-name-input').value = '';
-  document.getElementById('mobility-notes-input').value = '';
-  document.getElementById('mobility-delete-btn').style.display = 'none';
-  openModal('modal-mobility-add');
+async function saveMobNote(exId, val) {
+  if (!mobilityChecks[exId]) mobilityChecks[exId] = {};
+  mobilityChecks[exId].notes = val.trim();
+  await saveMobilityChecks();
+}
+
+async function updateMobTarget(exId, val) {
+  const secs = Math.max(5, Math.min(300, parseInt(val) || 30));
+  const ex = mobilityExercises.find(e => e.id === exId);
+  if (!ex) return;
+  ex.targetSeconds = secs;
+  await dbPut('mobility_exercises', ex);
+}
+
+// ── Edit mode & exercise CRUD ──
+function toggleMobilityEditMode() {
+  mobilityEditMode = !mobilityEditMode;
+  const btn = document.getElementById('mobility-edit-btn');
+  btn.textContent = mobilityEditMode ? 'Done' : 'Edit';
+  if (mobilityEditMode) btn.classList.add('btn-primary');
+  else btn.classList.remove('btn-primary');
+  renderMobility();
 }
 
 function openMobilityEdit(exId) {
@@ -6798,14 +7227,30 @@ function openMobilityEdit(exId) {
   if (!ex) return;
   document.getElementById('mobility-modal-title').textContent = 'Edit Exercise';
   document.getElementById('mobility-name-input').value = ex.name;
-  document.getElementById('mobility-notes-input').value = ex.notes || '';
+  document.getElementById('mobility-dur-input').value = ex.targetSeconds || 30;
+  document.getElementById('mobility-day-input').value = ex.day || 'A';
+  document.getElementById('mobility-bilateral-input').checked = !!ex.bilateral;
+  document.getElementById('mobility-notes-input').value = ex.cues || '';
   document.getElementById('mobility-delete-btn').style.display = '';
   openModal('modal-mobility-add');
 }
 
-document.getElementById('mobility-add-btn').addEventListener('click', openMobilityAdd);
+function openMobilityAdd() {
+  editingMobilityId = null;
+  document.getElementById('mobility-modal-title').textContent = 'Add Exercise';
+  document.getElementById('mobility-name-input').value = '';
+  document.getElementById('mobility-dur-input').value = 30;
+  document.getElementById('mobility-day-input').value = mobilityDay || 'A';
+  document.getElementById('mobility-bilateral-input').checked = false;
+  document.getElementById('mobility-notes-input').value = '';
+  document.getElementById('mobility-delete-btn').style.display = 'none';
+  openModal('modal-mobility-add');
+}
+
+document.getElementById('mobility-edit-btn').addEventListener('click', toggleMobilityEditMode);
 document.getElementById('mobility-reset-btn').addEventListener('click', async () => {
   mobilityChecks = {};
+  mobilityTimers = {};
   await saveMobilityChecks();
   renderMobility();
   showToast('Checklist reset');
@@ -6814,17 +7259,19 @@ document.getElementById('mobility-reset-btn').addEventListener('click', async ()
 document.getElementById('mobility-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('mobility-name-input').value.trim();
   if (!name) { showToast('Enter an exercise name'); return; }
-  const notes = document.getElementById('mobility-notes-input').value.trim();
+  const targetSeconds = parseInt(document.getElementById('mobility-dur-input').value) || 30;
+  const day = document.getElementById('mobility-day-input').value;
+  const bilateral = document.getElementById('mobility-bilateral-input').checked;
+  const cues = document.getElementById('mobility-notes-input').value.trim();
 
   if (editingMobilityId) {
     const idx = mobilityExercises.findIndex(e => e.id === editingMobilityId);
     if (idx >= 0) {
-      mobilityExercises[idx].name = name;
-      mobilityExercises[idx].notes = notes;
+      Object.assign(mobilityExercises[idx], { name, targetSeconds, day, bilateral, cues });
       await dbPut('mobility_exercises', mobilityExercises[idx]);
     }
   } else {
-    const ex = {id: uid(), name, notes, order: mobilityExercises.length};
+    const ex = { id: uid(), name, targetSeconds, day, bilateral, cues, order: mobilityExercises.length };
     await dbPut('mobility_exercises', ex);
   }
   closeModal('modal-mobility-add');
@@ -6842,6 +7289,46 @@ document.getElementById('mobility-delete-btn').addEventListener('click', async (
   await renderMobility();
   showToast('Deleted');
 });
+
+// ── History ──
+async function openMobilityHistory(exId) {
+  const ex = mobilityExercises.find(e => e.id === exId);
+  if (!ex) return;
+  document.getElementById('mobility-history-title').textContent = ex.name;
+  const body = document.getElementById('mobility-history-body');
+  body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">Loading…</div>';
+  openModal('modal-mobility-history');
+
+  const allChecks = await dbGetAll('mobility_checks');
+  allChecks.sort((a,b) => b.date.localeCompare(a.date));
+
+  const entries = allChecks.filter(dc => dc.checks && dc.checks[exId] && (dc.checks[exId].done || dc.checks[exId].doneL || dc.checks[exId].doneR));
+  if (entries.length === 0) {
+    body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">No history yet</div>';
+    return;
+  }
+
+  body.innerHTML = entries.map(dc => {
+    const c = dc.checks[exId];
+    const dateStr = new Date(dc.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    let timeStr;
+    if (ex.bilateral) {
+      const lStr = c.doneL ? `L: ${c.durationL || 0}s` : 'L: —';
+      const rStr = c.doneR ? `R: ${c.durationR || 0}s` : 'R: —';
+      timeStr = `${lStr}  ·  ${rStr}`;
+    } else {
+      timeStr = c.durationL ? `${c.durationL}s` : '✓';
+    }
+    const noteStr = c.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(c.notes)}</div>` : '';
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;color:var(--text2)">${dateStr}</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:500">${timeStr}</span>
+      </div>
+      ${noteStr}
+    </div>`;
+  }).join('');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // VARIANT EDITOR
@@ -7427,16 +7914,29 @@ async function saveWorkoutTimeEdit() {
 
   const startVal = document.getElementById('edit-start-time').value;
   const endVal = document.getElementById('edit-end-time').value;
+  const durVal = document.getElementById('edit-duration').value;
+
   if (!startVal) { showToast('Start time is required'); return; }
 
   const newStart = new Date(startVal).getTime();
-  const newEnd = endVal ? new Date(endVal).getTime() : null;
-
-  if (newEnd && newEnd <= newStart) { showToast('End must be after start'); return; }
+  if (isNaN(newStart)) { showToast('Invalid start time'); return; }
 
   session.startTime = newStart;
-  session.endTime = newEnd;
-  session.durationMinutes = newEnd ? Math.round((newEnd - newStart) / 60000) : null;
+
+  // If duration was edited, compute end from start + duration
+  const durMins = parseInt(durVal);
+  if (durMins > 0) {
+    session.durationMinutes = durMins;
+    session.endTime = newStart + durMins * 60000;
+  } else if (endVal) {
+    const newEnd = new Date(endVal).getTime();
+    if (isNaN(newEnd) || newEnd <= newStart) { showToast('End must be after start'); return; }
+    session.endTime = newEnd;
+    session.durationMinutes = Math.round((newEnd - newStart) / 60000);
+  } else {
+    session.endTime = null;
+    session.durationMinutes = null;
+  }
 
   await dbPut('sessions', session);
   showToast('Times updated');
