@@ -2003,11 +2003,21 @@ textarea { resize: none; }
       </button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-primary" id="start-empty-btn" style="width:100%">Start Empty Workout</button>
+      <div id="category-pick" style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:var(--text3);font-weight:500;margin-bottom:2px">What are you training?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="category-btns"></div>
       </div>
-      <div style="margin:16px 0 8px;font-size:12px;color:var(--text3);font-weight:500">From planned workouts</div>
-      <div id="modal-template-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div id="category-chosen" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" onclick="resetCategoryPick()" style="padding:4px 8px;font-size:12px">← Back</button>
+          <span id="category-chosen-label" style="font-size:13px;color:var(--text2)"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary" id="start-empty-btn" style="width:100%">Start Empty Workout</button>
+        </div>
+        <div style="margin:16px 0 8px;font-size:12px;color:var(--text3);font-weight:500">From planned workouts</div>
+        <div id="modal-template-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2109,6 +2119,10 @@ textarea { resize: none; }
       <div class="input-group" style="margin-bottom:12px">
         <div class="input-label">Workout Name</div>
         <input id="tmpl-name-input" type="text" placeholder="e.g., Monday Upper, Heavy Legs…">
+      </div>
+      <div class="input-group" style="margin-bottom:12px">
+        <div class="input-label">Category</div>
+        <div id="tmpl-category-btns" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
       </div>
       <div id="tmpl-exercises-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
       <div style="display:flex;gap:6px">
@@ -2918,6 +2932,28 @@ const PATTERN_SLOTS = [
   { id: "slot_tricep_iso",label: "Tricep Isolation",      pattern: "isolation", muscles: ["triceps"] },
   { id: "slot_core",      label: "Core Movement",         pattern: "core",      muscles: [] },
 ];
+
+const WORKOUT_CATEGORIES = {
+  upper:  { label: 'Upper', icon: '🔱', muscles: ['chest','back','shoulders'] },
+  lower:  { label: 'Lower', icon: '🦵', muscles: ['quads','hamstrings','glutes','calves'] },
+  arms:   { label: 'Arms',  icon: '💪', muscles: ['biceps','triceps'] },
+  core:   { label: 'Core',  icon: '🧱', muscles: ['core'] },
+  cardio: { label: 'Cardio',icon: '🫀', ids: ['concept2'] },
+  other:  { label: 'Other', icon: '🏋️', all: true },
+};
+
+function exerciseMatchesCategory(h, catKey) {
+  if (!catKey || catKey === 'other') return true;
+  const cat = WORKOUT_CATEGORIES[catKey];
+  if (!cat) return true;
+  if (cat.all) return true;
+  if (cat.ids) return cat.ids.includes(h.id);
+  if (cat.muscles) {
+    const all = [...h.muscles, ...(h.sec || [])];
+    return cat.muscles.some(m => all.includes(m));
+  }
+  return true;
+}
 const EQUIPMENT_TYPES = [...new Set(EXERCISE_HIERARCHY.flatMap(h => h.resistances.map(r => r.toLowerCase().replace(/[^a-z0-9+]/g,'_'))))].sort();
 
 // Build parent entries from hierarchy for library screen, analytics, etc.
@@ -3269,6 +3305,11 @@ document.getElementById('new-workout-btn').addEventListener('click', () => {
 });
 
 async function openNewWorkoutModal() {
+  // Reset to category picker
+  pendingCategory = 'other';
+  document.getElementById('category-pick').style.display = '';
+  document.getElementById('category-chosen').style.display = 'none';
+  renderCategoryButtons();
   const list = document.getElementById('modal-template-list');
   list.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">Loading…</div>';
   openModal('modal-new-workout');
@@ -3283,9 +3324,34 @@ async function openNewWorkoutModal() {
   }
 }
 
+let pendingCategory = 'other';
+
+function renderCategoryButtons() {
+  const container = document.getElementById('category-btns');
+  container.innerHTML = Object.entries(WORKOUT_CATEGORIES).map(([key, cat]) =>
+    `<button class="btn btn-secondary" onclick="pickCategory('${key}')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:13px">
+      <span style="font-size:22px">${cat.icon}</span>${cat.label}
+    </button>`
+  ).join('');
+}
+
+function pickCategory(key) {
+  pendingCategory = key;
+  const cat = WORKOUT_CATEGORIES[key];
+  document.getElementById('category-pick').style.display = 'none';
+  document.getElementById('category-chosen').style.display = '';
+  document.getElementById('category-chosen-label').textContent = cat.icon + ' ' + cat.label;
+}
+
+function resetCategoryPick() {
+  document.getElementById('category-pick').style.display = '';
+  document.getElementById('category-chosen').style.display = 'none';
+}
+
 document.getElementById('start-empty-btn').addEventListener('click', () => {
   closeModal('modal-new-workout');
-  startSession({title: 'Workout', exercises: []});
+  const cat = WORKOUT_CATEGORIES[pendingCategory];
+  startSession({title: cat ? cat.label : 'Workout', exercises: [], category: pendingCategory});
 });
 
 async function startFromTemplate(templateId) {
@@ -3342,7 +3408,7 @@ async function startFromTemplate(templateId) {
       });
     }
   }
-  startSession({title: tmpl.name, exercises});
+  startSession({title: tmpl.name, exercises, category: tmpl.category || pendingCategory});
   
   // Single-use: delete the plan after launching
   try { await dbDelete('templates', templateId); } catch(e) {}
@@ -3372,6 +3438,7 @@ function startSession(sessionData) {
   activeSession = {
     id: uid(),
     title: sessionData.title,
+    category: sessionData.category || 'other',
     startTime: sessionStartEpoch,
     endTime: null,
     durationMinutes: null,
@@ -4215,6 +4282,7 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
   };
   document.getElementById('pick-ex-title').textContent = 'Add Exercise';
   document.getElementById('pick-ex-confirm').textContent = 'Add Exercise';
+  pickerCategoryFilter = activeSession ? activeSession.category : null;
   openExercisePicker();
 });
 
@@ -5136,6 +5204,7 @@ function saveTmplDraft() {
   localStorage.setItem(TMPL_DRAFT_KEY, JSON.stringify({
     id: editingTemplateId,
     name,
+    category: tmplCategory,
     exercises: tmplExercises
   }));
   const dot = document.getElementById('tmpl-autosave-dot');
@@ -5172,10 +5241,12 @@ async function openTemplateEditor(templateId) {
     document.getElementById('tmpl-editor-title').textContent = 'Edit Plan';
     if (hasDraft) {
       document.getElementById('tmpl-name-input').value = draft.name;
+      tmplCategory = draft.category || tmpl.category || 'other';
       renderTemplateExercises(draft.exercises);
       showToast('Restored unsaved changes');
     } else {
       document.getElementById('tmpl-name-input').value = tmpl.name;
+      tmplCategory = tmpl.category || 'other';
       renderTemplateExercises(tmpl.exercises);
     }
     deleteBtn.style.display = '';
@@ -5183,19 +5254,35 @@ async function openTemplateEditor(templateId) {
     document.getElementById('tmpl-editor-title').textContent = 'Plan Workout';
     if (hasDraft) {
       document.getElementById('tmpl-name-input').value = draft.name;
+      tmplCategory = draft.category || 'other';
       renderTemplateExercises(draft.exercises);
       showToast('Restored unsaved draft');
     } else {
       document.getElementById('tmpl-name-input').value = '';
+      tmplCategory = 'other';
       renderTemplateExercises([]);
     }
     deleteBtn.style.display = 'none';
   }
+  renderTmplCategoryBtns();
   openModal('modal-template-editor');
 }
 
 let tmplExercises = [];
 let tmplExpandedIdx = null;
+let tmplCategory = 'other';
+
+function renderTmplCategoryBtns() {
+  const container = document.getElementById('tmpl-category-btns');
+  container.innerHTML = Object.entries(WORKOUT_CATEGORIES).map(([key, cat]) =>
+    `<button class="filter-pill ${tmplCategory === key ? 'active' : ''}" onclick="setTmplCategory('${key}')" style="font-size:12px;padding:4px 10px">${cat.icon} ${cat.label}</button>`
+  ).join('');
+}
+function setTmplCategory(key) {
+  tmplCategory = key;
+  renderTmplCategoryBtns();
+  saveTmplDraft();
+}
 
 function renderTemplateExercises(exercises) {
   tmplExercises = exercises ? [...exercises] : [];
@@ -5666,6 +5753,7 @@ document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
   };
   document.getElementById('pick-ex-title').textContent = 'Add to Plan';
   document.getElementById('pick-ex-confirm').textContent = 'Add Exercise';
+  pickerCategoryFilter = tmplCategory;
   openExercisePicker();
 });
 
@@ -5690,6 +5778,7 @@ document.getElementById('tmpl-save-btn').addEventListener('click', async () => {
   const tmpl = {
     id: editingTemplateId || uid(),
     name,
+    category: tmplCategory,
     exercises: tmplExercises
   };
   await dbPut('templates', tmpl);
@@ -5713,6 +5802,7 @@ document.getElementById('tmpl-delete-btn').addEventListener('click', async () =>
 // ═══════════════════════════════════════════════════════════════
 let pickerMuscleFilter = '';
 let pickerSlotFilter = null; // {pattern, muscles} when picker is opened for a slot
+let pickerCategoryFilter = null; // set by session or template context
 
 function openExercisePicker(slotFilter) {
   pickerMuscleFilter = '';
@@ -5825,6 +5915,10 @@ function renderPickerLiftList() {
   const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
 
   EXERCISE_HIERARCHY.forEach(h => {
+    // Session/template category filter
+    if (pickerCategoryFilter) {
+      if (!exerciseMatchesCategory(h, pickerCategoryFilter)) return;
+    }
     // Slot filter: restrict to matching pattern + muscles
     if (pickerSlotFilter) {
       if (h.pattern !== pickerSlotFilter.pattern) return;
