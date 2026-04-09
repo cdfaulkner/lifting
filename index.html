@@ -348,7 +348,7 @@ select option { background: var(--bg3); }
   border-radius: var(--r2) var(--r2) 0 0;
   width: 100%;
   max-width: 520px;
-  max-height: 90vh;
+  max-height: calc(90vh - var(--safe-top));
   display: flex;
   flex-direction: column;
   padding-bottom: var(--safe-bot);
@@ -430,9 +430,8 @@ select option { background: var(--bg3); }
 .workout-card:active { border-color: var(--border2); background: var(--bg3); }
 .workout-card-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 .workout-card-title {
   font-family: var(--display);
@@ -1822,72 +1821,76 @@ textarea { resize: none; }
   <div id="content">
     <!-- ══ HOME ══ -->
     <div id="screen-home" class="screen active">
-      <div class="page-header">
-        <div class="page-title" style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:24px;line-height:1">🦾</span>
-          Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span>
-          <span id="sync-dot" title="Checking sync…"></span>
+      <div class="page-header" style="justify-content:space-between">
+        <div>
+          <div class="page-title" style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:24px;line-height:1">🦾</span>
+            Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span>
+            <span id="sync-dot" title="Checking sync…"></span>
+          </div>
+          <div class="page-sub" id="home-stats-sub"></div>
         </div>
-        <div class="page-sub" id="home-stats-sub"></div>
-      </div>
-      <div id="active-banner"></div>
-      <div class="section-row">
-        <div class="section-title">Recent Workouts</div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm" id="export-claude-btn" title="Export for Claude">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Share
           </button>
+          <button class="btn btn-ghost btn-sm" id="new-template-btn">Plan</button>
           <button class="btn btn-primary btn-sm" id="new-workout-btn">+ New</button>
         </div>
       </div>
-      <div id="recent-workouts" class="workout-list"></div>
+      <!-- Sub-tabs -->
+      <div id="home-tabs-row" style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
+        <button id="home-tab-workouts" class="lib-tab active" onclick="setHomeTab('workouts')">Workouts</button>
+        <button id="home-tab-exercises" class="lib-tab" onclick="setHomeTab('exercises')">Exercises</button>
+      </div>
+      <!-- Workouts sub-view -->
+      <div id="home-view-workouts">
+        <div id="active-banner"></div>
+        <div id="recent-workouts" class="workout-list"></div>
+      </div>
+      <!-- Exercises sub-view (was Library) -->
+      <div id="home-view-exercises" style="display:none">
+        <div id="lib-sticky-header">
+          <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;padding:10px 16px 0">
+            <div class="page-sub" id="lib-count-sub"></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+              <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
+            </div>
+          </div>
+          <!-- View tabs -->
+          <div id="lib-tabs-row" style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
+            <button id="lib-tab-browse" class="lib-tab active" onclick="setLibTab('browse')">Browse</button>
+            <button id="lib-tab-history" class="lib-tab" onclick="setLibTab('history')">History</button>
+          </div>
+          <!-- Search bars (toggled by tab) -->
+          <div class="library-search-bar" id="lib-browse-search-wrap">
+            <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
+            <div class="library-filters" id="lib-filters"></div>
+          </div>
+          <div id="lib-history-search-wrap" style="display:none;padding:10px 16px 6px">
+            <input id="lib-history-search" type="search" placeholder="Search logged exercises…" autocomplete="off">
+          </div>
+        </div>
+        <!-- Browse view -->
+        <div id="lib-view-browse">
+          <div id="library-list" class="library-list"></div>
+        </div>
+        <!-- History log view -->
+        <div id="lib-view-history" style="display:none">
+          <div id="lib-history-list" class="library-list"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- ══ PLANNED WORKOUTS ══ -->
+    <!-- ══ PLANNED WORKOUTS (hidden screen, kept for template editor) ══ -->
     <div id="screen-templates" class="screen">
       <div class="page-header">
         <div class="page-title">Planned Workouts</div>
-        <button class="btn btn-primary btn-sm" id="new-template-btn">+ Plan</button>
+        <button class="btn btn-ghost btn-sm" onclick="showScreen('home')">← Back</button>
       </div>
       <div id="template-list" class="template-list"></div>
-    </div>
-
-    <!-- ══ LIBRARY ══ -->
-    <div id="screen-library" class="screen">
-      <div id="lib-sticky-header">
-        <div class="page-header" style="justify-content:space-between">
-          <div style="display:flex;align-items:baseline;gap:10px">
-            <div class="page-title">Library</div>
-            <div class="page-sub" id="lib-count-sub"></div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-            <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
-          </div>
-        </div>
-        <!-- View tabs -->
-        <div id="lib-tabs-row" style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
-          <button id="lib-tab-browse" class="lib-tab active" onclick="setLibTab('browse')">Browse</button>
-          <button id="lib-tab-history" class="lib-tab" onclick="setLibTab('history')">History</button>
-        </div>
-        <!-- Search bars (toggled by tab) -->
-        <div class="library-search-bar" id="lib-browse-search-wrap">
-          <input id="lib-search" type="search" placeholder="Search exercises…" autocomplete="off">
-          <div class="library-filters" id="lib-filters"></div>
-        </div>
-        <div id="lib-history-search-wrap" style="display:none;padding:10px 16px 6px">
-          <input id="lib-history-search" type="search" placeholder="Search logged exercises…" autocomplete="off">
-        </div>
-      </div>
-      <!-- Browse view -->
-      <div id="lib-view-browse">
-        <div id="library-list" class="library-list"></div>
-      </div>
-      <!-- History log view -->
-      <div id="lib-view-history" style="display:none">
-        <div id="lib-history-list" class="library-list"></div>
-      </div>
     </div>
 
     <!-- ══ BODY ══ -->
@@ -1944,7 +1947,7 @@ textarea { resize: none; }
           <div class="page-title">Admin</div>
           <div class="page-sub">Exercise taxonomy</div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="showScreen('library')">← Back</button>
+        <button class="btn btn-ghost btn-sm" onclick="setHomeTab('exercises');showScreen('home')">← Back</button>
       </div>
       <div class="admin-search-bar">
         <input id="admin-search" type="search" placeholder="Filter exercises…" autocomplete="off" oninput="renderAdminList()">
@@ -1970,14 +1973,6 @@ textarea { resize: none; }
     <button class="nav-btn active" data-screen="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
-    </button>
-    <button class="nav-btn" data-screen="templates">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Plan
-    </button>
-    <button class="nav-btn" data-screen="library">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Library
     </button>
     <button class="nav-btn" data-screen="progress">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -2076,7 +2071,7 @@ textarea { resize: none; }
 
 <!-- Exercise Analytics View -->
 <div class="modal-overlay" id="modal-exercise-detail">
-  <div class="modal" style="max-height:95vh">
+  <div class="modal">
     <div class="modal-header">
       <div style="flex:1">
         <div class="modal-title" id="ex-detail-name"></div>
@@ -2108,7 +2103,7 @@ textarea { resize: none; }
 
 <!-- Workout Planner -->
 <div class="modal-overlay" id="modal-template-editor">
-  <div class="modal" style="max-height:95vh">
+  <div class="modal">
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:8px"><div class="modal-title" id="tmpl-editor-title">Plan Workout</div><div id="tmpl-autosave-dot" class="autosave-dot" title="Saved"></div></div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-template-editor')">
@@ -2250,7 +2245,7 @@ textarea { resize: none; }
 
 <!-- Variant Editor Modal -->
 <div class="modal-overlay" id="modal-variant-editor">
-  <div class="modal" style="max-height:90vh">
+  <div class="modal">
     <div class="modal-header">
       <div>
         <div class="modal-title" id="variant-editor-title">Edit Variant</div>
@@ -2386,7 +2381,7 @@ textarea { resize: none; }
 
 <!-- Swap Exercise Modal -->
 <div class="modal-overlay" id="modal-swap-variant">
-  <div class="modal" style="max-height:90vh">
+  <div class="modal">
     <div class="modal-header">
       <div>
         <div class="modal-title">Swap Exercise</div>
@@ -2451,7 +2446,7 @@ textarea { resize: none; }
 
 <!-- Exercise Picker — must be last modal in DOM so it renders above all others -->
 <div class="modal-overlay" id="modal-pick-exercise" style="z-index:400">
-  <div class="modal" style="max-height:95vh">
+  <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="pick-ex-title">Add Exercise</div>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="closeExercisePicker()">
@@ -2838,7 +2833,7 @@ const EXERCISE_HIERARCHY = [
     variants:["Standing","Seated","Incline","Preacher","Unilateral","Narrow","Wide"] },
   { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra","Band"],
-    variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip"] },
+    variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip","Bar","Rope","Reverse Grip"] },
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW","Belt Lever"],
@@ -2934,13 +2929,18 @@ const PATTERN_SLOTS = [
 ];
 
 const WORKOUT_CATEGORIES = {
-  upper:  { label: 'Upper', icon: '🔱', muscles: ['chest','back','shoulders'] },
-  lower:  { label: 'Lower', icon: '🦵', muscles: ['quads','hamstrings','glutes','calves'] },
-  arms:   { label: 'Arms',  icon: '💪', muscles: ['biceps','triceps'] },
-  core:   { label: 'Core',  icon: '🧱', muscles: ['core'] },
-  cardio: { label: 'Cardio',icon: '🫀', ids: ['concept2'] },
-  other:  { label: 'Other', icon: '🏋️', all: true },
+  upper:     { label: 'Upper',      icon: '🔱', muscles: ['chest','back','shoulders'] },
+  lower:     { label: 'Lower',      icon: '🛞', muscles: ['quads','hamstrings','glutes','calves'] },
+  arms_core: { label: 'Arms & Core',icon: '🍬', muscles: ['biceps','triceps','core'] },
+  cardio:    { label: 'Cardio',     icon: '🫠', ids: ['concept2'] },
+  other:     { label: 'Other',      icon: '🎲', all: true },
 };
+
+// Map legacy category keys to current ones
+function resolveCategory(key) {
+  if (key === 'arms' || key === 'core') return 'arms_core';
+  return WORKOUT_CATEGORIES[key] ? key : 'other';
+}
 
 function exerciseMatchesCategory(h, catKey) {
   if (!catKey || catKey === 'other') return true;
@@ -3142,15 +3142,25 @@ async function getSortedSessions() {
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
+let homeTab = 'workouts'; // 'workouts' | 'exercises'
+
+function setHomeTab(tab) {
+  homeTab = tab;
+  document.getElementById('home-tab-workouts').classList.toggle('active', tab === 'workouts');
+  document.getElementById('home-tab-exercises').classList.toggle('active', tab === 'exercises');
+  document.getElementById('home-view-workouts').style.display = tab === 'workouts' ? '' : 'none';
+  document.getElementById('home-view-exercises').style.display = tab === 'exercises' ? '' : 'none';
+  if (tab === 'exercises') renderLibrary();
+}
+
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`screen-${name}`)?.classList.add('active');
   document.querySelector(`[data-screen="${name}"]`)?.classList.add('active');
 
-  if (name === 'home') renderHome();
+  if (name === 'home') { if (homeTab === 'workouts') renderHome(); else renderLibrary(); }
   if (name === 'templates') renderTemplates();
-  if (name === 'library') renderLibrary();
   if (name === 'progress') renderProgress();
   if (name === 'mobility') renderMobility();
   if (name === 'admin') renderAdminList();
@@ -3269,11 +3279,15 @@ async function renderHome() {
 
   list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
     const bwHtml = bwMap[s.id] ? `<div class="workout-meta-item"><span class="workout-meta-val">${bwMap[s.id]}</span> lbs</div>` : '';
+    const catIcon = (WORKOUT_CATEGORIES[resolveCategory(s.category)] || WORKOUT_CATEGORIES.other).icon;
     return `<div class="workout-card swipe-item" data-sid="${s.id}">
       <div class="swipe-item-inner" onclick="viewWorkoutDetail('${s.id}')">
         <div class="workout-card-header">
-          <div class="workout-card-title">${escHtml(s.title)}</div>
-          <div class="workout-card-date">${dateStr}</div>
+          <span style="font-size:28px;line-height:1;flex-shrink:0">${catIcon}</span>
+          <div style="flex:1;min-width:0">
+            <div class="workout-card-title">${escHtml(s.title)}</div>
+            <div class="workout-card-date">${dateStr}</div>
+          </div>
         </div>
         <div class="workout-card-exercises">${exList}${more}</div>
         <div class="workout-card-meta">
@@ -4282,7 +4296,7 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
   };
   document.getElementById('pick-ex-title').textContent = 'Add Exercise';
   document.getElementById('pick-ex-confirm').textContent = 'Add Exercise';
-  pickerCategoryFilter = activeSession ? activeSession.category : null;
+  pickerCategoryFilter = activeSession ? resolveCategory(activeSession.category) : null;
   openExercisePicker();
 });
 
