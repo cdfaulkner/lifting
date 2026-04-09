@@ -1886,9 +1886,14 @@ textarea { resize: none; }
 
     <!-- ══ PLANNED WORKOUTS (hidden screen, kept for template editor) ══ -->
     <div id="screen-templates" class="screen">
-      <div class="page-header">
-        <div class="page-title">Planned Workouts</div>
-        <button class="btn btn-ghost btn-sm" onclick="showScreen('home')">← Back</button>
+      <div class="page-header" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('home')" style="margin-left:-4px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="page-title">Planned Workouts</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openTemplateEditor(null)">+ New</button>
       </div>
       <div id="template-list" class="template-list"></div>
     </div>
@@ -3160,7 +3165,7 @@ function showScreen(name) {
   document.querySelector(`[data-screen="${name}"]`)?.classList.add('active');
 
   if (name === 'home') { if (homeTab === 'workouts') renderHome(); else renderLibrary(); }
-  if (name === 'templates') renderTemplates();
+  if (name === 'templates') { renderTemplates(); document.querySelector('[data-screen="home"]')?.classList.add('active'); }
   if (name === 'progress') renderProgress();
   if (name === 'mobility') renderMobility();
   if (name === 'admin') renderAdminList();
@@ -3269,16 +3274,8 @@ async function renderHome() {
     return {s, dateStr, dur, totalSets, exList, more};
   });
 
-  // Load bodyweights for session dates
-  const bwMap = {};
-  await Promise.all(cards.map(async ({s}) => {
-    const d = new Date(s.startTime).toISOString().split('T')[0];
-    const m = await dbGet('measurements', d);
-    if (m && m.weight) bwMap[s.id] = m.weight;
-  }));
-
+  // Render cards immediately (no waiting for BW data)
   list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
-    const bwHtml = bwMap[s.id] ? `<div class="workout-meta-item"><span class="workout-meta-val">${bwMap[s.id]}</span> lbs</div>` : '';
     const catIcon = (WORKOUT_CATEGORIES[resolveCategory(s.category)] || WORKOUT_CATEGORIES.other).icon;
     return `<div class="workout-card swipe-item" data-sid="${s.id}">
       <div class="swipe-item-inner" onclick="viewWorkoutDetail('${s.id}')">
@@ -3294,7 +3291,7 @@ async function renderHome() {
           ${dur ? `<div class="workout-meta-item"><span class="workout-meta-val">${dur}</span></div>` : ''}
           <div class="workout-meta-item"><span class="workout-meta-val">${totalSets}</span> sets</div>
           <div class="workout-meta-item"><span class="workout-meta-val">${s.exercises.length}</span> exercises</div>
-          ${bwHtml}
+          <span id="bw-${s.id}"></span>
         </div>
       </div>
       <div class="swipe-delete-bg" style="pointer-events:none">
@@ -3308,10 +3305,23 @@ async function renderHome() {
     const sid = el.dataset.sid;
     if (sid) {
       await dbDelete('sessions', sid);
+      invalidateSessionCache();
       showToast('Workout deleted');
       renderHome();
     }
   });
+
+  // Lazily patch in bodyweight data
+  Promise.all(cards.map(async ({s}) => {
+    const d = new Date(s.startTime).toISOString().split('T')[0];
+    try {
+      const m = await dbGet('measurements', d);
+      if (m && m.weight) {
+        const el = document.getElementById(`bw-${s.id}`);
+        if (el) el.outerHTML = `<div class="workout-meta-item"><span class="workout-meta-val">${m.weight}</span> lbs</div>`;
+      }
+    } catch(e) {}
+  }));
 }
 
 document.getElementById('new-workout-btn').addEventListener('click', () => {
@@ -4462,7 +4472,9 @@ async function viewWorkoutDetail(sessionId) {
 
   const body = document.getElementById('ex-detail-body');
   const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
-  document.getElementById('ex-detail-name').textContent = session.title;
+  const resolvedCat = resolveCategory(session.category || 'other');
+  const catObj = WORKOUT_CATEGORIES[resolvedCat] || WORKOUT_CATEGORIES.other;
+  document.getElementById('ex-detail-name').innerHTML = `<span onclick="editPastWorkoutTitle('${session.id}')" style="cursor:pointer">${catObj.icon} ${escHtml(session.title)} <span style="font-size:11px;opacity:0.4">✏️</span></span>`;
   const startTimeStr = new Date(session.startTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
   document.getElementById('ex-detail-sub').innerHTML = `${date} · ${startTimeStr} · <span onclick="toggleWorkoutTimeEdit()" style="cursor:pointer;text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px">${session.durationMinutes || '?'}m</span>${bwStr}`;
 
@@ -4476,21 +4488,18 @@ async function viewWorkoutDetail(sessionId) {
   const endDT = session.endTime ? toLocalDatetimeStr(session.endTime) : '';
   const durVal = session.durationMinutes || '';
   const timeEditHtml = `<div id="workout-time-edit" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3)">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-      <label style="font-size:11px;color:var(--text3);min-width:40px">Duration</label>
-      <input type="number" id="edit-duration" value="${durVal}" placeholder="min" inputmode="numeric" min="1"
-        style="width:70px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text);text-align:center">
-      <span style="font-size:11px;color:var(--text3)">min</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px" onclick="saveWorkoutTimeEdit()">Save</button>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <label style="font-size:11px;color:var(--text3);min-width:40px">Start</label>
-      <input type="datetime-local" id="edit-start-time" value="${startDT}" style="flex:1;padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-      <label style="font-size:11px;color:var(--text3);min-width:40px">End</label>
-      <input type="datetime-local" id="edit-end-time" value="${endDT}" style="flex:1;padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
+    <div style="display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center">
+      <label style="font-size:11px;color:var(--text3)">Duration</label>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input type="number" id="edit-duration" value="${durVal}" placeholder="min" inputmode="numeric" min="1"
+          style="width:70px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);text-align:center">
+        <span style="font-size:11px;color:var(--text3)">min</span>
+      </div>
+      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;grid-row:1/4" onclick="saveWorkoutTimeEdit()">Save</button>
+      <label style="font-size:11px;color:var(--text3)">Start</label>
+      <input type="datetime-local" id="edit-start-time" value="${startDT}" style="padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
+      <label style="font-size:11px;color:var(--text3)">End</label>
+      <input type="datetime-local" id="edit-end-time" value="${endDT}" style="padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
     </div>
   </div>`;
 
@@ -5208,7 +5217,7 @@ function initTemplateDrag() {
   });
 }
 
-document.getElementById('new-template-btn').addEventListener('click', () => openTemplateEditor(null));
+document.getElementById('new-template-btn').addEventListener('click', () => showScreen('templates'));
 document.getElementById('tmpl-name-input').addEventListener('input', () => saveTmplDraft());
 
 const TMPL_DRAFT_KEY = '__tmpl_draft__';
@@ -8011,7 +8020,45 @@ function toLocalDatetimeStr(epoch) {
 
 function toggleWorkoutTimeEdit() {
   const el = document.getElementById('workout-time-edit');
-  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function editPastWorkoutTitle(sessionId) {
+  const catKeys = Object.keys(WORKOUT_CATEGORIES);
+  const acts = catKeys.map(k => {
+    const c = WORKOUT_CATEGORIES[k];
+    return { label: `${c.icon} ${c.label}`, fn: `savePastWorkoutCategory('${sessionId}','${k}')` };
+  }).concat([
+    { label: '✏️ Rename', fn: `promptRenamePastWorkout('${sessionId}')` }
+  ]);
+  showActionSheet('Edit Workout', acts);
+}
+
+function promptRenamePastWorkout(sessionId) {
+  const name = prompt('Workout name:');
+  if (name && name.trim()) savePastWorkoutTitle(sessionId, name.trim());
+}
+
+async function savePastWorkoutTitle(sessionId, newTitle) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session) return;
+  session.title = newTitle;
+  await dbPut('sessions', session);
+  invalidateSessionCache();
+  showToast('Title updated');
+  viewWorkoutDetail(sessionId);
+  renderHome();
+}
+
+async function savePastWorkoutCategory(sessionId, newCat) {
+  const session = await dbGet('sessions', sessionId);
+  if (!session) return;
+  session.category = newCat;
+  await dbPut('sessions', session);
+  invalidateSessionCache();
+  showToast('Category updated');
+  viewWorkoutDetail(sessionId);
+  renderHome();
 }
 
 async function saveWorkoutTimeEdit() {
