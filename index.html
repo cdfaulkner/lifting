@@ -1603,6 +1603,133 @@ textarea { resize: none; }
   margin: 0 16px 10px;
 }
 
+
+
+/* ════════════════════════════════════
+   MOBILITY FUN
+════════════════════════════════════ */
+.mobility-fun-strip {
+  padding: 10px 16px 4px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.mobility-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text2);
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.18);
+}
+.mobility-chip.good {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(124,58,237,0.55), rgba(219,39,119,0.45));
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(124,58,237,0.18);
+}
+.mobility-chip.soft {
+  color: var(--accent-blue);
+  background: rgba(96,165,250,0.08);
+  border-color: rgba(96,165,250,0.18);
+}
+.mobility-day-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mobility-day-pill.active {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 8px 24px rgba(124,58,237,0.22);
+}
+.mobility-card {
+  padding: 12px 14px;
+  background:
+    radial-gradient(ellipse 120% 100% at 0% 0%, rgba(167,139,250,0.10), transparent 55%),
+    var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, opacity .16s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+.mobility-card:active {
+  transform: scale(0.985);
+}
+.mobility-card.done {
+  border-color: rgba(167,139,250,0.6);
+  box-shadow: 0 10px 26px rgba(124,58,237,0.16);
+  opacity: .82;
+}
+.mobility-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.mobility-side-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: rgba(13,11,20,0.78);
+  border-radius: var(--r2);
+  border: 1px solid var(--border);
+}
+.mobility-side-row.done {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(96,165,250,0.06));
+}
+.mobility-target-input,
+.mobility-notes-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.mobility-target-input {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  width: 58px;
+  text-align: center;
+  border: none;
+  border-bottom: 1px dashed var(--text3);
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.mobility-target-input:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: none;
+}
+.mobility-notes-input {
+  padding: 6px 9px;
+  font-size: 12px;
+  border-radius: var(--r);
+}
+.mobility-celebration {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 16px 0;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  color: #fff;
+  background: linear-gradient(135deg, rgba(124,58,237,0.72), rgba(219,39,119,0.62));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 12px 28px rgba(124,58,237,0.22);
+}
+.mobility-celebration-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.82);
+  margin-top: 2px;
+}
+
 /* ════════════════════════════════════
    LOADING
 ════════════════════════════════════ */
@@ -1774,7 +1901,7 @@ textarea { resize: none; }
 </head>
 <body>
 <div id="rest-timer-bar"></div>
-<button id="rest-timer-toast" onclick="skipRestTimer()" aria-label="Dismiss rest timer">
+<button id="rest-timer-toast"  aria-label="Dismiss rest timer">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
   <span id="rest-timer-label">0:00</span>
   <span style="font-size:10px;color:var(--text3)">tap to skip</span>
@@ -1854,8 +1981,8 @@ textarea { resize: none; }
       </div>
       <!-- Sub-tabs -->
       <div id="home-tabs-row" style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
-        <button id="home-tab-workouts" class="lib-tab active" onclick="setHomeTab('workouts')">Workouts</button>
-        <button id="home-tab-exercises" class="lib-tab" onclick="setHomeTab('exercises')">Exercises</button>
+        <button id="home-tab-workouts" class="lib-tab active" data-home-tab="workouts">Workouts</button>
+        <button id="home-tab-exercises" class="lib-tab" data-home-tab="exercises">Exercises</button>
       </div>
       <!-- Workouts sub-view -->
       <div id="home-view-workouts">
@@ -1868,14 +1995,14 @@ textarea { resize: none; }
           <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;padding:10px 16px 0">
             <div class="page-sub" id="lib-count-sub"></div>
             <div style="display:flex;gap:6px;align-items:center">
-              <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('admin')" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+              <button class="btn btn-ghost btn-sm btn-icon" id="open-admin-btn" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
               <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
             </div>
           </div>
           <!-- View tabs -->
           <div id="lib-tabs-row" style="display:flex;gap:0;padding:0 16px 0;border-bottom:1px solid var(--border);margin-bottom:0">
-            <button id="lib-tab-browse" class="lib-tab active" onclick="setLibTab('browse')">Browse</button>
-            <button id="lib-tab-history" class="lib-tab" onclick="setLibTab('history')">History</button>
+            <button id="lib-tab-browse" class="lib-tab active" data-lib-tab="browse">Browse</button>
+            <button id="lib-tab-history" class="lib-tab" data-lib-tab="history">History</button>
           </div>
           <!-- Search bars (toggled by tab) -->
           <div class="library-search-bar" id="lib-browse-search-wrap">
@@ -1901,12 +2028,12 @@ textarea { resize: none; }
     <div id="screen-templates" class="screen">
       <div class="page-header" style="justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="showScreen('home')" style="margin-left:-4px">
+          <button class="btn btn-ghost btn-sm btn-icon" id="templates-back-btn" style="margin-left:-4px">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <div class="page-title">Planned Workouts</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="openTemplateEditor(null)">+ New</button>
+        <button class="btn btn-primary btn-sm" id="templates-new-btn">+ New</button>
       </div>
       <div id="template-list" class="template-list"></div>
     </div>
@@ -1915,7 +2042,7 @@ textarea { resize: none; }
     <div id="screen-progress" class="screen">
       <div class="page-header" style="justify-content:space-between">
         <div class="page-title">Body</div>
-        <button onclick="openMeasModal()" class="btn btn-primary btn-sm">+ Log</button>
+        <button id="open-meas-btn" class="btn btn-primary btn-sm">+ Log</button>
       </div>
       <div class="bw-chart-wrap">
         <div id="meas-metric-pills" class="period-pills" style="margin-bottom:8px;padding:0"></div>
@@ -1953,6 +2080,7 @@ textarea { resize: none; }
           <div id="mobility-progress-bar" style="height:100%;width:0%;background:var(--gradient);border-radius:99px;transition:width .3s"></div>
         </div>
       </div>
+      <div id="mobility-fun-strip" class="mobility-fun-strip"></div>
       <div id="mobility-list" style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
@@ -1965,10 +2093,10 @@ textarea { resize: none; }
           <div class="page-title">Admin</div>
           <div class="page-sub">Exercise taxonomy</div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="setHomeTab('exercises');showScreen('home')">← Back</button>
+        <button class="btn btn-ghost btn-sm" id="admin-back-btn">← Back</button>
       </div>
       <div class="admin-search-bar">
-        <input id="admin-search" type="search" placeholder="Filter exercises…" autocomplete="off" oninput="renderAdminList()">
+        <input id="admin-search" type="search" placeholder="Filter exercises…" autocomplete="off">
       </div>
       <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
         <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Data</div>
@@ -2011,7 +2139,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Start Workout</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-new-workout')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-new-workout">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2022,7 +2150,7 @@ textarea { resize: none; }
       </div>
       <div id="category-chosen" style="display:none">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <button class="btn btn-ghost btn-sm" onclick="resetCategoryPick()" style="padding:4px 8px;font-size:12px">← Back</button>
+          <button class="btn btn-ghost btn-sm" id="category-reset-btn" style="padding:4px 8px;font-size:12px">← Back</button>
           <span id="category-chosen-label" style="font-size:13px;color:var(--text2)"></span>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -2040,7 +2168,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="set-detail-title">Set Detail</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-set-detail')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-set-detail">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2104,7 +2232,7 @@ textarea { resize: none; }
         <div class="modal-title" id="ex-detail-name"></div>
         <div id="ex-detail-sub" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-exercise-detail')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-exercise-detail">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2112,8 +2240,8 @@ textarea { resize: none; }
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0">Show:</span>
         <div style="display:flex;gap:4px">
-          <button id="ex-filter-exact" class="filter-pill active" onclick="setAnalyticsMatchMode('exact')" style="font-size:11px;padding:3px 9px">Exact variants</button>
-          <button id="ex-filter-any-variant" class="filter-pill" onclick="setAnalyticsMatchMode('any_variant')" style="font-size:11px;padding:3px 9px">Any variant</button>
+          <button id="ex-filter-exact" class="filter-pill active" data-analytics-mode="exact" style="font-size:11px;padding:3px 9px">Exact variants</button>
+          <button id="ex-filter-any-variant" class="filter-pill" data-analytics-mode="any_variant" style="font-size:11px;padding:3px 9px">Any variant</button>
         </div>
       </div>
     </div>
@@ -2133,7 +2261,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:8px"><div class="modal-title" id="tmpl-editor-title">Plan Workout</div><div id="tmpl-autosave-dot" class="autosave-dot" title="Saved"></div></div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-template-editor')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-template-editor">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2164,7 +2292,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="meas-modal-title">Log Measurements</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-meas-entry')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-meas-entry">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2217,7 +2345,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="mobility-modal-title">Edit Exercise</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-mobility-add')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-mobility-add">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2262,7 +2390,7 @@ textarea { resize: none; }
   <div class="modal" style="max-height:80vh;display:flex;flex-direction:column">
     <div class="modal-header">
       <div class="modal-title" id="mobility-history-title">History</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-mobility-history')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-mobility-history">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2278,7 +2406,7 @@ textarea { resize: none; }
         <div class="modal-title" id="variant-editor-title">Edit Variant</div>
         <div id="variant-editor-parent" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-variant-editor')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-variant-editor">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2313,7 +2441,7 @@ textarea { resize: none; }
         <div class="modal-title">New Variant</div>
         <div id="new-variant-parent-name" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-new-variant')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-new-variant">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2338,7 +2466,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">New Exercise</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-new-parent')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-new-parent">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2388,7 +2516,7 @@ textarea { resize: none; }
         <div class="modal-title" id="superset-modal-title">Superset</div>
         <div id="superset-modal-sub" style="font-size:12px;color:var(--text3);margin-top:2px"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-superset')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-superset">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2414,7 +2542,7 @@ textarea { resize: none; }
         <div class="modal-title">Swap Exercise</div>
         <div id="swap-variant-parent-name" style="font-size:12px;color:var(--text3)"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-swap-variant')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-swap-variant">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2432,7 +2560,7 @@ textarea { resize: none; }
         <div class="modal-title">Exercise Notes</div>
         <div id="ex-notes-modal-sub" style="font-size:12px;color:var(--text3)"></div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-ex-notes')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-ex-notes">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2454,7 +2582,7 @@ textarea { resize: none; }
         <div class="modal-title">Export for Claude</div>
         <div style="font-size:12px;color:var(--text3);margin-top:2px">Paste this into any Claude chat</div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeModal('modal-export-claude')">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-export-claude">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2476,7 +2604,7 @@ textarea { resize: none; }
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="pick-ex-title">Add Exercise</div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="closeExercisePicker()">
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-ex-picker="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2486,7 +2614,7 @@ textarea { resize: none; }
       <!-- Step indicator -->
       <div id="pick-ex-steps" class="picker-steps" style="display:none"></div>
       <!-- Back button for sub-steps -->
-      <button id="pick-ex-back" class="picker-back-btn" style="display:none" onclick="pickerGoBack()">
+      <button id="pick-ex-back" class="picker-back-btn" style="display:none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         Back
       </button>
@@ -3311,7 +3439,7 @@ async function renderHome() {
     const catIcon = catObj.icon;
     const catColor = catObj.color || 'var(--border)';
     return `<div class="workout-card swipe-item" data-sid="${s.id}" style="--cat-color:${catColor}">
-      <div class="swipe-item-inner" onclick="viewWorkoutDetail('${s.id}')">
+      <div class="swipe-item-inner" data-action="view-workout-detail" data-session-id="${s.id}">
         <div class="workout-card-header">
           <span style="font-size:28px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 8px ${catColor}40)">${catIcon}</span>
           <div style="flex:1;min-width:0">
@@ -3372,7 +3500,7 @@ async function openNewWorkoutModal() {
   openModal('modal-new-workout');
   const templates = await dbGetAll('templates');
   list.innerHTML = templates.map(t => `
-    <button class="btn btn-secondary" style="width:100%;text-align:left;justify-content:space-between" onclick="startFromTemplate('${t.id}')">
+    <button class="btn btn-secondary" style="width:100%;text-align:left;justify-content:space-between" data-action="start-template" data-template-id="${t.id}">
       <span style="font-size:14px;font-weight:500">${escHtml(t.name)}</span>
       <span style="font-size:12px;color:var(--text3)">${t.exercises.length} exercises</span>
     </button>`).join('');
@@ -3386,7 +3514,7 @@ let pendingCategory = 'other';
 function renderCategoryButtons() {
   const container = document.getElementById('category-btns');
   container.innerHTML = Object.entries(WORKOUT_CATEGORIES).map(([key, cat]) =>
-    `<button class="btn btn-secondary" onclick="pickCategory('${key}')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:13px;border-color:${cat.color}30;box-shadow:0 0 12px ${cat.color}20">
+    `<button class="btn btn-secondary" data-action="pick-category" data-category="${key}" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:13px;border-color:${cat.color}30;box-shadow:0 0 12px ${cat.color}20">
       <span style="font-size:22px;filter:drop-shadow(0 0 6px ${cat.color}50)">${cat.icon}</span>${cat.label}
     </button>`
   ).join('');
@@ -4123,7 +4251,7 @@ function openSupersetModal(exIdx) {
     exList.innerHTML = others.map(({e,i}) => {
       const mName = getVariantDisplayName(e.variantId);
       const alreadyInOtherGroup = e.supersetId && e.supersetId !== ex.supersetId;
-      return `<div onclick="linkSuperset(${i})"
+      return `<div data-action="link-session-superset" data-other-idx="${i}"
         style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px">
         <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${escHtml(mName)}</div>
@@ -4414,6 +4542,32 @@ document.getElementById('session-timer').addEventListener('click', toggleSession
 document.getElementById('session-start-time').addEventListener('click', e => { e.stopPropagation(); toggleActiveTimeEdit(); });
 document.getElementById('save-active-start-btn').addEventListener('click', saveActiveStartTime);
 
+
+document.getElementById('rest-timer-toast').addEventListener('click', skipRestTimer);
+document.getElementById('open-admin-btn')?.addEventListener('click', () => showScreen('admin'));
+document.getElementById('templates-back-btn')?.addEventListener('click', () => showScreen('home'));
+document.getElementById('templates-new-btn')?.addEventListener('click', () => openTemplateEditor(null));
+document.getElementById('open-meas-btn')?.addEventListener('click', () => openMeasModal());
+document.getElementById('admin-back-btn')?.addEventListener('click', () => { setHomeTab('exercises'); showScreen('home'); });
+document.getElementById('admin-search')?.addEventListener('input', renderAdminList);
+document.getElementById('category-reset-btn')?.addEventListener('click', resetCategoryPick);
+document.getElementById('pick-ex-back')?.addEventListener('click', pickerGoBack);
+document.querySelectorAll('[data-home-tab]').forEach(btn => {
+  btn.addEventListener('click', () => setHomeTab(btn.dataset.homeTab));
+});
+document.querySelectorAll('[data-lib-tab]').forEach(btn => {
+  btn.addEventListener('click', () => setLibTab(btn.dataset.libTab));
+});
+document.querySelectorAll('[data-analytics-mode]').forEach(btn => {
+  btn.addEventListener('click', () => setAnalyticsMatchMode(btn.dataset.analyticsMode));
+});
+document.addEventListener('click', e => {
+  const closeBtn = e.target.closest('[data-close-modal]');
+  if (closeBtn) {
+    closeModal(closeBtn.dataset.closeModal);
+  }
+});
+
 function renderActiveBanner() {
   const banner = document.getElementById('active-banner');
   if (!activeSession) { banner.innerHTML = ''; return; }
@@ -4549,9 +4703,9 @@ async function viewWorkoutDetail(sessionId) {
   const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
   const resolvedCat = resolveCategory(session.category || 'other');
   const catObj = WORKOUT_CATEGORIES[resolvedCat] || WORKOUT_CATEGORIES.other;
-  document.getElementById('ex-detail-name').innerHTML = `<span onclick="editPastWorkoutTitle('${session.id}')" style="cursor:pointer">${catObj.icon} ${escHtml(session.title)} <span style="font-size:11px;opacity:0.4">✏️</span></span>`;
+  document.getElementById('ex-detail-name').innerHTML = `<span data-action="edit-past-workout-title" data-session-id="${session.id}" style="cursor:pointer">${catObj.icon} ${escHtml(session.title)} <span style="font-size:11px;opacity:0.4">✏️</span></span>`;
   const startTimeStr = new Date(session.startTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
-  document.getElementById('ex-detail-sub').innerHTML = `${date} · ${startTimeStr} · <span onclick="toggleWorkoutTimeEdit()" style="cursor:pointer;text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px">${session.durationMinutes || '?'}m</span>${bwStr}`;
+  document.getElementById('ex-detail-sub').innerHTML = `${date} · ${startTimeStr} · <span data-action="toggle-workout-time-edit" style="cursor:pointer;text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px">${session.durationMinutes || '?'}m</span>${bwStr}`;
 
   // Show repeat button
   repeatWorkoutSessionId = sessionId;
@@ -4570,7 +4724,7 @@ async function viewWorkoutDetail(sessionId) {
           style="width:70px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);text-align:center">
         <span style="font-size:11px;color:var(--text3)">min</span>
       </div>
-      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;grid-row:1/4" onclick="saveWorkoutTimeEdit()">Save</button>
+      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;grid-row:1/4" data-action="save-workout-time-edit">Save</button>
       <label style="font-size:11px;color:var(--text3)">Start</label>
       <input type="datetime-local" id="edit-start-time" value="${startDT}" style="padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
       <label style="font-size:11px;color:var(--text3)">End</label>
@@ -4611,8 +4765,8 @@ async function viewWorkoutDetail(sessionId) {
     return `<div style="margin-bottom:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);overflow:hidden">
       <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border)">
         <div style="font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</div>
-        <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" onclick="addSetToPastWorkout('${session.id}',${exI})">+ Set</button>
-        <button class="btn btn-ghost btn-sm btn-icon" style="opacity:0.5" onclick="removeExFromPastWorkout('${session.id}',${exI})" title="Remove exercise">
+        <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" data-action="add-past-set" data-session-id="${session.id}" data-ex-idx="${exI}">+ Set</button>
+        <button class="btn btn-ghost btn-sm btn-icon" style="opacity:0.5" data-action="remove-past-ex" data-session-id="${session.id}" data-ex-idx="${exI}" title="Remove exercise">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -4629,9 +4783,9 @@ async function viewWorkoutDetail(sessionId) {
           return `<div style="border-top:1px solid var(--border);padding:2px 0">
             <div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;align-items:center">
               <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
-              <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
-              <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
-              <button onclick="deletePastSet('${session.id}',${exI},${origIdx})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
+              <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="weight">
+              <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="reps">
+              <button data-action="delete-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
             </div>
             ${vTags.length ? `<div style="padding:0 0 2px 20px" class="voltra-tags">${vTags.join(' · ')}</div>` : ''}
           </div>`;
@@ -4641,7 +4795,7 @@ async function viewWorkoutDetail(sessionId) {
     </div>`;
   }).join('') + `</div>
   <div style="padding:0 16px 16px">
-    <button class="btn btn-ghost btn-sm" style="width:100%;border:1px dashed var(--border)" onclick="addExToPastWorkout('${session.id}')">+ Add Exercise</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;border:1px dashed var(--border)" data-action="add-past-ex" data-session-id="${session.id}">+ Add Exercise</button>
   </div>`;
 
   editingPastSessionId = session.id;
@@ -5017,9 +5171,9 @@ function renderAnalyticsBody(variantId, sessions) {
     ${hasChart ? `
     <div class="analytics-card-wide ex-chart-wrap">
       <div class="ex-chart-toggle">
-        <button id="ex-chart-btn-max" class="filter-pill ${exChartMetric === 'max_weight' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('max_weight')">Heaviest</button>
-        <button id="ex-chart-btn-1rm" class="filter-pill ${exChartMetric === 'est_1rm' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('est_1rm')">Est. 1RM</button>
-        <button id="ex-chart-btn-vol" class="filter-pill ${exChartMetric === 'volume' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" onclick="setExChartMetric('volume')">Volume</button>
+        <button id="ex-chart-btn-max" class="filter-pill ${exChartMetric === 'max_weight' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" data-action="set-ex-chart-metric" data-metric="max_weight">Heaviest</button>
+        <button id="ex-chart-btn-1rm" class="filter-pill ${exChartMetric === 'est_1rm' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" data-action="set-ex-chart-metric" data-metric="est_1rm">Est. 1RM</button>
+        <button id="ex-chart-btn-vol" class="filter-pill ${exChartMetric === 'volume' ? 'active' : ''}" style="font-size:11px;padding:3px 9px" data-action="set-ex-chart-metric" data-metric="volume">Volume</button>
       </div>
       <div class="ex-chart-svg-wrap" id="ex-chart-svg-wrap">
         <svg></svg>
@@ -5132,10 +5286,10 @@ async function renderTemplates() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
         </div>
         <div class="template-name">${escHtml(t.name)}</div>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="duplicatePlan('${t.id}')" title="Duplicate">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="duplicate-template" data-template-id="${t.id}" title="Duplicate">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         </button>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="openTemplateEditor('${t.id}')" title="Edit">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="edit-template" data-template-id="${t.id}" title="Edit">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
       </div>
@@ -5162,7 +5316,7 @@ async function renderTemplates() {
         ${t.exercises.length > 6 ? `<div style="font-size:11px;color:var(--text3)">+${t.exercises.length-6} more</div>` : ''}
       </div>
       <div class="template-actions">
-        <button class="btn btn-primary btn-sm" onclick="startFromTemplate('${t.id}')">Start</button>
+        <button class="btn btn-primary btn-sm" data-action="start-template" data-template-id="${t.id}">Start</button>
       </div>
     </div>`).join('');
 
@@ -5302,7 +5456,7 @@ let tmplCategory = 'other';
 function renderTmplCategoryBtns() {
   const container = document.getElementById('tmpl-category-btns');
   container.innerHTML = Object.entries(WORKOUT_CATEGORIES).map(([key, cat]) =>
-    `<button class="filter-pill ${tmplCategory === key ? 'active' : ''}" onclick="setTmplCategory('${key}')" style="font-size:12px;padding:4px 10px">${cat.icon} ${cat.label}</button>`
+    `<button class="filter-pill ${tmplCategory === key ? 'active' : ''}" data-action="set-tmpl-category" data-category="${key}" style="font-size:12px;padding:4px 10px">${cat.icon} ${cat.label}</button>`
   ).join('');
 }
 function setTmplCategory(key) {
@@ -5360,7 +5514,7 @@ function renderTmplExCard(i, n, inSuperset) {
   // Slot placeholder
   if (ex.slotId) {
     return `<div class="tmpl-ex-card" data-tmpl-ex-idx="${i}" style="overflow:hidden">
-      <div class="slot-placeholder" onclick="fillTmplSlot(${i})">
+      <div class="slot-placeholder" data-action="fill-tmpl-slot" data-ex-idx="${i}">
         <div class="slot-placeholder-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         </div>
@@ -5368,10 +5522,10 @@ function renderTmplExCard(i, n, inSuperset) {
           <div class="slot-placeholder-label">${escHtml(ex.slotLabel)}</div>
           <div class="slot-placeholder-sub">Tap to choose exercise</div>
         </div>
-        <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder" aria-label="Drag to reorder">
+        <div class="tmpl-ex-drag-handle" data-stop-click="true" title="Drag to reorder" aria-label="Drag to reorder">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </div>
-        <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0" aria-label="Remove slot">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="remove-template-ex" data-ex-idx="${i}" data-stop-click="true" style="flex-shrink:0" aria-label="Remove slot">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -5397,22 +5551,22 @@ function renderTmplExCard(i, n, inSuperset) {
   const badgeContent = myNum > 0 ? myNum : `<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="16" height="16" rx="3"/></svg>`;
 
   return `<div class="tmpl-ex-card" data-tmpl-ex-idx="${i}" style="background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);overflow:hidden">
-    <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;cursor:pointer" onclick="toggleTmplExSets(${i})">
+    <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;cursor:pointer" data-action="toggle-tmpl-ex-sets" data-ex-idx="${i}">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(getVariantDisplayName(ex.variantId))}</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">${sets.length} sets${!isExpanded && sets.length > 0 ? ' \u00b7 ' + setsPreview : ''}</div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); cycleTmplSuperset(${i})"
+      <button class="btn btn-ghost btn-sm btn-icon" data-action="cycle-tmpl-superset" data-ex-idx="${i}" data-stop-click="true"
         title="Superset group" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid;${badgeStyle};font-size:11px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;padding:0;transition:background 0.15s,border-color 0.15s">
         ${badgeContent}
       </button>
-      <div class="tmpl-ex-drag-handle" onclick="event.stopPropagation()" title="Drag to reorder" aria-label="Drag to reorder">
+      <div class="tmpl-ex-drag-handle" data-stop-click="true" title="Drag to reorder" aria-label="Drag to reorder">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </div>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); swapTemplateEx(${i})" title="Swap exercise" style="flex-shrink:0">
+      <button class="btn btn-ghost btn-sm btn-icon" data-action="swap-template-ex" data-ex-idx="${i}" data-stop-click="true" title="Swap exercise" style="flex-shrink:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
       </button>
-      <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeTemplateEx(${i})" style="flex-shrink:0">
+      <button class="btn btn-ghost btn-sm btn-icon" data-action="remove-template-ex" data-ex-idx="${i}" data-stop-click="true" style="flex-shrink:0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -5426,10 +5580,10 @@ function renderTmplSets(exIdx, sets) {
     <div class="tmpl-set-row">
       <div class="tmpl-set-num">${si + 1}</div>
       <input type="number" step="0.5" value="${s.weight || ''}" placeholder="lbs"
-        inputmode="decimal" onchange="updateTmplSet(${exIdx},${si},'weight',this.value)">
+        inputmode="decimal" data-change-action="update-tmpl-set" data-ex-idx="${exIdx}" data-set-idx="${si}" data-field="weight">
       <input type="number" value="${s.reps || ''}" placeholder="reps"
-        inputmode="numeric" onchange="updateTmplSet(${exIdx},${si},'reps',this.value)">
-      <button class="tmpl-set-remove" onclick="removeTmplSet(${exIdx},${si})">
+        inputmode="numeric" data-change-action="update-tmpl-set" data-ex-idx="${exIdx}" data-set-idx="${si}" data-field="reps">
+      <button class="tmpl-set-remove" data-action="remove-tmpl-set" data-ex-idx="${exIdx}" data-set-idx="${si}" data-stop-click="true">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -5442,7 +5596,7 @@ function renderTmplSets(exIdx, sets) {
       <div></div>
     </div>
     ${rows}
-    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="addTmplSet(${exIdx})">+ Add Set</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" data-action="add-tmpl-set" data-ex-idx="${exIdx}">+ Add Set</button>
   </div>`;
 }
 
@@ -5636,7 +5790,7 @@ function openTmplSupersetModal(exIdx) {
     exList.innerHTML = others.map(({e,i}) => {
       const mName = getVariantDisplayName(e.variantId);
       const alreadyInOtherGroup = e.supersetId && e.supersetId !== ex.supersetId;
-      return `<div onclick="tmplLinkSuperset(${i})"
+      return `<div data-action="tmpl-link-superset" data-other-idx="${i}"
         style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px">
         <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${escHtml(mName)}</div>
@@ -5779,7 +5933,7 @@ function renderPickerFilters() {
   const muscles = ['all', ...MUSCLE_GROUPS];
   container.innerHTML = muscles.map(m => `
     <button class="filter-pill ${pickerMuscleFilter === (m==='all'?'':m) ? 'active' : ''}"
-      onclick="setPickerMuscle('${m === 'all' ? '' : m}')">
+      data-action="picker-set-muscle" data-muscle="${m === 'all' ? '' : m}">
       ${m === 'all' ? 'All' : m}
     </button>`).join('');
 }
@@ -5889,7 +6043,7 @@ function renderPickerLiftList() {
     groups[pat].forEach(h => {
       const muscleTags = h.muscles.map(m => `<span class="tag tag-muscle">${m}</span>`).join('');
       const resTags = h.resistances.map(r => `<span class="tag tag-equipment">${RES_ABBREV[r]||r}</span>`).join(' ');
-      html += `<div class="variant-row" onclick="pickerSelectLift('${h.id}')">
+      html += `<div class="variant-row" data-action="picker-select-lift" data-lift-id="${h.id}">
         <div class="variant-row-left">
           <div class="variant-name">${escHtml(h.name)}</div>
           <div class="variant-equip-tags">${muscleTags} ${resTags}</div>
@@ -5931,7 +6085,7 @@ function renderPickerResistance() {
 
   list.innerHTML = `<div class="picker-section-label">Select Resistance Type</div>
     <div class="picker-grid">${h.resistances.map(r => `
-      <div class="picker-option" onclick="pickerSelectResistance('${r}')">
+      <div class="picker-option" data-action="picker-select-resistance" data-resistance="${r}">
         <div class="picker-option-name">${escHtml(r)}</div>
         <div class="picker-option-sub">${escHtml(RES_ABBREV[r] || r)}</div>
       </div>`).join('')}
@@ -5956,13 +6110,13 @@ function renderPickerVariant() {
 
   list.innerHTML = `<div class="picker-section-label">Select Variants <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
     <div class="picker-grid">${h.variants.map(v => `
-      <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" onclick="pickerToggleVariant('${escHtml(v)}')">
+      <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}">
         <div class="picker-option-name">${escHtml(v)}</div>
       </div>`).join('')}
     </div>
     <div style="padding:12px 0;display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:0 0 auto" onclick="pickerVariantContinue()">Skip</button>
-      <button class="btn btn-primary" style="flex:1" onclick="pickerVariantContinue()">Continue${pickerState.variants.length > 0 ? ' (' + pickerState.variants.length + ' selected)' : ''}</button>
+      <button class="btn btn-ghost" style="flex:0 0 auto" data-action="picker-variant-continue">Skip</button>
+      <button class="btn btn-primary" style="flex:1" data-action="picker-variant-continue">Continue${pickerState.variants.length > 0 ? ' (' + pickerState.variants.length + ' selected)' : ''}</button>
     </div>`;
 }
 
@@ -5996,12 +6150,12 @@ function renderPickerModifiers() {
       <div class="picker-preview-name" id="picker-preview-name">${escHtml(previewName)}</div>
       <input class="picker-name-edit" id="picker-custom-name" type="text"
         placeholder="${escHtml(previewName)}" value="${escHtml(pickerState.customName)}"
-        oninput="pickerState.customName=this.value">
+        data-input-action="picker-custom-name">
       <div style="font-size:11px;color:var(--text3);margin-top:4px">Leave blank to use auto-generated name</div>
     </div>
     <div style="margin-top:10px">
       <div class="input-label" style="margin-bottom:4px">Notes (optional)</div>
-      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Paused, Tempo…" value="${escHtml(pickerState.mods.other)}" oninput="pickerState.mods.other=this.value;updatePickerPreview()">
+      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Paused, Tempo…" value="${escHtml(pickerState.mods.other)}" data-input-action="picker-other-note">
     </div>`;
 }
 
@@ -6156,7 +6310,7 @@ function renderLibraryBrowse(query) {
       // Build resistance chips
       const resChips = h.resistances.map(r =>
         `<button class="lib-res-chip ${r === selRes ? 'selected' : ''}"
-          onclick="event.stopPropagation(); libSelectRes('${h.id}','${r}')">${r}</button>`
+          data-action="lib-select-res" data-exercise-id="${h.id}" data-resistance="${r}" data-stop-click="true">${r}</button>`
       ).join('');
 
       // Build variant chips for selected resistance — show all variants
@@ -6164,18 +6318,18 @@ function renderLibraryBrowse(query) {
         ? `<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin:6px 0 2px;text-transform:uppercase;letter-spacing:0.05em">Variants</div>
            <div class="lib-variant-grid">
              ${h.variants.map(v =>
-               `<button class="lib-variant-chip" onclick="event.stopPropagation(); libOpenVariantAnalytics('${h.id}','${selRes}','${v}')">${v}</button>`
+               `<button class="lib-variant-chip" data-action="lib-open-variant-analytics" data-exercise-id="${h.id}" data-resistance="${selRes}" data-variant="${escHtml(v)}" data-stop-click="true">${v}</button>`
              ).join('')}
            </div>`
         : '';
 
       const baseBtn = `<button class="lib-variant-chip" style="border-color:var(--accent);color:var(--accent)"
-        onclick="event.stopPropagation(); showExerciseAnalytics('${h.id}__${selRes}', 'any_variant')">
+        data-action="show-exercise-analytics" data-variant-id="${h.id}__${selRes}" data-match-mode="any_variant" data-stop-click="true">
         ${h.name} (${selRes}) →
       </button>`;
 
       html += `<div class="lib-ex-card ${isOpen ? 'open' : ''}" id="lib-card-${h.id}">
-        <div class="lib-ex-card-header" onclick="libToggleCard('${h.id}')">
+        <div class="lib-ex-card-header" data-action="lib-toggle-card" data-exercise-id="${h.id}">
           <div style="flex:1;min-width:0">
             <div class="lib-ex-card-name">${escHtml(h.name)}</div>
             <div class="lib-ex-card-meta">${muscleStr} · ${h.resistances.length} resistance${h.resistances.length>1?'s':''}</div>
@@ -6279,7 +6433,7 @@ function renderLibraryHistoryList(query) {
     groups[pat].forEach(item => {
       const lastDate = new Date(item.lastDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
       const sessionCount = item.sessions.size;
-      html += `<div class="lib-history-item" onclick="showExerciseAnalytics('${item.variantId}')">
+      html += `<div class="lib-history-item" data-action="show-exercise-analytics" data-variant-id="${item.variantId}">
         <div style="flex:1;min-width:0">
           <div class="lib-history-item-name">${escHtml(item.name)}</div>
           <div class="lib-history-item-meta">${item.totalSets} sets · last ${lastDate}</div>
@@ -6340,7 +6494,7 @@ async function renderMeasChart() {
   // Metric pills — null = overview, clicking active pill deselects
   const metricPillsEl = document.getElementById('meas-metric-pills');
   metricPillsEl.innerHTML = MEAS_METRICS.map(m => `
-    <button class="period-pill ${measMetric === m.key ? 'active' : ''}" onclick="setMeasMetric('${m.key}')">${m.label}</button>`).join('');
+    <button class="period-pill ${measMetric === m.key ? 'active' : ''}" data-action="set-meas-metric" data-metric="${m.key}">${m.label}</button>`).join('');
 
   const statsRow = document.getElementById('meas-stats-row');
   const periodEl = document.getElementById('meas-period-pills');
@@ -6382,7 +6536,7 @@ async function renderMeasChart() {
         <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text3)">—</div>
       </div>`;
       const dateStr = new Date(info.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
-      return `<div style="text-align:center;padding:8px 4px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);cursor:pointer" onclick="setMeasMetric('${m.key}')">
+      return `<div style="text-align:center;padding:8px 4px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);cursor:pointer" data-action="set-meas-metric" data-metric="${m.key}">
         <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${m.label}</div>
         <div style="font-family:var(--display);font-size:18px;font-weight:600">${info.val}<span style="font-size:11px;font-weight:400;color:var(--text2)"> ${m.unit}</span></div>
         <div style="font-size:9px;color:var(--text3)">${dateStr}</div>
@@ -6422,7 +6576,7 @@ async function renderMeasChart() {
   }
 
   periodEl.innerHTML = Object.keys(MEAS_PERIODS).map(p => `
-    <button class="period-pill ${measPeriod === p ? 'active' : ''}" onclick="setMeasPeriod('${p}')">${p}</button>`).join('');
+    <button class="period-pill ${measPeriod === p ? 'active' : ''}" data-action="set-meas-period" data-period="${p}">${p}</button>`).join('');
 
   renderMeasSVG(display, metric);
 }
@@ -6591,10 +6745,10 @@ async function renderMeasHistory() {
         ${partsHtml}
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0">
-        <button onclick="editMeasEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
+        <button data-action="edit-meas-entry" data-date="${e.date}" class="btn btn-ghost btn-sm btn-icon" title="Edit" style="opacity:0.6">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button onclick="deleteMeasEntry('${e.date}')" class="btn btn-ghost btn-sm btn-icon" title="Delete" style="opacity:0.6;color:var(--red)">
+        <button data-action="delete-meas-entry" data-date="${e.date}" class="btn btn-ghost btn-sm btn-icon" title="Delete" style="opacity:0.6;color:var(--red)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
         </button>
       </div>
@@ -6730,9 +6884,9 @@ async function renderLiftsTab() {
 
     const availablePatterns = MOVEMENT_PATTERNS.filter(p => patternCounts[p]);
     filterBar.innerHTML = [
-      `<button class="lifts-filter-pill ${liftsPatternFilter === 'all' ? 'active' : ''}" onclick="setLiftsFilter('all')">All</button>`,
+      `<button class="lifts-filter-pill ${liftsPatternFilter === 'all' ? 'active' : ''}" data-action="set-lifts-filter" data-pattern="all">All</button>`,
       ...availablePatterns.map(p =>
-        `<button class="lifts-filter-pill ${liftsPatternFilter === p ? 'active' : ''}" onclick="setLiftsFilter('${p}')">${p} (${patternCounts[p]})</button>`)
+        `<button class="lifts-filter-pill ${liftsPatternFilter === p ? 'active' : ''}" data-action="set-lifts-filter" data-pattern="${escHtml(p)}">${p} (${patternCounts[p]})</button>`)
     ].join('');
 
     let sorted = Object.entries(best1RM).sort((a,b) => b[1].rm - a[1].rm);
@@ -6750,13 +6904,13 @@ async function renderLiftsTab() {
           parentCounts[pid] = (parentCounts[pid] || 0) + 1;
         });
         breadcrumb.style.display = 'flex';
-        breadcrumb.innerHTML = `<span onclick="setLiftsFilter('all');liftsParentFilter=null;renderLiftsTab()">All</span><span class="bc-sep">›</span><span style="color:var(--text)">${liftsPatternFilter}</span>`;
+        breadcrumb.innerHTML = `<span data-action="reset-lifts-breadcrumb">All</span><span class="bc-sep">›</span><span style="color:var(--text)">${liftsPatternFilter}</span>`;
 
         // Build parent-level sub-pills
         const parentPills = Object.entries(parentCounts)
           .sort((a,b) => b[1] - a[1])
           .map(([pid, cnt]) =>
-            `<button class="lifts-filter-pill" onclick="drillToParent('${pid}')" style="font-size:10px;padding:4px 10px">${getParentNameForId(pid)} (${cnt})</button>`)
+            `<button class="lifts-filter-pill" data-action="drill-to-parent" data-parent-id="${pid}" style="font-size:10px;padding:4px 10px">${getParentNameForId(pid)} (${cnt})</button>`)
           .join('');
         filterBar.innerHTML += `<div style="width:100%;display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${parentPills}</div>`;
       }
@@ -6772,7 +6926,7 @@ async function renderLiftsTab() {
   // ── Level 1: Drilled into a specific parent exercise ──
   const parentPattern = hierarchyMap[liftsParentFilter]?.pattern || liftsPatternFilter;
   breadcrumb.style.display = 'flex';
-  breadcrumb.innerHTML = `<span onclick="setLiftsFilter('all');liftsParentFilter=null;renderLiftsTab()">All</span><span class="bc-sep">›</span><span onclick="liftsParentFilter=null;renderLiftsTab()">${parentPattern || liftsPatternFilter}</span><span class="bc-sep">›</span><span style="color:var(--text)">${getParentNameForId(liftsParentFilter)}</span>`;
+  breadcrumb.innerHTML = `<span data-action="reset-lifts-breadcrumb">All</span><span class="bc-sep">›</span><span data-action="clear-lifts-parent">${parentPattern || liftsPatternFilter}</span><span class="bc-sep">›</span><span style="color:var(--text)">${getParentNameForId(liftsParentFilter)}</span>`;
 
   let sorted = Object.entries(best1RM)
     .filter(([vid]) => getParentIdForVariant(vid) === liftsParentFilter)
@@ -6781,7 +6935,7 @@ async function renderLiftsTab() {
   // Show variant sub-pills if more than one
   if (sorted.length > 1) {
     filterBar.innerHTML = sorted.map(([vid]) =>
-      `<button class="lifts-filter-pill" onclick="showExerciseAnalytics('${vid}')" style="font-size:10px;padding:4px 10px">${escHtml(getVariantDisplayName(vid))}</button>`
+      `<button class="lifts-filter-pill" data-action="show-exercise-analytics" data-variant-id="${vid}" style="font-size:10px;padding:4px 10px">${escHtml(getVariantDisplayName(vid))}</button>`
     ).join('');
   } else {
     filterBar.innerHTML = '';
@@ -6803,7 +6957,7 @@ function renderLiftsCards(sorted, headingText) {
     const name = getVariantDisplayName(variantId);
     const date = new Date(data.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
     const pattern = getMovementPatternForVariant(variantId);
-    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="showExerciseAnalytics('${variantId}')">
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px" data-action="show-exercise-analytics" data-variant-id="${variantId}">
       <div style="min-width:22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">${idx + 1}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</div>
@@ -6940,20 +7094,273 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+function softHaptic(pattern = 10) {
+  try {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+  } catch (e) {}
+}
+
+// Centralized delegated UI handlers for progressively removing inline JS
+// from dynamically rendered HTML. Keep this list focused and additive.
+document.addEventListener('click', (event) => {
+  const selectOnClick = event.target.closest('[data-select-on-click]');
+  if (selectOnClick && typeof selectOnClick.select === 'function') {
+    setTimeout(() => selectOnClick.select(), 0);
+  }
+
+  const closeModalBtn = event.target.closest('[data-close-modal]');
+  if (closeModalBtn) {
+    event.preventDefault();
+    closeModal(closeModalBtn.dataset.closeModal);
+    return;
+  }
+
+  const closePickerBtn = event.target.closest('[data-close-ex-picker]');
+  if (closePickerBtn) {
+    event.preventDefault();
+    closeExercisePicker();
+    return;
+  }
+
+  const actionEl = event.target.closest('[data-action]');
+  if (!actionEl) {
+    const stopOnly = event.target.closest('[data-stop-click]');
+    if (stopOnly) event.stopPropagation();
+    return;
+  }
+
+  if (actionEl.dataset.stopClick !== undefined) {
+    event.stopPropagation();
+  }
+
+  const action = actionEl.dataset.action;
+  switch (action) {
+    case 'pick-category':
+      pickCategory(actionEl.dataset.category);
+      return;
+    case 'reset-category-pick':
+      resetCategoryPick();
+      return;
+    case 'start-template':
+      startFromTemplate(actionEl.dataset.templateId);
+      return;
+    case 'duplicate-template':
+      duplicatePlan(actionEl.dataset.templateId);
+      return;
+    case 'edit-template':
+      openTemplateEditor(actionEl.dataset.templateId);
+      return;
+    case 'set-tmpl-category':
+      setTmplCategory(actionEl.dataset.category);
+      return;
+    case 'fill-tmpl-slot':
+      fillTmplSlot(Number(actionEl.dataset.exIdx));
+      return;
+    case 'picker-set-muscle':
+      setPickerMuscle(actionEl.dataset.muscle || '');
+      return;
+    case 'picker-select-lift':
+      pickerSelectLift(actionEl.dataset.liftId);
+      return;
+    case 'picker-select-resistance':
+      pickerSelectResistance(actionEl.dataset.resistance);
+      return;
+    case 'picker-toggle-variant':
+      pickerToggleVariant(actionEl.dataset.variant);
+      return;
+    case 'picker-variant-continue':
+      pickerVariantContinue();
+      return;
+    case 'lib-select-res':
+      libSelectRes(actionEl.dataset.exerciseId, actionEl.dataset.resistance);
+      return;
+    case 'lib-open-variant-analytics':
+      libOpenVariantAnalytics(actionEl.dataset.exerciseId, actionEl.dataset.resistance, actionEl.dataset.variant);
+      return;
+    case 'show-exercise-analytics':
+      showExerciseAnalytics(actionEl.dataset.variantId, actionEl.dataset.matchMode || undefined);
+      return;
+    case 'lib-toggle-card':
+      libToggleCard(actionEl.dataset.exerciseId);
+      return;
+    case 'set-meas-metric':
+      setMeasMetric(actionEl.dataset.metric);
+      return;
+    case 'set-meas-period':
+      setMeasPeriod(actionEl.dataset.period);
+      return;
+    case 'edit-meas-entry':
+      editMeasEntry(actionEl.dataset.date);
+      return;
+    case 'delete-meas-entry':
+      deleteMeasEntry(actionEl.dataset.date);
+      return;
+    case 'toggle-tmpl-ex-sets':
+      toggleTmplExSets(Number(actionEl.dataset.exIdx));
+      return;
+    case 'cycle-tmpl-superset':
+      cycleTmplSuperset(Number(actionEl.dataset.exIdx));
+      return;
+    case 'swap-template-ex':
+      swapTemplateEx(Number(actionEl.dataset.exIdx));
+      return;
+    case 'remove-template-ex':
+      removeTemplateEx(Number(actionEl.dataset.exIdx));
+      return;
+    case 'add-tmpl-set':
+      addTmplSet(Number(actionEl.dataset.exIdx));
+      return;
+    case 'remove-tmpl-set':
+      removeTmplSet(Number(actionEl.dataset.exIdx), Number(actionEl.dataset.setIdx));
+      return;
+    case 'tmpl-link-superset':
+      tmplLinkSuperset(Number(actionEl.dataset.otherIdx));
+      return;
+    case 'view-workout-detail':
+      viewWorkoutDetail(actionEl.dataset.sessionId);
+      return;
+    case 'link-session-superset':
+      linkSuperset(Number(actionEl.dataset.otherIdx));
+      return;
+    case 'set-ex-chart-metric':
+      setExChartMetric(actionEl.dataset.metric);
+      return;
+    case 'set-lifts-filter':
+      setLiftsFilter(actionEl.dataset.pattern);
+      return;
+    case 'reset-lifts-breadcrumb':
+      setLiftsFilter('all');
+      liftsParentFilter = null;
+      renderLiftsTab();
+      return;
+    case 'clear-lifts-parent':
+      liftsParentFilter = null;
+      renderLiftsTab();
+      return;
+    case 'drill-to-parent':
+      drillToParent(actionEl.dataset.parentId);
+      return;
+    case 'add-new-equip-type':
+      addNewEquipType(actionEl.dataset.containerId);
+      return;
+    case 'admin-toggle-resistance':
+      adminToggleResistance(actionEl.dataset.exerciseId, actionEl.dataset.resistance);
+      return;
+    case 'admin-toggle-variant':
+      adminToggleVariant(actionEl.dataset.exerciseId, actionEl.dataset.variant);
+      return;
+    case 'admin-toggle-card':
+      adminToggleCard(actionEl.dataset.exerciseId);
+      return;
+    case 'edit-past-workout-title':
+      editPastWorkoutTitle(actionEl.dataset.sessionId);
+      return;
+    case 'toggle-workout-time-edit':
+      toggleWorkoutTimeEdit();
+      return;
+    case 'save-workout-time-edit':
+      saveWorkoutTimeEdit();
+      return;
+    case 'add-past-set':
+      addSetToPastWorkout(actionEl.dataset.sessionId, Number(actionEl.dataset.exIdx));
+      return;
+    case 'delete-past-set':
+      deletePastSet(actionEl.dataset.sessionId, Number(actionEl.dataset.exIdx), Number(actionEl.dataset.setIdx));
+      return;
+    case 'remove-past-ex':
+      removeExFromPastWorkout(actionEl.dataset.sessionId, Number(actionEl.dataset.exIdx));
+      return;
+    case 'add-past-ex':
+      addExToPastWorkout(actionEl.dataset.sessionId);
+      return;
+    case 'set-mobility-day':
+      setMobilityDay(actionEl.dataset.day);
+      return;
+    case 'open-mobility-add':
+      openMobilityAdd();
+      return;
+    case 'open-mobility-edit':
+      openMobilityEdit(actionEl.dataset.exId);
+      return;
+    case 'open-mobility-history':
+      openMobilityHistory(actionEl.dataset.exId);
+      return;
+    case 'reset-mob-side':
+      resetMobSide(actionEl.dataset.exId, actionEl.dataset.side);
+      return;
+    case 'toggle-mob-timer':
+      toggleMobTimer(actionEl.dataset.exId, actionEl.dataset.side);
+      return;
+    default:
+      return;
+  }
+});
+
+document.addEventListener('change', (event) => {
+  const actionEl = event.target.closest('[data-change-action]');
+  if (!actionEl) return;
+
+  switch (actionEl.dataset.changeAction) {
+    case 'update-tmpl-set':
+      updateTmplSet(
+        Number(actionEl.dataset.exIdx),
+        Number(actionEl.dataset.setIdx),
+        actionEl.dataset.field,
+        actionEl.value
+      );
+      return;
+    case 'edit-past-set':
+      editPastSet(
+        actionEl.dataset.sessionId,
+        Number(actionEl.dataset.exIdx),
+        Number(actionEl.dataset.setIdx),
+        actionEl.dataset.field,
+        actionEl.value
+      );
+      return;
+    case 'save-mob-note':
+      saveMobNote(actionEl.dataset.exId, actionEl.value);
+      return;
+    case 'update-mob-target':
+      updateMobTarget(actionEl.dataset.exId, actionEl.value);
+      return;
+    default:
+      return;
+  }
+});
+
+document.addEventListener('input', (event) => {
+  const actionEl = event.target.closest('[data-input-action]');
+  if (!actionEl) return;
+
+  switch (actionEl.dataset.inputAction) {
+    case 'picker-custom-name':
+      pickerState.customName = actionEl.value;
+      return;
+    case 'picker-other-note':
+      pickerState.mods.other = actionEl.value;
+      updatePickerPreview();
+      return;
+    default:
+      return;
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY CHECKLIST
 // ═══════════════════════════════════════════════════════════════
+const MOBILITY_DEFAULTS_VERSION = 2;
 const DEFAULT_MOBILITY_EXERCISES = [
-  { id:'mob_deep_squat',   name:'Deep Squat Hold',             targetSeconds:30, bilateral:false, day:'A', order:0 },
-  { id:'mob_wgs',          name:"World's Greatest Stretch",    targetSeconds:30, bilateral:true,  day:'A', order:1 },
-  { id:'mob_dead_hang',    name:'Dead Hang',                   targetSeconds:30, bilateral:false, day:'A', order:2 },
-  { id:'mob_back_ext',     name:'Back Extension Hold',         targetSeconds:30, bilateral:false, day:'A', order:3 },
-  { id:'mob_dead_bugs',    name:'Dead Bugs',                   targetSeconds:30, bilateral:false, day:'A', order:4 },
-  { id:'mob_split_squat',  name:'Split Squat Hold',            targetSeconds:30, bilateral:true,  day:'B', order:5 },
-  { id:'mob_9090',         name:'90/90 Hip Rotation',          targetSeconds:30, bilateral:true,  day:'B', order:6 },
-  { id:'mob_shoulder_rot', name:'Shoulder Rotations',          targetSeconds:30, bilateral:true,  day:'B', order:7 },
-  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetSeconds:30, bilateral:true, day:'B', order:8 },
-  { id:'mob_tspine',       name:'T-Spine Rotation',            targetSeconds:30, bilateral:true,  day:'B', order:9 },
+  { id:'mob_split_squat',  name:'Split Squat Hold',               targetSeconds:30, bilateral:true,  day:'A', order:0 },
+  { id:'mob_dead_hang',    name:'Dead Hang',                      targetSeconds:30, bilateral:false, day:'A', order:1 },
+  { id:'mob_back_ext',     name:'Back Extension Hold',            targetSeconds:30, bilateral:false, day:'A', order:2 },
+  { id:'mob_9090',         name:'90/90 Hip Rotations',            targetSeconds:30, bilateral:true,  day:'A', order:3 },
+  { id:'mob_dead_bugs',    name:'Dead Bugs',                      targetSeconds:30, bilateral:false, day:'A', order:4 },
+  { id:'mob_wgs',          name:"World's Greatest Stretch",       targetSeconds:30, bilateral:true,  day:'B', order:5 },
+  { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetSeconds:30, bilateral:true,  day:'B', order:6 },
+  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetSeconds:30, bilateral:true,  day:'B', order:7 },
+  { id:'mob_tspine',       name:'T-Spine Rotation',               targetSeconds:30, bilateral:true,  day:'B', order:8 },
+  { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetSeconds:30, bilateral:false, day:'B', order:9 },
 ];
 
 let mobilityExercises = [];
@@ -6991,10 +7398,34 @@ function setMobilityDay(day) {
 
 async function seedMobilityExercises() {
   const existing = await dbGetAll('mobility_exercises');
-  if (existing.length > 0) return;
-  for (const ex of DEFAULT_MOBILITY_EXERCISES) {
-    await dbPut('mobility_exercises', { ...ex });
+  if (existing.length === 0) {
+    for (const ex of DEFAULT_MOBILITY_EXERCISES) {
+      await dbPut('mobility_exercises', { ...ex });
+    }
+    localStorage.setItem('mobility_defaults_version', String(MOBILITY_DEFAULTS_VERSION));
+    return;
   }
+
+  const appliedVersion = parseInt(localStorage.getItem('mobility_defaults_version') || '0', 10);
+  if (appliedVersion >= MOBILITY_DEFAULTS_VERSION) return;
+
+  const byId = new Map(existing.map(ex => [ex.id, ex]));
+  for (const def of DEFAULT_MOBILITY_EXERCISES) {
+    const prev = byId.get(def.id);
+    await dbPut('mobility_exercises', prev
+      ? {
+          ...prev,
+          name: def.name,
+          bilateral: def.bilateral,
+          day: def.day,
+          order: def.order,
+          targetSeconds: typeof prev.targetSeconds === 'number' ? prev.targetSeconds : def.targetSeconds,
+        }
+      : { ...def }
+    );
+  }
+
+  localStorage.setItem('mobility_defaults_version', String(MOBILITY_DEFAULTS_VERSION));
 }
 
 async function loadMobility() {
@@ -7036,45 +7467,66 @@ async function renderMobility() {
   const today = new Date();
   subEl.textContent = today.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
 
-  // Day pills
   const dayPills = document.getElementById('mobility-day-pills');
-  dayPills.innerHTML = ['A','B'].map(d =>
-    `<button class="period-pill ${mobilityDay === d ? 'active' : ''}" onclick="setMobilityDay('${d}')">Day ${d}</button>`
-  ).join('');
+  dayPills.innerHTML = ['A','B'].map(d => {
+    const emoji = d === 'A' ? '🧘' : '⚡';
+    return `<button class="period-pill mobility-day-pill ${mobilityDay === d ? 'active' : ''}" data-action="set-mobility-day" data-day="${d}">Day ${d} <span aria-hidden="true">${emoji}</span></button>`;
+  }).join('');
 
   const dayExercises = getDayExercises();
   const completedCount = dayExercises.filter(ex => isMobExDone(ex)).length;
   const total = dayExercises.length;
+  const remainingCount = Math.max(total - completedCount, 0);
   const allDone = total > 0 && completedCount === total;
 
   document.getElementById('mobility-progress-text').textContent =
-    allDone ? '✓ All done!' : `${completedCount}/${total}`;
+    allDone ? 'Flow complete' : `${completedCount}/${total} done`;
   document.getElementById('mobility-progress-bar').style.width =
     total ? `${(completedCount/total*100)}%` : '0%';
+
+  const funStrip = document.getElementById('mobility-fun-strip');
+  const mobilityStatusLabel = allDone ? 'Complete' : (completedCount > 0 ? 'In progress' : 'Not started');
+  const mobilityStatusClass = allDone ? 'good' : (completedCount > 0 ? 'soft' : '');
+  funStrip.innerHTML = `
+    <div class="mobility-chip ${mobilityStatusClass}">${mobilityStatusLabel}</div>
+    <div class="mobility-chip">Day ${mobilityDay} · ${total} moves</div>
+    <div class="mobility-chip ${completedCount ? 'good' : ''}">${completedCount} finished</div>
+    ${remainingCount ? `<div class="mobility-chip">${remainingCount} left</div>` : `<div class="mobility-chip good">Nice work</div>`}
+  `;
 
   const list = document.getElementById('mobility-list');
   if (dayExercises.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon" style="font-size:36px">🧘</div>
       <div class="empty-state-title">No exercises on Day ${mobilityDay}</div>
+      <div class="empty-state-sub">Flip to the other day or add a few favorite resets.</div>
     </div>`;
     return;
   }
 
-  list.innerHTML = dayExercises.map(ex => renderMobExCard(ex)).join('') +
-    (mobilityEditMode ? `<button class="btn btn-secondary" style="width:100%;margin-top:4px" onclick="openMobilityAdd()">+ Add Exercise</button>` : '');
+  const celebration = allDone ? `
+    <div class="mobility-celebration">
+      <div>
+        <div style="font-size:14px;font-weight:700">Flow complete ✨</div>
+        <div class="mobility-celebration-sub">${total} movements done for Day ${mobilityDay}</div>
+      </div>
+      <div style="font-size:22px" aria-hidden="true">🪩</div>
+    </div>` : '';
+
+  list.innerHTML = celebration + dayExercises.map(ex => renderMobExCard(ex)).join('') +
+    (mobilityEditMode ? `<button class="btn btn-secondary" style="width:100%;margin-top:4px" data-action="open-mobility-add">+ Add Exercise</button>` : '');
 }
 
 function renderMobExCard(ex) {
   const c = mobilityChecks[ex.id] || {};
   const done = isMobExDone(ex);
   const editBtns = mobilityEditMode ? `
-    <button class="btn btn-ghost btn-sm btn-icon" onclick="openMobilityEdit('${ex.id}')" aria-label="Edit exercise">
+    <button class="btn btn-ghost btn-sm btn-icon" data-action="open-mobility-edit" data-ex-id="${ex.id}" aria-label="Edit exercise">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
     </button>` : '';
 
   const histBtn = !mobilityEditMode ? `
-    <button class="btn btn-ghost btn-sm btn-icon" onclick="openMobilityHistory('${ex.id}')" aria-label="View history" style="opacity:0.5">
+    <button class="btn btn-ghost btn-sm btn-icon" data-action="open-mobility-history" data-ex-id="${ex.id}" aria-label="View history" style="opacity:0.5">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </button>` : '';
 
@@ -7089,22 +7541,23 @@ function renderMobExCard(ex) {
     timerSection = `<div style="margin-top:8px">${renderSideTimer(ex, 'L', null, c)}</div>`;
   }
 
-  // Notes
   const noteVal = c.notes || '';
   const notesSection = `
     <div style="margin-top:6px">
-      <input type="text" placeholder="Notes…" value="${escHtml(noteVal)}"
-        style="width:100%;padding:5px 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg);color:var(--text);font-family:var(--body)"
-        onchange="saveMobNote('${ex.id}', this.value)">
+      <input type="text" class="mobility-notes-input" placeholder="Notes…" value="${escHtml(noteVal)}"
+        data-change-action="save-mob-note" data-ex-id="${ex.id}">
     </div>`;
 
-  return `<div style="padding:12px 14px;background:var(--bg2);border:1px solid ${done ? 'var(--accent)' : 'var(--border)'};border-radius:var(--r2);transition:border-color .15s;${done ? 'opacity:0.75' : ''}">
-    <div style="display:flex;align-items:center;gap:10px">
+  return `<div class="mobility-card ${done ? 'done' : ''}">
+    <div class="mobility-card-head">
       <div style="flex:1;min-width:0">
-        <div style="font-size:15px;font-weight:500;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
-        ${ex.cues ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">${escHtml(ex.cues)}</div>` : ''}
+        <div style="font-size:15px;font-weight:600;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px">
+          <span style="font-size:11px;color:var(--text3)">${done ? 'Done' : (ex.bilateral ? '2 sides' : '1 timer')}</span>
+          ${ex.cues ? `<div style="font-size:11px;color:var(--text3)">${escHtml(ex.cues)}</div>` : ''}
+        </div>
       </div>
-      ${histBtn}${editBtns}
+      <div style="display:flex;align-items:center;gap:2px">${histBtn}${editBtns}</div>
     </div>
     ${timerSection}
     ${notesSection}
@@ -7119,13 +7572,12 @@ function renderSideTimer(ex, side, label, c) {
   const target = ex.targetSeconds || 30;
 
   if (sideDone && !timer) {
-    // Completed
-    return `<div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--accent)">
+    return `<div class="mobility-side-row done">
       ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       <span style="font-family:var(--mono);font-size:13px;color:var(--accent)">${fmtTimer(sideTime)}s</span>
       <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px" onclick="resetMobSide('${ex.id}','${side}')">Redo</button>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px" data-action="reset-mob-side" data-ex-id="${ex.id}" data-side="${side}">Redo</button>
     </div>`;
   }
 
@@ -7133,19 +7585,18 @@ function renderSideTimer(ex, side, label, c) {
   const running = timer ? timer.running : false;
   const canEdit = !timer;
 
-  // Editable target: tap the time when no timer is active to change duration
   const timerDisplay = canEdit
-    ? `<input type="number" inputmode="numeric" value="${target}" min="5" max="300" style="font-family:var(--mono);font-size:20px;font-weight:600;width:52px;text-align:center;border:none;border-bottom:1px dashed var(--text3);background:transparent;color:var(--text);padding:0"
-        onchange="updateMobTarget('${ex.id}',this.value)" onclick="this.select()">`
+    ? `<input type="number" inputmode="numeric" class="mobility-target-input" value="${target}" min="5" max="300"
+        data-change-action="update-mob-target" data-ex-id="${ex.id}" data-select-on-click>`
     : `<div style="font-family:var(--mono);font-size:20px;font-weight:600;min-width:42px;text-align:center;${remaining <= 5 && running ? 'color:var(--accent)' : ''}" id="mob-timer-${key}">${fmtTimer(remaining)}</div>`;
 
-  return `<div style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--border)">
+  return `<div class="mobility-side-row">
     ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
     ${timerDisplay}
     ${canEdit ? '<span style="font-size:10px;color:var(--text3)">s</span>' : ''}
     <div style="flex:1"></div>
     <button class="btn ${running ? 'btn-ghost' : 'btn-primary'} btn-sm" style="padding:4px 12px;font-size:12px"
-      onclick="toggleMobTimer('${ex.id}','${side}')">
+      data-action="toggle-mob-timer" data-ex-id="${ex.id}" data-side="${side}">
       ${running ? 'Pause' : (timer ? 'Resume' : 'Start')}
     </button>
   </div>`;
@@ -7209,6 +7660,7 @@ async function completeMobSide(exId, side, duration) {
   c.ts = Date.now();
   // Clear timer state
   delete mobilityTimers[`${exId}_${side}`];
+  softHaptic(12);
   // Play a short beep
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -7218,7 +7670,12 @@ async function completeMobSide(exId, side, duration) {
     osc.frequency.value = 880; gain.gain.value = 0.3;
     osc.start(); osc.stop(ctx.currentTime + 0.15);
   } catch(e) {}
+  const allDoneNow = getDayExercises().length > 0 && getDayExercises().every(item => isMobExDone(item));
   await saveMobilityChecks();
+  if (allDoneNow) {
+    softHaptic([12, 40, 12]);
+    showToast('Mobility complete ✨');
+  }
   renderMobility();
 }
 
@@ -7288,6 +7745,7 @@ document.getElementById('mobility-reset-btn').addEventListener('click', async ()
   mobilityTimers = {};
   await saveMobilityChecks();
   renderMobility();
+  softHaptic(8);
   showToast('Checklist reset');
 });
 
@@ -7425,7 +7883,7 @@ function buildEquipCheckboxes(containerId, selectedEquip) {
   }).join('') + `
     <div id="${containerId}-new-equip-row" style="display:flex;align-items:center;gap:6px;margin-top:2px;width:100%">
       <input id="${containerId}-new-equip-input" type="text" placeholder="+ New type…" style="font-size:12px;padding:5px 8px;border-style:dashed;flex:1;min-width:100px">
-      <button class="btn btn-ghost btn-sm" onclick="addNewEquipType('${containerId}')" style="white-space:nowrap;padding:5px 10px;font-size:12px">Add</button>
+      <button class="btn btn-ghost btn-sm" data-action="add-new-equip-type" data-container-id="${containerId}" style="white-space:nowrap;padding:5px 10px;font-size:12px">Add</button>
     </div>`;
   // Live highlight on change
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
@@ -8514,6 +8972,140 @@ function migrateLegacyId(id) {
   return id;
 }
 
+
+const HISTORICAL_WORKOUT_CLASSIFY_VERSION = 'historical_workout_classify_v2';
+
+function formatSessionMonthDay(epoch) {
+  const d = new Date(epoch || Date.now());
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function getSessionExerciseDomain(ex) {
+  if (!ex) return 'unknown';
+
+  const lowerMuscles = new Set(['quads', 'hamstrings', 'glutes', 'calves']);
+  const upperMuscles = new Set(['chest', 'back', 'shoulders']);
+  const armMuscles = new Set(['biceps', 'triceps', 'forearms']);
+
+  let pattern = ex.slotPattern || null;
+  let primary = Array.isArray(ex.slotMuscles) ? [...ex.slotMuscles] : [];
+
+  if (ex.variantId) {
+    const variantId = migrateLegacyId(ex.variantId);
+    const variantKey = String(variantId || '').toLowerCase();
+    if (/(^|__)(concept2|row|rowing|rower|bikeerg|skierg|erg)(_|__|$)/.test(variantKey) || variantKey.includes('concept2')) {
+      return 'cardio';
+    }
+    const parent = getParentForVariant(variantId);
+    const muscles = getMusclesForVariant(variantId);
+    pattern = pattern || (parent && parent.pattern) || null;
+    primary = (muscles && Array.isArray(muscles.primary) ? muscles.primary : []).filter(Boolean);
+  }
+
+  const slotLabel = String(ex.slotLabel || '').toLowerCase();
+  if (/(concept2|rower|rowing|bikeerg|skierg|erg)/.test(slotLabel)) return 'cardio';
+
+  if (pattern === 'cardio') return 'cardio';
+  if (pattern === 'core') return 'core';
+
+  const pset = new Set(primary);
+  if (primary.length && primary.every(m => armMuscles.has(m))) return 'arms';
+  if (primary.length && primary.every(m => m === 'core')) return 'core';
+  if ([...pset].some(m => lowerMuscles.has(m))) return 'lower';
+  if ([...pset].some(m => upperMuscles.has(m))) return 'upper';
+  if ([...pset].some(m => armMuscles.has(m))) return 'arms';
+
+  if (pattern === 'squat' || pattern === 'hinge') return 'lower';
+  if (pattern === 'push' || pattern === 'pull') return 'upper';
+  if (pattern === 'isolation') {
+    if ([...pset].some(m => lowerMuscles.has(m))) return 'lower';
+    if ([...pset].some(m => upperMuscles.has(m))) return 'upper';
+    if ([...pset].some(m => armMuscles.has(m))) return 'arms';
+  }
+
+  return 'unknown';
+}
+
+function inferHistoricalWorkoutClassification(session) {
+  if (!session || !Array.isArray(session.exercises) || session.exercises.length === 0) return null;
+
+  const completedExercises = session.exercises.filter(ex => Array.isArray(ex.sets) && ex.sets.some(st => st && st.completed));
+  const exercises = completedExercises.length ? completedExercises : session.exercises;
+  const counts = { upper: 0, lower: 0, arms: 0, core: 0, cardio: 0, unknown: 0 };
+
+  exercises.forEach(ex => {
+    const domain = getSessionExerciseDomain(ex);
+    counts[domain] = (counts[domain] || 0) + 1;
+  });
+
+  let category = 'other';
+  let titleBase = 'Other';
+
+  if (counts.cardio > 0 && counts.upper + counts.lower + counts.arms + counts.core === 0) {
+    category = 'cardio';
+    titleBase = 'Cardio';
+  } else if (counts.upper === 0 && counts.lower === 0 && counts.cardio === 0 && (counts.arms > 0 || counts.core > 0)) {
+    category = 'arms_core';
+    if (counts.core > 0 && counts.arms === 0) titleBase = 'Core';
+    else if (counts.arms > 0 && counts.core === 0) titleBase = 'Arms';
+    else titleBase = 'Arms & Core';
+  } else if (counts.lower > 0 && counts.upper === 0 && counts.cardio === 0) {
+    category = 'lower';
+    titleBase = 'Lower';
+  } else if (counts.upper > 0 && counts.lower === 0 && counts.cardio === 0) {
+    category = 'upper';
+    titleBase = 'Upper';
+  } else {
+    return { category: 'other', title: `Other ${formatSessionMonthDay(session.startTime)}`, counts };
+  }
+
+  return { category, title: `${titleBase} ${formatSessionMonthDay(session.startTime)}`, counts };
+}
+
+async function migrateHistoricalWorkoutCategories() {
+  try {
+    if (localStorage.getItem(HISTORICAL_WORKOUT_CLASSIFY_VERSION) === 'done') return;
+  } catch (e) {}
+
+  const sessions = await dbGetAll('sessions');
+  let changed = 0;
+
+  for (const session of sessions) {
+    if (!session) continue;
+    const currentCategory = resolveCategory(session.category);
+    const inferred = inferHistoricalWorkoutClassification(session);
+    if (!inferred || inferred.category === 'other') continue;
+
+    const currentTitle = (session.title || '').trim();
+    const genericName = /^(workout|other)(\s+\d{1,2}\/\d{1,2})?$/i.test(currentTitle);
+    const shouldReclassify = currentCategory === 'other' || genericName;
+    if (!shouldReclassify) continue;
+
+    let dirty = false;
+    if (session.category !== inferred.category) {
+      session.category = inferred.category;
+      dirty = true;
+    }
+    if (currentTitle !== inferred.title) {
+      session.title = inferred.title;
+      dirty = true;
+    }
+
+    if (dirty) {
+      await dbPut('sessions', session);
+      changed += 1;
+    }
+  }
+
+  try { localStorage.setItem(HISTORICAL_WORKOUT_CLASSIFY_VERSION, 'done'); } catch (e) {}
+
+  if (changed) {
+    invalidateSessionCache();
+    renderHome();
+    showToast(`Updated ${changed} workouts`);
+  }
+}
+
 async function init() {
   // ── Critical path: DB + first paint ──
   await openDB();
@@ -8530,6 +9122,9 @@ async function init() {
   // Restore in-progress session if browser was closed mid-workout
   if (!activeSession) await loadSessionDraft();
 
+  // ── Historical workout cleanup ──
+  migrateHistoricalWorkoutCategories().catch(e => console.warn('Historical workout cleanup skipped:', e));
+
   // ── Background maintenance (non-blocking) ──
   requestIdleCallback(() => {
     migrateToSupabase().catch(e => console.warn('Migration skipped:', e));
@@ -8540,7 +9135,17 @@ async function init() {
   });
 }
 // requestIdleCallback polyfill for Safari
-if (!window.requestIdleCallback) window.requestIdleCallback = fn => setTimeout(fn, 1);
+if (!window.requestIdleCallback) {
+  window.requestIdleCallback = (fn, options = {}) => {
+    const start = Date.now();
+    const timeout = typeof options.timeout === 'number' ? options.timeout : 50;
+    return setTimeout(() => fn({
+      didTimeout: false,
+      timeRemaining: () => Math.max(0, timeout - (Date.now() - start))
+    }), 16);
+  };
+  window.cancelIdleCallback = id => clearTimeout(id);
+}
 
 // Clear-on-first-keystroke for number inputs (not set-cell-inputs which have their own handling)
 document.addEventListener('focus', e => {
@@ -8681,20 +9286,20 @@ function renderAdminCard(exerciseId) {
 
   const resChips = RESISTANCE_TYPES.map(r => {
     const on = state.resistances.has(r);
-    return `<button class="admin-chip ${on ? 'on' : ''}" onclick="adminToggleResistance('${exerciseId}','${r}')">
+    return `<button class="admin-chip ${on ? 'on' : ''}" data-action="admin-toggle-resistance" data-exercise-id="${exerciseId}" data-resistance="${escHtml(r)}">
       <span class="chip-dot"></span>${r}
     </button>`;
   }).join('');
 
   const varChips = VARIANT_TYPES.map(v => {
     const on = state.variants.has(v);
-    return `<button class="admin-chip ${on ? 'on' : ''}" onclick="adminToggleVariant('${exerciseId}',${JSON.stringify(v)})">
+    return `<button class="admin-chip ${on ? 'on' : ''}" data-action="admin-toggle-variant" data-exercise-id="${exerciseId}" data-variant="${escHtml(v)}">
       <span class="chip-dot"></span>${v}
     </button>`;
   }).join('');
 
   card.innerHTML = `
-    <div class="admin-ex-header" onclick="adminToggleCard('${exerciseId}')">
+    <div class="admin-ex-header" data-action="admin-toggle-card" data-exercise-id="${exerciseId}">
       <div>
         <div class="admin-ex-title">${escHtml(h.name)}</div>
         <div class="admin-ex-meta">${h.pattern} · ${state.resistances.size} resistance · ${state.variants.size} variant${state.variants.size !== 1 ? 's' : ''}</div>
