@@ -141,7 +141,7 @@ body::after {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-top: var(--safe-top);
-  padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
 }
 
 .screen { display: none; min-height: 100%; }
@@ -150,11 +150,11 @@ body::after {
 
 /* ── HEADER ── */
 .page-header {
-  padding: 20px 16px 14px;
+  padding: 16px 16px 10px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
 }
 .page-title {
   font-family: var(--display);
@@ -392,6 +392,58 @@ select option { background: var(--bg3); }
 }
 .toast-undo-btn:active { opacity: 0.7; }
 
+
+.home-workout-toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  padding: 10px 16px 6px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(19,16,30,0.65);
+  backdrop-filter: blur(8px);
+}
+.home-workout-pills {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.home-workout-selects {
+  display:flex;
+  gap:6px;
+  margin-left:auto;
+}
+.home-workout-selects select {
+  width:auto;
+  min-width: 88px;
+  padding: 7px 28px 7px 10px;
+  font-size: 12px;
+  background: var(--bg2);
+}
+.home-filter-pill {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.home-filter-pill.active {
+  background: var(--bg3);
+  color: var(--text);
+  border-color: var(--accent);
+}
+.home-filter-summary {
+  padding: 4px 16px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+}
+
 /* ════════════════════════════════════
    HOME / LOG SCREEN
 ════════════════════════════════════ */
@@ -422,7 +474,7 @@ select option { background: var(--bg3); }
   font-weight: 500;
 }
 
-.workout-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.workout-list { padding: 10px 16px 4px; display: flex; flex-direction: column; gap: 8px; }
 
 .workout-card {
   background: var(--bg2);
@@ -437,7 +489,7 @@ select option { background: var(--bg3); }
 .workout-card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .workout-card-title {
   font-family: var(--display);
@@ -871,10 +923,10 @@ select option { background: var(--bg3); }
    PLANNED WORKOUTS SCREEN
 ════════════════════════════════════ */
 #screen-templates .template-list {
-  padding: 12px 16px;
+  padding: 10px 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .template-card {
   background: var(--bg2);
@@ -926,7 +978,7 @@ select option { background: var(--bg3); }
    EXERCISE LIBRARY
 ════════════════════════════════════ */
 .library-search-bar {
-  padding: 12px 16px 8px;
+  padding: 10px 16px 6px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1061,7 +1113,7 @@ select option { background: var(--bg3); }
 .lib-history-item-count { font-family: var(--mono); font-size: 12px; color: var(--text3); text-align:right; flex-shrink:0; }
 
 .library-list {
-  padding: 8px 16px 16px;
+  padding: 6px 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1200,7 +1252,7 @@ select option { background: var(--bg3); }
   padding: 12px 14px;
   cursor: pointer;
   user-select: none;
-  gap: 10px;
+  gap: 8px;
 }
 .admin-ex-header:active { background: var(--bg3); }
 .admin-ex-title {
@@ -1291,8 +1343,8 @@ select option { background: var(--bg3); }
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 8px;
+  padding: 10px 16px;
 }
 .analytics-card {
   background: var(--bg2);
@@ -1499,7 +1551,7 @@ select option { background: var(--bg3); }
 .lifts-breadcrumb .bc-sep { cursor: default; color: var(--text3); opacity: 0.5; }
 .lifts-breadcrumb .bc-sep:hover { color: var(--text3); }
 .bw-chart-wrap {
-  padding: 16px;
+  padding: 12px 16px 14px;
 }
 .bw-chart-container {
   background: var(--bg2);
@@ -1551,7 +1603,7 @@ select option { background: var(--bg3); }
 .filter-row {
   display: flex;
   gap: 8px;
-  padding: 0 16px 12px;
+  padding: 0 16px 10px;
 }
 .filter-row select { font-size: 13px; padding: 8px 10px; }
 
@@ -1563,7 +1615,7 @@ textarea { resize: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 8px;
+  padding: 10px 16px 6px;
 }
 .section-title {
   font-family: var(--display);
@@ -1576,7 +1628,7 @@ textarea { resize: none; }
 .period-pills {
   display: flex;
   gap: 4px;
-  padding: 0 16px 8px;
+  padding: 0 16px 6px;
 }
 .period-pill {
   padding: 4px 10px;
@@ -1667,7 +1719,7 @@ textarea { resize: none; }
 .mobility-card-head {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 .mobility-side-row {
   flex: 1;
@@ -1971,9 +2023,8 @@ textarea { resize: none; }
           <div class="page-sub" id="home-stats-sub"></div>
         </div>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" id="export-claude-btn" title="Export for Claude">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Share
+          <button class="btn btn-ghost btn-sm btn-icon" id="home-admin-btn" title="Admin">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
           <button class="btn btn-ghost btn-sm" id="new-template-btn">Plan</button>
           <button class="btn btn-primary btn-sm" id="new-workout-btn">+ New</button>
@@ -1987,6 +2038,17 @@ textarea { resize: none; }
       <!-- Workouts sub-view -->
       <div id="home-view-workouts">
         <div id="active-banner"></div>
+        <div class="home-workout-toolbar">
+          <div class="home-workout-pills">
+            <button class="home-filter-pill active" id="home-scope-recent-btn" data-home-scope="recent">Recent</button>
+            <button class="home-filter-pill" id="home-scope-all-btn" data-home-scope="all">All history</button>
+          </div>
+          <div class="home-workout-selects">
+            <select id="home-year-filter" aria-label="Filter workout history by year"></select>
+            <select id="home-month-filter" aria-label="Filter workout history by month"></select>
+          </div>
+        </div>
+        <div id="home-filter-summary" class="home-filter-summary"></div>
         <div id="recent-workouts" class="workout-list"></div>
       </div>
       <!-- Exercises sub-view (was Library) -->
@@ -1995,7 +2057,6 @@ textarea { resize: none; }
           <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;padding:10px 16px 0">
             <div class="page-sub" id="lib-count-sub"></div>
             <div style="display:flex;gap:6px;align-items:center">
-              <button class="btn btn-ghost btn-sm btn-icon" id="open-admin-btn" title="Admin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
               <button class="btn btn-primary btn-sm" id="new-parent-btn">+ New</button>
             </div>
           </div>
@@ -2110,6 +2171,10 @@ textarea { resize: none; }
             Import JSON
           </button>
         </div>
+        <button class="btn btn-ghost btn-sm" id="export-claude-btn" style="width:100%">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Share for Claude
+        </button>
         <input type="file" id="import-file-input" accept=".json" style="display:none">
       </div>
       <div class="admin-exercise-list" id="admin-exercise-list"></div>
@@ -2913,10 +2978,10 @@ const VARIANT_TYPES = [
   // Position / angle
   "Flat","Incline","Decline","Seated","Standing","Kneeling","Overhead","Lying",
   // Grip
-  "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip",
+  "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip","Reverse Grip",
   // Load position / style
-  "Front","Back","Goblet","Zercher","Hack","Sissy","Harness","Belt","Belt Squat",
-  "Preacher","Bar","Ring","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up",
+  "Front","Back","Goblet","Zercher","Hack","Harness","Belt","Belt Squat",
+  "Preacher","Bar","Ring","Rope","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up","Box","Pistol","Russian",
   // Modifier
   "Unilateral","Band","Paused","Tempo",
 ];
@@ -2925,7 +2990,7 @@ const EXERCISE_HIERARCHY = [
   // ── CHEST ──
   { id:"chest_press", name:"Chest Press", pattern:"push", muscles:["chest"], sec:["triceps","shoulders"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
-    variants:["Flat","Incline","Decline","Standing","Kneeling","Unilateral","Paused","Close Grip"] },
+    variants:["Flat","Incline","Decline","Standing","Kneeling","Unilateral","Paused","Close Grip","Neutral","Supinated","Pronated"] },
   { id:"chest_fly", name:"Chest Fly", pattern:"isolation", muscles:["chest"], sec:["shoulders"],
     resistances:["Dumbbell","Voltra","Band"],
     variants:["Flat","Incline","Decline","Unilateral"] },
@@ -2941,13 +3006,13 @@ const EXERCISE_HIERARCHY = [
     variants:["Supinated","Pronated","Neutral","Wide","Narrow","Bar","Ring","Paused","Harness","Belt"] },
   { id:"lat_pulldown", name:"Lat Pulldown", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["Voltra","Band"],
-    variants:["Wide","Narrow","Neutral","Unilateral"] },
+    variants:["Wide","Narrow","Neutral","Supinated","Pronated","Unilateral"] },
   { id:"row", name:"Row", pattern:"pull", muscles:["back"], sec:["biceps","shoulders"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
-    variants:["Wide","Narrow","Neutral","Unilateral","Seated","Standing","Incline","Paused"] },
+    variants:["Wide","Narrow","Neutral","Supinated","Pronated","Unilateral","Seated","Standing","Incline","Paused"] },
   { id:"suspension_row", name:"Suspension Row", pattern:"pull", muscles:["back"], sec:["biceps"],
     resistances:["BW","Voltra"],
-    variants:["Bar","Ring","Unilateral","Harness","Belt"] },
+    variants:["Bar","Ring","Neutral","Supinated","Pronated","Unilateral","Harness","Belt"] },
   { id:"pullover", name:"Pullover", pattern:"pull", muscles:["back"], sec:["chest"],
     resistances:["Barbell","Dumbbell","Voltra"],
     variants:["Flat","Incline","Unilateral"] },
@@ -2963,7 +3028,7 @@ const EXERCISE_HIERARCHY = [
   // ── SHOULDERS ──
   { id:"overhead_press", name:"Overhead Press", pattern:"push", muscles:["shoulders"], sec:["triceps"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band"],
-    variants:["Seated","Standing","Kneeling","Unilateral","Paused"] },
+    variants:["Seated","Standing","Kneeling","Goblet","Neutral","Supinated","Pronated","Unilateral","Paused"] },
   { id:"shoulder_raise", name:"Shoulder Raise", pattern:"isolation", muscles:["shoulders"], sec:[],
     resistances:["Dumbbell","Voltra","Landmine","Misc","Band"],
     variants:["Seated","Standing","Unilateral","Incline"] },
@@ -2985,14 +3050,14 @@ const EXERCISE_HIERARCHY = [
   // ── ARMS ──
   { id:"bicep_curl", name:"Bicep Curl", pattern:"isolation", muscles:["biceps"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra","Misc","Band"],
-    variants:["Standing","Seated","Incline","Preacher","Unilateral","Narrow","Wide"] },
+    variants:["Standing","Seated","Incline","Preacher","Unilateral","Narrow","Wide","Neutral","Supinated","Pronated","Rope"] },
   { id:"tricep_extension", name:"Tricep Extension", pattern:"isolation", muscles:["triceps"], sec:[],
     resistances:["Barbell","Dumbbell","Voltra","Band"],
-    variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip","Bar","Rope","Reverse Grip"] },
+    variants:["Seated","Standing","Flat","Incline","Overhead","Unilateral","Close Grip","Bar","Rope","Reverse Grip","Neutral","Supinated","Pronated"] },
   // ── LEGS ──
   { id:"squat", name:"Squat", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Landmine","Band","BW","Belt Lever"],
-    variants:["Back","Front","Zercher","Goblet","Hack","Harness","Belt","Cossack","Paused","Band"] },
+    variants:["Back","Front","Overhead","Zercher","Goblet","Hack","Harness","Belt","Cossack","Box","Pistol","Paused","Band"] },
   { id:"lunge", name:"Lunge", pattern:"squat", muscles:["quads"], sec:["glutes","hamstrings"],
     resistances:["Barbell","Dumbbell","Voltra","Band","BW","Belt Lever"],
     variants:["BSS","Walking","Stationary","Forward","Backward","Step-Up","Goblet","Harness","Belt","Unilateral"] },
@@ -3037,7 +3102,7 @@ const EXERCISE_HIERARCHY = [
     variants:["Seated","Standing","Unilateral"] },
   // ── CORE ──
   { id:"crunch", name:"Crunch", pattern:"core", muscles:["core"], sec:[],
-    resistances:["Voltra","BW","Band"],
+    resistances:["Voltra","BW","Band","Dumbbell"],
     variants:["Unilateral","Incline"] },
   { id:"leg_raise", name:"Leg Raise / Knee Raise", pattern:"core", muscles:["core"], sec:[],
     resistances:["BW","Band"],
@@ -3054,6 +3119,15 @@ const EXERCISE_HIERARCHY = [
   { id:"side_bend", name:"Side Bend / QL", pattern:"core", muscles:["core"], sec:[],
     resistances:["Dumbbell","Voltra","Band"],
     variants:["Unilateral","Seated","Standing"] },
+  { id:"twist", name:"Twist", pattern:"core", muscles:["core"], sec:[],
+    resistances:["Voltra","Landmine","Misc"],
+    variants:["Russian","Kneeling","Standing"] },
+  { id:"v_up", name:"V-Up", pattern:"core", muscles:["core"], sec:[],
+    resistances:["BW","Misc"],
+    variants:[] },
+  { id:"hollow_rock", name:"Hollow Rock", pattern:"core", muscles:["core"], sec:[],
+    resistances:["BW","Misc"],
+    variants:[] },
   // ── OTHER ──
   { id:"concept2", name:"Concept2", pattern:"cardio", muscles:["full body"], sec:[],
     resistances:["BW"],
@@ -3298,6 +3372,11 @@ async function getSortedSessions() {
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
 let homeTab = 'workouts'; // 'workouts' | 'exercises'
+let homeWorkoutScope = 'recent'; // 'recent' | 'all'
+let homeWorkoutYear = 'all';
+let homeWorkoutMonth = 'all';
+const HOME_RECENT_LIMIT = 60;
+const HOME_MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function setHomeTab(tab) {
   homeTab = tab;
@@ -3397,6 +3476,55 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
+function populateHomeWorkoutFilters(sessions) {
+  const yearSel = document.getElementById('home-year-filter');
+  const monthSel = document.getElementById('home-month-filter');
+  if (!yearSel || !monthSel) return;
+
+  const years = [...new Set(sessions.map(s => new Date(s.startTime).getFullYear()))].sort((a,b) => b-a);
+  yearSel.innerHTML = `<option value="all">All years</option>` + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  yearSel.value = years.includes(Number(homeWorkoutYear)) ? String(homeWorkoutYear) : 'all';
+  if (yearSel.value === 'all') homeWorkoutYear = 'all';
+
+  monthSel.innerHTML = `<option value="all">All months</option>` + HOME_MONTH_NAMES.map((m, idx) => `<option value="${idx}">${m}</option>`).join('');
+  const monthAllowed = homeWorkoutYear !== 'all';
+  monthSel.disabled = !monthAllowed;
+  if (!monthAllowed) {
+    homeWorkoutMonth = 'all';
+    monthSel.value = 'all';
+  } else {
+    monthSel.value = homeWorkoutMonth === 'all' ? 'all' : String(homeWorkoutMonth);
+  }
+
+  document.querySelectorAll('[data-home-scope]').forEach(btn => btn.classList.toggle('active', btn.dataset.homeScope === homeWorkoutScope));
+}
+
+function getFilteredHomeSessions(sessions) {
+  let filtered = sessions;
+  const hasDateFilter = homeWorkoutYear !== 'all' || homeWorkoutMonth !== 'all';
+
+  if (hasDateFilter) {
+    filtered = sessions.filter(s => {
+      const d = new Date(s.startTime);
+      if (homeWorkoutYear !== 'all' && d.getFullYear() !== Number(homeWorkoutYear)) return false;
+      if (homeWorkoutMonth !== 'all' && d.getMonth() !== Number(homeWorkoutMonth)) return false;
+      return true;
+    });
+  } else if (homeWorkoutScope === 'recent') {
+    filtered = sessions.slice(0, HOME_RECENT_LIMIT);
+  }
+
+  return filtered;
+}
+
+function getHomeFilterSummary(totalCount, shownCount) {
+  if (shownCount === 0) return 'No workouts match this filter';
+  const monthLabel = homeWorkoutMonth === 'all' ? '' : ` · ${HOME_MONTH_NAMES[Number(homeWorkoutMonth)]}`;
+  if (homeWorkoutYear !== 'all') return `Showing ${shownCount} of ${totalCount} workouts · ${homeWorkoutYear}${monthLabel}`;
+  if (homeWorkoutScope === 'recent') return `Showing your ${shownCount} most recent workouts`;
+  return `Showing all ${shownCount} workouts`;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // HOME SCREEN
 // ═══════════════════════════════════════════════════════════════
@@ -3406,14 +3534,18 @@ async function renderHome() {
   const sub = document.getElementById('home-stats-sub');
   sub.textContent = `${sessions.length} sessions logged`;
 
+  populateHomeWorkoutFilters(sessions);
+
   const list = document.getElementById('recent-workouts');
-  const recent = sessions.slice(0, 20);
+  const recent = getFilteredHomeSessions(sessions);
+  const filterSummary = document.getElementById('home-filter-summary');
+  if (filterSummary) filterSummary.textContent = getHomeFilterSummary(sessions.length, recent.length);
 
   if (recent.length === 0) {
     list.innerHTML = `<div class="empty-state">
-      <div class="empty-state-icon">💪</div>
-      <div class="empty-state-title">No workouts yet</div>
-      <div class="empty-state-sub">Tap + New to start your first session</div>
+      <div class="empty-state-icon">🗂️</div>
+      <div class="empty-state-title">No workouts in this range</div>
+      <div class="empty-state-sub">Try a different year, month, or switch back to Recent</div>
     </div>`;
     return;
   }
@@ -3423,12 +3555,12 @@ async function renderHome() {
     const dateStr = date.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     const dur = s.durationMinutes ? `${s.durationMinutes}m` : '';
     const totalSets = s.exercises.reduce((acc, ex) => acc + ex.sets.filter(st => st.completed).length, 0);
-    const exList = s.exercises.slice(0,4).map(ex => {
+    const exList = s.exercises.slice(0,8).map(ex => {
       const name = getVariantDisplayName(ex.variantId);
       const topSet = ex.sets.filter(st => st.completed && st.weight).sort((a,b) => b.weight - a.weight)[0];
       return `<div class="workout-card-exercise">${name}${topSet ? ` <span style="color:var(--text3);font-family:var(--mono);font-size:11px">${topSet.weight}×${topSet.reps}</span>` : ''}</div>`;
     }).join('');
-    const more = s.exercises.length > 4 ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">+${s.exercises.length - 4} more</div>` : '';
+    const more = s.exercises.length > 8 ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">+${s.exercises.length - 8} more</div>` : '';
 
     return {s, dateStr, dur, totalSets, exList, more};
   });
@@ -4545,6 +4677,7 @@ document.getElementById('save-active-start-btn').addEventListener('click', saveA
 
 document.getElementById('rest-timer-toast').addEventListener('click', skipRestTimer);
 document.getElementById('open-admin-btn')?.addEventListener('click', () => showScreen('admin'));
+document.getElementById('home-admin-btn')?.addEventListener('click', () => showScreen('admin'));
 document.getElementById('templates-back-btn')?.addEventListener('click', () => showScreen('home'));
 document.getElementById('templates-new-btn')?.addEventListener('click', () => openTemplateEditor(null));
 document.getElementById('open-meas-btn')?.addEventListener('click', () => openMeasModal());
@@ -4554,6 +4687,27 @@ document.getElementById('category-reset-btn')?.addEventListener('click', resetCa
 document.getElementById('pick-ex-back')?.addEventListener('click', pickerGoBack);
 document.querySelectorAll('[data-home-tab]').forEach(btn => {
   btn.addEventListener('click', () => setHomeTab(btn.dataset.homeTab));
+});
+document.querySelectorAll('[data-home-scope]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    homeWorkoutScope = btn.dataset.homeScope || 'recent';
+    if (homeWorkoutScope === 'recent') {
+      homeWorkoutYear = 'all';
+      homeWorkoutMonth = 'all';
+    }
+    renderHome();
+  });
+});
+document.getElementById('home-year-filter')?.addEventListener('change', e => {
+  homeWorkoutYear = e.target.value;
+  if (homeWorkoutYear === 'all') homeWorkoutMonth = 'all';
+  else homeWorkoutScope = 'all';
+  renderHome();
+});
+document.getElementById('home-month-filter')?.addEventListener('change', e => {
+  homeWorkoutMonth = e.target.value;
+  if (homeWorkoutMonth !== 'all') homeWorkoutScope = 'all';
+  renderHome();
 });
 document.querySelectorAll('[data-lib-tab]').forEach(btn => {
   btn.addEventListener('click', () => setLibTab(btn.dataset.libTab));
@@ -9106,6 +9260,30 @@ async function migrateHistoricalWorkoutCategories() {
   }
 }
 
+const TEMPLATE_RESET_VERSION = 'templates_reset_v1';
+async function clearTemplatesOnce() {
+  try {
+    if (localStorage.getItem(TEMPLATE_RESET_VERSION) === 'done') return;
+  } catch (e) {}
+
+  let cleared = 0;
+  try {
+    const templates = await dbGetAll('templates');
+    for (const t of templates) {
+      await dbDelete('templates', t.id);
+      cleared++;
+    }
+    localStorage.removeItem('tmpl_order');
+    localStorage.setItem(TEMPLATE_RESET_VERSION, 'done');
+    if (cleared > 0) {
+      renderTemplates();
+      showToast('Cleared planned workouts');
+    }
+  } catch (e) {
+    console.warn('Template reset skipped:', e);
+  }
+}
+
 async function init() {
   // ── Critical path: DB + first paint ──
   await openDB();
@@ -9121,6 +9299,8 @@ async function init() {
 
   // Restore in-progress session if browser was closed mid-workout
   if (!activeSession) await loadSessionDraft();
+
+  await clearTemplatesOnce();
 
   // ── Historical workout cleanup ──
   migrateHistoricalWorkoutCategories().catch(e => console.warn('Historical workout cleanup skipped:', e));
