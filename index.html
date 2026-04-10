@@ -403,6 +403,12 @@ select option { background: var(--bg3); }
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4), 0 2px 8px rgba(219,39,119,0.3);
+  animation: banner-pulse 2s ease-in-out infinite;
+}
+@keyframes banner-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(124,58,237,0.4), 0 2px 8px rgba(219,39,119,0.3); }
+  50% { box-shadow: 0 4px 28px rgba(124,58,237,0.6), 0 2px 12px rgba(219,39,119,0.45); }
 }
 #screen-home .session-bar-title {
   font-family: var(--display);
@@ -425,7 +431,7 @@ select option { background: var(--bg3); }
   padding: 14px;
   cursor: pointer;
   transition: border-color 0.15s;
-  active: border-color var(--border2);
+  border-left: 3px solid var(--cat-color, var(--border));
 }
 .workout-card:active { border-color: var(--border2); background: var(--bg3); }
 .workout-card-header {
@@ -521,6 +527,7 @@ select option { background: var(--bg3); }
   display: flex;
   align-items: center;
   gap: 6px;
+  text-shadow: 0 0 12px rgba(167,139,250,0.5);
 }
 .session-timer.paused { color: var(--text3); }
 .session-timer.paused .timer-text { opacity: 0.6; }
@@ -642,12 +649,17 @@ select option { background: var(--bg3); }
   transition: background 0.15s;
 }
 .set-row:last-child { border-bottom: none; }
-.set-row.completed { background: rgba(167,139,250,0.06); }
+.set-row.completed { background: rgba(167,139,250,0.06); box-shadow: inset 3px 0 0 var(--accent2); }
 .set-row.completed .set-num { color: var(--accent); }
 
 /* ── Voltra eccentric weight column ── */
-.sets-header.voltra { grid-template-columns: 32px 1fr 1fr 1fr 1fr 44px 24px 24px; }
-.set-row.voltra { grid-template-columns: 32px 1fr 1fr 1fr 1fr 44px 24px 24px; }
+.voltra-tags {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
 .set-del-btn {
   background: none;
   border: none;
@@ -778,6 +790,7 @@ select option { background: var(--bg3); }
 .check-btn.done {
   background: var(--gradient);
   border-color: transparent;
+  box-shadow: 0 0 10px rgba(124,58,237,0.4), 0 0 4px rgba(219,39,119,0.3);
 }
 .check-btn svg { width: 16px; height: 16px; }
 
@@ -1748,7 +1761,7 @@ textarea { resize: none; }
 /* Sync status dot */
 #sync-dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: var(--text4);
+  background: var(--text3);
   flex-shrink: 0;
   transition: background 0.3s;
   cursor: pointer;
@@ -1792,18 +1805,18 @@ textarea { resize: none; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         <div id="autosave-dot" title="Saved"></div>
-      <div id="session-timer" class="session-timer" onclick="toggleSessionPause()">
+      <div id="session-timer" class="session-timer">
         <button class="pause-btn" id="pause-btn" aria-label="Pause timer">
           <svg id="pause-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           <svg id="play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
         <span class="timer-text">0:00</span>
-        <span id="session-start-time" style="font-size:10px;color:var(--text3);cursor:pointer;margin-left:4px" onclick="event.stopPropagation();toggleActiveTimeEdit()" title="Edit start time"></span>
+        <span id="session-start-time" style="font-size:10px;color:var(--text3);cursor:pointer;margin-left:4px" title="Edit start time"></span>
       </div>
       <div id="active-time-edit" style="display:none;padding:6px 16px;border-top:1px solid var(--border);gap:8px;align-items:center">
         <label style="font-size:11px;color:var(--text3);white-space:nowrap">Started</label>
         <input type="datetime-local" id="active-start-input" style="flex:1;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text)">
-        <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px" onclick="saveActiveStartTime()">Save</button>
+        <button class="btn btn-primary btn-sm" id="save-active-start-btn" style="padding:4px 10px;font-size:11px">Save</button>
       </div>
       </div>
     </div>
@@ -1824,7 +1837,7 @@ textarea { resize: none; }
       <div class="page-header" style="justify-content:space-between">
         <div>
           <div class="page-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:24px;line-height:1">🦾</span>
+            <span style="font-size:24px;line-height:1;filter:drop-shadow(0 0 8px rgba(167,139,250,0.5))">🦾</span>
             Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span>
             <span id="sync-dot" title="Checking sync…"></span>
           </div>
@@ -2038,17 +2051,26 @@ textarea { resize: none; }
             <div class="input-label">Weight (lbs)</div>
             <input id="detail-weight" type="number" step="0.5" placeholder="0">
           </div>
-          <div class="input-group" style="flex:1" id="detail-ecc-group" hidden>
-            <div class="input-label">Eccentric (lbs)</div>
-            <input id="detail-weightEcc" type="number" step="0.5" placeholder="0">
-          </div>
-          <div class="input-group" style="flex:1" id="detail-chains-group" hidden>
-            <div class="input-label">Chains (lbs)</div>
-            <input id="detail-weightChains" type="number" step="0.5" placeholder="0">
-          </div>
           <div class="input-group" style="flex:1">
             <div class="input-label">Reps</div>
             <input id="detail-reps" type="number" placeholder="0">
+          </div>
+        </div>
+        <div id="detail-voltra-fields" style="display:none">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin:4px 0 8px;text-transform:uppercase;letter-spacing:0.04em">Voltra Resistance</div>
+          <div class="input-row">
+            <div class="input-group" style="flex:1">
+              <div class="input-label">Eccentric</div>
+              <input id="detail-weightEcc" type="number" step="0.5" placeholder="0">
+            </div>
+            <div class="input-group" style="flex:1">
+              <div class="input-label">Chains</div>
+              <input id="detail-weightChains" type="number" step="0.5" placeholder="0">
+            </div>
+            <div class="input-group" style="flex:1">
+              <div class="input-label">Inverse</div>
+              <input id="detail-weightInverse" type="number" step="0.5" placeholder="0">
+            </div>
           </div>
         </div>
         <div class="input-row">
@@ -2934,11 +2956,11 @@ const PATTERN_SLOTS = [
 ];
 
 const WORKOUT_CATEGORIES = {
-  upper:     { label: 'Upper',      icon: '🔱', muscles: ['chest','back','shoulders'] },
-  lower:     { label: 'Lower',      icon: '🛞', muscles: ['quads','hamstrings','glutes','calves'] },
-  arms_core: { label: 'Arms & Core',icon: '🍬', muscles: ['biceps','triceps','core'] },
-  cardio:    { label: 'Cardio',     icon: '🫠', ids: ['concept2'] },
-  other:     { label: 'Other',      icon: '🎲', all: true },
+  upper:     { label: 'Upper',      icon: '🔱', muscles: ['chest','back','shoulders'], color: '#a78bfa' },
+  lower:     { label: 'Lower',      icon: '🛞', muscles: ['quads','hamstrings','glutes','calves'], color: '#f59e0b' },
+  arms_core: { label: 'Arms & Core',icon: '🍬', muscles: ['biceps','triceps','core'], color: '#f472b6' },
+  cardio:    { label: 'Cardio',     icon: '🫠', ids: ['concept2'], color: '#f87171' },
+  other:     { label: 'Other',      icon: '🎲', all: true, color: '#60a5fa' },
 };
 
 // Map legacy category keys to current ones
@@ -3212,7 +3234,9 @@ function closeModal(id) {
   if (!anyOpen) document.getElementById('modal-backdrop').classList.remove('show');
 }
 
+let _actionSheetCallbacks = [];
 function showActionSheet(title, actions) {
+  _actionSheetCallbacks = actions;
   let sheet = document.getElementById('_action-sheet');
   if (!sheet) {
     sheet = document.createElement('div');
@@ -3220,11 +3244,18 @@ function showActionSheet(title, actions) {
     sheet.style.cssText = 'position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;justify-content:flex-end';
     sheet.innerHTML = '<div id="_action-sheet-bg" style="position:absolute;inset:0;background:rgba(0,0,0,0.5)"></div><div id="_action-sheet-body" style="position:relative;background:var(--bg2);border-radius:16px 16px 0 0;padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px))"></div>';
     sheet.querySelector('#_action-sheet-bg').addEventListener('click', () => sheet.remove());
+    sheet.addEventListener('click', e => {
+      const btn = e.target.closest('[data-action-idx]');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.actionIdx);
+      sheet.remove();
+      if (_actionSheetCallbacks[idx]?.action) _actionSheetCallbacks[idx].action();
+    });
     document.body.appendChild(sheet);
   }
   const body = sheet.querySelector('#_action-sheet-body');
-  body.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--text3);text-align:center;padding:4px 16px 12px;letter-spacing:0.04em;text-transform:uppercase">${title}</div>` +
-    actions.map(a => `<button onclick="${a.fn};document.getElementById('_action-sheet').remove()"
+  body.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--text3);text-align:center;padding:4px 16px 12px;letter-spacing:0.04em;text-transform:uppercase">${escHtml(title)}</div>` +
+    actions.map((a, i) => `<button data-action-idx="${i}"
       style="display:block;width:100%;padding:14px 20px;background:none;border:none;border-top:1px solid var(--border);color:var(--text);font-size:15px;text-align:left;cursor:pointer;font-family:var(--body)">${a.label}</button>`).join('');
   sheet.style.display = 'flex';
 }
@@ -3276,11 +3307,13 @@ async function renderHome() {
 
   // Render cards immediately (no waiting for BW data)
   list.innerHTML = cards.map(({s, dateStr, dur, totalSets, exList, more}) => {
-    const catIcon = (WORKOUT_CATEGORIES[resolveCategory(s.category)] || WORKOUT_CATEGORIES.other).icon;
-    return `<div class="workout-card swipe-item" data-sid="${s.id}">
+    const catObj = WORKOUT_CATEGORIES[resolveCategory(s.category)] || WORKOUT_CATEGORIES.other;
+    const catIcon = catObj.icon;
+    const catColor = catObj.color || 'var(--border)';
+    return `<div class="workout-card swipe-item" data-sid="${s.id}" style="--cat-color:${catColor}">
       <div class="swipe-item-inner" onclick="viewWorkoutDetail('${s.id}')">
         <div class="workout-card-header">
-          <span style="font-size:28px;line-height:1;flex-shrink:0">${catIcon}</span>
+          <span style="font-size:28px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 8px ${catColor}40)">${catIcon}</span>
           <div style="flex:1;min-width:0">
             <div class="workout-card-title">${escHtml(s.title)}</div>
             <div class="workout-card-date">${dateStr}</div>
@@ -3353,8 +3386,8 @@ let pendingCategory = 'other';
 function renderCategoryButtons() {
   const container = document.getElementById('category-btns');
   container.innerHTML = Object.entries(WORKOUT_CATEGORIES).map(([key, cat]) =>
-    `<button class="btn btn-secondary" onclick="pickCategory('${key}')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:13px">
-      <span style="font-size:22px">${cat.icon}</span>${cat.label}
+    `<button class="btn btn-secondary" onclick="pickCategory('${key}')" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;font-size:13px;border-color:${cat.color}30;box-shadow:0 0 12px ${cat.color}20">
+      <span style="font-size:22px;filter:drop-shadow(0 0 6px ${cat.color}50)">${cat.icon}</span>${cat.label}
     </button>`
   ).join('');
 }
@@ -3613,6 +3646,95 @@ function saveActiveStartTime() {
   showToast('Start time updated');
 }
 
+// ── Standalone exercise block renderer (used by both full render and targeted updates) ──
+function buildExBlockHtml(exIdx) {
+  if (!activeSession) return '';
+  const exercises = activeSession.exercises;
+  const ex = exercises[exIdx];
+  if (!ex || ex.slotId) return '';
+  const displayName = getVariantDisplayName(ex.variantId);
+  const isVoltra = isVoltraVariant(ex.variantId);
+  const setsHtml = `
+    <div class="sets-header">
+      <div class="sets-header-cell">#</div>
+      <div class="sets-header-cell">LBS</div>
+      <div class="sets-header-cell">REPS</div>
+      <div class="sets-header-cell"></div>
+      <div class="sets-header-cell"></div>
+    </div>
+    ${(ex.sets || []).map((set, si) => renderSetRow(exIdx, si, set, isVoltra)).join('')}
+  `;
+  const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
+  const hasNote = !!exerciseNotes[ex.variantId];
+  const cueHtml = hasNote ? `<div class="ex-cue">${escHtml(exerciseNotes[ex.variantId])}</div>` : '';
+  const completedCount = (ex.sets || []).filter(s => s.completed).length;
+  const totalSets = (ex.sets || []).length;
+  const isCollapsed = collapsedExercises.has(exIdx);
+  const topSet = (ex.sets || []).filter(s => s.completed && s.weight).sort((a,b) => b.weight - a.weight)[0];
+  const summaryText = completedCount > 0
+    ? `${completedCount}/${totalSets} sets` + (topSet ? ` · ${topSet.weight}×${topSet.reps}` : '')
+    : `${totalSets} sets`;
+  return `<div class="ex-block swipe-item ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}" data-variant="${ex.variantId}">
+    <div class="swipe-item-inner">
+    <div class="ex-block-header">
+      <button class="ex-block-collapse-btn" data-action="collapse" data-ex="${exIdx}" title="Collapse/expand" aria-label="Collapse or expand exercise">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="ex-drag-handle" title="Drag to reorder">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
+      </div>
+      <div class="ex-block-info">
+        <div class="ex-name">${escHtml(displayName)}</div>
+        <div class="ex-summary">${summaryText}</div>
+      </div>
+      <div class="ex-block-actions">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="superset" data-ex="${exIdx}" title="Superset" style="${ssActive}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="swap" data-ex="${exIdx}" title="Swap exercise">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="ex-notes" data-ex="${exIdx}" title="Notes" style="${hasNote?'color:var(--accent-blue)':''}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="ex-history" data-ex="${exIdx}" title="History">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="remove-ex" data-ex="${exIdx}" title="Remove" aria-label="Remove exercise">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ex-block-body">
+      ${cueHtml}
+      ${setsHtml}
+      <div class="ex-block-footer">
+        <div class="prev-best" id="prev-best-${exIdx}">loading…</div>
+        <button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="${exIdx}">+ Set</button>
+      </div>
+    </div>
+  </div>
+    </div>
+    <div class="swipe-delete-bg" style="border-radius:0 var(--r) var(--r) 0;pointer-events:none">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Remove
+    </div>
+  </div>`;
+}
+
+// ── Targeted update: replace a single exercise block in-place ──
+function updateExerciseBlock(exIdx) {
+  const old = document.getElementById(`ex-block-${exIdx}`);
+  if (!old) { renderActiveSession(); return; }
+  const html = buildExBlockHtml(exIdx);
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  const newBlock = temp.firstElementChild;
+  old.replaceWith(newBlock);
+  attachSetInputListeners();
+  if (activeSession.exercises[exIdx]?.variantId) loadPrevBest(activeSession.exercises[exIdx].variantId, exIdx);
+  saveSessionDraftDebounced();
+}
+
 function renderActiveSession() {
   if (!activeSession) return;
   document.getElementById('session-title').textContent = activeSession.title;
@@ -3648,84 +3770,11 @@ function renderActiveSession() {
     }
   });
 
-  function renderExBlock(exIdx) {
-    const ex = exercises[exIdx];
-    const displayName = getVariantDisplayName(ex.variantId);
-    const isVoltra = isVoltraVariant(ex.variantId);
-    const setsHtml = `
-      <div class="sets-header${isVoltra ? ' voltra' : ''}">
-        <div class="sets-header-cell">#</div>
-        <div class="sets-header-cell">LBS</div>
-        ${isVoltra ? '<div class="sets-header-cell">ECC</div><div class="sets-header-cell">CHN</div>' : ''}
-        <div class="sets-header-cell">REPS</div>
-        <div class="sets-header-cell"></div>
-        <div class="sets-header-cell"></div>
-      </div>
-      ${(ex.sets || []).map((set, si) => renderSetRow(exIdx, si, set, isVoltra)).join('')}
-    `;
-    const ssActive = ex.supersetId ? 'color:var(--accent)' : '';
-    const hasNote = !!exerciseNotes[ex.variantId];
-    const cueHtml = hasNote ? `<div class="ex-cue">${escHtml(exerciseNotes[ex.variantId])}</div>` : '';
-    const totalEx = exercises.length;
-    const completedCount = (ex.sets || []).filter(s => s.completed).length;
-    const totalSets = (ex.sets || []).length;
-    const isCollapsed = collapsedExercises.has(exIdx);
-    const topSet = (ex.sets || []).filter(s => s.completed && s.weight).sort((a,b) => b.weight - a.weight)[0];
-    const summaryText = completedCount > 0
-      ? `${completedCount}/${totalSets} sets` + (topSet ? ` · ${topSet.weight}×${topSet.reps}` : '')
-      : `${totalSets} sets`;
-    return `<div class="ex-block swipe-item ${isCollapsed ? 'collapsed' : ''}" id="ex-block-${exIdx}">
-      <div class="swipe-item-inner">
-      <div class="ex-block-header">
-        <button class="ex-block-collapse-btn" onclick="toggleExCollapse(${exIdx})" title="Collapse/expand" aria-label="Collapse or expand exercise">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="ex-drag-handle" title="Drag to reorder">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
-        </div>
-        <div class="ex-block-info">
-          <div class="ex-name">${escHtml(displayName)}</div>
-          <div class="ex-summary">${summaryText}</div>
-        </div>
-        <div class="ex-block-actions">
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="openSupersetModal(${exIdx})" title="Superset" style="${ssActive}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-          </button>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="openSwapVariantModal(${exIdx})" title="Swap exercise">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-          </button>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="openExNotesModal('${ex.variantId}')" title="Notes" style="${hasNote?'color:var(--accent-blue)':''}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="showExerciseAnalyticsFromSession('${ex.variantId}')" title="History">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </button>
-          <button class="btn btn-ghost btn-sm btn-icon" onclick="removeExFromSession(${exIdx})" title="Remove" aria-label="Remove exercise">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="ex-block-body">
-        ${cueHtml}
-        ${setsHtml}
-        <div class="ex-block-footer">
-          <div class="prev-best" id="prev-best-${exIdx}">loading…</div>
-          <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${exIdx})">+ Set</button>
-        </div>
-      </div>
-    </div>
-      </div>
-      <div class="swipe-delete-bg" style="border-radius:0 var(--r) var(--r) 0;pointer-events:none">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Remove
-      </div>
-    </div>`;
-  }
-
   body.innerHTML = items.map(item => {
     if (item.type === 'slot') return renderSessionSlot(item.idx);
-    if (item.type === 'solo') return renderExBlock(item.idx);
+    if (item.type === 'solo') return buildExBlockHtml(item.idx);
     const blocksHtml = item.indices.map((idx, i) =>
-      (i > 0 ? `<div class="superset-connector" data-label="then"></div>` : '') + renderExBlock(idx)
+      (i > 0 ? `<div class="superset-connector" data-label="then"></div>` : '') + buildExBlockHtml(idx)
     ).join('');
     return `<div class="superset-group" style="border-left-color:${item.color}">
       <div class="superset-label">
@@ -3752,7 +3801,7 @@ function renderActiveSession() {
 
 function renderSessionSlot(exIdx) {
   const slot = activeSession.exercises[exIdx];
-  return `<div class="slot-placeholder" onclick="fillSessionSlot(${exIdx})" style="margin-bottom:8px">
+  return `<div class="slot-placeholder" data-action="fill-slot" data-ex="${exIdx}" style="margin-bottom:8px">
     <div class="slot-placeholder-icon">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     </div>
@@ -3760,7 +3809,7 @@ function renderSessionSlot(exIdx) {
       <div class="slot-placeholder-label">${escHtml(slot.slotLabel)}</div>
       <div class="slot-placeholder-sub">Tap to choose exercise</div>
     </div>
-    <button class="btn btn-ghost btn-sm btn-icon" onclick="event.stopPropagation(); removeExFromSession(${exIdx})" title="Remove" aria-label="Remove slot">
+    <button class="btn btn-ghost btn-sm btn-icon" data-action="remove-ex" data-ex="${exIdx}" title="Remove" aria-label="Remove slot">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>`;
@@ -3776,7 +3825,7 @@ function fillSessionSlot(exIdx) {
       variantId,
       supersetId: null,
       sets: defaultSets.map((s,i) => ({
-        index: i, weight: 0, weightEcc: 0, weightChains: 0, reps: 8,
+        index: i, weight: 0, weightEcc: 0, weightChains: 0, weightInverse: 0, reps: 8,
         completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
       }))
     };
@@ -3800,39 +3849,41 @@ function fillSessionSlot(exIdx) {
 
 function renderSetRow(exIdx, si, set, isVoltra) {
   const w = set.weight != null && set.weight !== '' ? set.weight : '';
-  const wEcc = set.weightEcc != null && set.weightEcc !== '' ? set.weightEcc : '';
-  const wChains = set.weightChains != null && set.weightChains !== '' ? set.weightChains : '';
   const r = set.reps != null && set.reps !== '' ? set.reps : '';
   const setLabel = String(si + 1);
-  return `<div class="set-row ${set.completed ? 'completed' : ''}${isVoltra ? ' voltra' : ''}" id="set-row-${exIdx}-${si}" onclick="focusSetRow(event, ${exIdx}, ${si})">
+  // Build Voltra tags for non-zero values
+  let voltraTags = '';
+  if (isVoltra) {
+    const tags = [];
+    if (set.weightEcc) tags.push(`ECC ${set.weightEcc}`);
+    if (set.weightChains) tags.push(`CHN ${set.weightChains}`);
+    if (set.weightInverse) tags.push(`INV ${set.weightInverse}`);
+    if (tags.length) voltraTags = `<div class="voltra-tags">${tags.join(' · ')}</div>`;
+  }
+  return `<div class="set-row ${set.completed ? 'completed' : ''}" id="set-row-${exIdx}-${si}" data-action="focus-row" data-ex="${exIdx}" data-set="${si}">
     <div class="set-num">${setLabel}</div>
     <input class="set-cell-input" type="number" step="0.5" value="${w}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="weight"
       inputmode="decimal">
-    ${isVoltra ? `<input class="set-cell-input" type="number" step="0.5" value="${wEcc}" placeholder="0"
-      data-ex="${exIdx}" data-set="${si}" data-field="weightEcc"
-      inputmode="decimal">
-    <input class="set-cell-input" type="number" step="0.5" value="${wChains}" placeholder="0"
-      data-ex="${exIdx}" data-set="${si}" data-field="weightChains"
-      inputmode="decimal">` : ''}
     <input class="set-cell-input" type="number" value="${r}" placeholder="0"
       data-ex="${exIdx}" data-set="${si}" data-field="reps"
       inputmode="numeric">
     <div class="set-check">
       <button class="check-btn ${set.completed ? 'done' : ''}"
-        onclick="event.stopPropagation(); toggleSetComplete(${exIdx}, ${si})"
+        data-action="toggle-set" data-ex="${exIdx}" data-set="${si}"
         id="check-${exIdx}-${si}" aria-label="${set.completed ? 'Mark incomplete' : 'Complete set'}">
         ${set.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
       </button>
     </div>
-    <button class="set-copy-btn" onclick="event.stopPropagation(); copySetBelow(${exIdx},${si})" title="Duplicate set" aria-label="Duplicate set">
+    <button class="set-copy-btn" data-action="copy-set" data-ex="${exIdx}" data-set="${si}" title="Duplicate set" aria-label="Duplicate set">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
     </button>
-    <button class="set-del-btn" onclick="event.stopPropagation(); deleteSetFromExercise(${exIdx},${si})" title="Delete set" aria-label="Delete set">×</button>
+    <button class="set-del-btn" data-action="del-set" data-ex="${exIdx}" data-set="${si}" title="Delete set" aria-label="Delete set">×</button>
   </div>
+  ${voltraTags ? `<div style="padding:0 8px 2px 32px">${voltraTags}</div>` : ''}
   <div class="set-detail" id="set-detail-${exIdx}-${si}">
     <div class="set-detail-row">
-      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openSetDetailModal(${exIdx},${si})">Notes / RPE / Rest…</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1" data-action="set-detail" data-ex="${exIdx}" data-set="${si}">${isVoltra ? 'Voltra / Notes / RPE…' : 'Notes / RPE / Rest…'}</button>
     </div>
   </div>`;
 }
@@ -3927,12 +3978,8 @@ function toggleSetComplete(exIdx, si) {
 
   // Read current input values before toggling
   const wInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weight"]`);
-  const wEccInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightEcc"]`);
-  const wChainsInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightChains"]`);
   const rInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="reps"]`);
   if (wInput) set.weight = parseFloat(wInput.value) || 0;
-  if (wEccInput) set.weightEcc = parseFloat(wEccInput.value) || 0;
-  if (wChainsInput) set.weightChains = parseFloat(wChainsInput.value) || 0;
   if (rInput) set.reps = parseInt(rInput.value) || 0;
 
   set.completed = !set.completed;
@@ -3982,9 +4029,7 @@ function addSetToExercise(exIdx) {
     restSeconds: lastSet.restSeconds || null,
     notes: ''
   });
-  // Re-render just the sets area
-  saveSessionDraftDebounced();
-  renderActiveSession();
+  updateExerciseBlock(exIdx);
 }
 
 function deleteSetFromExercise(exIdx, si) {
@@ -3992,13 +4037,11 @@ function deleteSetFromExercise(exIdx, si) {
   const ex = activeSession.exercises[exIdx];
   if (!ex || ex.sets.length <= 1) return;
   const removed = ex.sets.splice(si, 1)[0];
-  saveSessionDraftDebounced();
-  renderActiveSession();
+  updateExerciseBlock(exIdx);
   showToast('Set deleted', () => {
     if (!activeSession || !activeSession.exercises[exIdx]) return;
     activeSession.exercises[exIdx].sets.splice(si, 0, removed);
-    saveSessionDraftDebounced();
-    renderActiveSession();
+    updateExerciseBlock(exIdx);
   });
 }
 
@@ -4008,8 +4051,7 @@ function copySetBelow(exIdx, si) {
   const orig = ex.sets[si];
   const copy = {...orig, completed: false, completedAt: null};
   ex.sets.splice(si + 1, 0, copy);
-  saveSessionDraft();
-  renderActiveSession();
+  updateExerciseBlock(exIdx);
 }
 
 function removeExFromSession(exIdx) {
@@ -4228,21 +4270,15 @@ function openSetDetailModal(exIdx, si) {
   document.getElementById('detail-rest').value = set.restSeconds || '';
   document.getElementById('detail-notes').value = set.notes || '';
 
-  // Show/hide ECC weight field
-  const eccGroup = document.getElementById('detail-ecc-group');
-  const eccInput = document.getElementById('detail-weightEcc');
-  const chainsGroup = document.getElementById('detail-chains-group');
-  const chainsInput = document.getElementById('detail-weightChains');
+  // Show/hide Voltra resistance fields
+  const voltraFields = document.getElementById('detail-voltra-fields');
   if (isVoltra) {
-    eccGroup.hidden = false;
-    eccInput.value = set.weightEcc || '';
-    chainsGroup.hidden = false;
-    chainsInput.value = set.weightChains || '';
+    voltraFields.style.display = '';
+    document.getElementById('detail-weightEcc').value = set.weightEcc || '';
+    document.getElementById('detail-weightChains').value = set.weightChains || '';
+    document.getElementById('detail-weightInverse').value = set.weightInverse || '';
   } else {
-    eccGroup.hidden = true;
-    eccInput.value = '';
-    chainsGroup.hidden = true;
-    chainsInput.value = '';
+    voltraFields.style.display = 'none';
   }
 
   const tsEl = document.getElementById('detail-timestamp');
@@ -4263,20 +4299,14 @@ document.getElementById('detail-save-btn').addEventListener('click', () => {
   set.weight = parseFloat(document.getElementById('detail-weight').value) || 0;
   set.weightEcc = parseFloat(document.getElementById('detail-weightEcc').value) || 0;
   set.weightChains = parseFloat(document.getElementById('detail-weightChains').value) || 0;
+  set.weightInverse = parseFloat(document.getElementById('detail-weightInverse').value) || 0;
   set.reps = parseInt(document.getElementById('detail-reps').value) || 0;
   set.rpe = parseFloat(document.getElementById('detail-rpe').value) || null;
   set.restSeconds = parseInt(document.getElementById('detail-rest').value) || null;
   set.notes = document.getElementById('detail-notes').value.trim();
 
-  // Update inline inputs
-  const wInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weight"]`);
-  const wEccInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightEcc"]`);
-  const wChainsInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="weightChains"]`);
-  const rInput = document.querySelector(`input[data-ex="${exIdx}"][data-set="${si}"][data-field="reps"]`);
-  if (wInput) wInput.value = set.weight || '';
-  if (wEccInput) wEccInput.value = set.weightEcc || '';
-  if (wChainsInput) wChainsInput.value = set.weightChains || '';
-  if (rInput) rInput.value = set.reps || '';
+  // Re-render the exercise block to update inline values + Voltra tags
+  updateExerciseBlock(exIdx);
 
   closeModal('modal-set-detail');
   showToast('Set updated');
@@ -4288,9 +4318,9 @@ document.getElementById('session-add-ex-btn').addEventListener('click', () => {
     if (!activeSession) return;
     closeExercisePicker();
     // Add immediately with default sets, render, then backfill prev sets
-    const defaultSets = [{index:0,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
-                         {index:1,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
-                         {index:2,weight:0,weightEcc:0,weightChains:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''}];
+    const defaultSets = [{index:0,weight:0,weightEcc:0,weightChains:0,weightInverse:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+                         {index:1,weight:0,weightEcc:0,weightChains:0,weightInverse:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''},
+                         {index:2,weight:0,weightEcc:0,weightChains:0,weightInverse:0,reps:8,completed:false,completedAt:null,rpe:null,restSeconds:null,notes:''}];
     const exIdx = activeSession.exercises.length;
     activeSession.exercises.push({ variantId, sets: defaultSets });
     collapsedExercises.delete(exIdx);
@@ -4321,6 +4351,42 @@ document.getElementById('session-back-btn').addEventListener('click', () => {
   renderActiveBanner();
 });
 
+// ── Session body: centralized event delegation ──
+document.getElementById('session-body').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const exIdx = parseInt(btn.dataset.ex);
+  const si = parseInt(btn.dataset.set);
+
+  // Stop propagation for actions inside set rows (prevents focus-row from firing)
+  if (action !== 'focus-row') e.stopPropagation();
+
+  switch (action) {
+    case 'focus-row': focusSetRow(e, exIdx, si); break;
+    case 'toggle-set': toggleSetComplete(exIdx, si); break;
+    case 'copy-set': copySetBelow(exIdx, si); break;
+    case 'del-set': deleteSetFromExercise(exIdx, si); break;
+    case 'set-detail': openSetDetailModal(exIdx, si); break;
+    case 'add-set': addSetToExercise(exIdx); break;
+    case 'collapse': toggleExCollapse(exIdx); break;
+    case 'superset': openSupersetModal(exIdx); break;
+    case 'swap': openSwapVariantModal(exIdx); break;
+    case 'remove-ex': removeExFromSession(exIdx); break;
+    case 'fill-slot': fillSessionSlot(exIdx); break;
+    case 'ex-notes': {
+      const vid = btn.closest('[data-variant]')?.dataset.variant;
+      if (vid) openExNotesModal(vid);
+      break;
+    }
+    case 'ex-history': {
+      const vid = btn.closest('[data-variant]')?.dataset.variant;
+      if (vid) showExerciseAnalyticsFromSession(vid);
+      break;
+    }
+  }
+});
+
 // Sync dot: tap to show status
 document.getElementById('sync-dot').addEventListener('click', () => {
   const msg = _syncStatus === 'online' ? '☁️ Cloud sync active'
@@ -4343,6 +4409,11 @@ document.getElementById('session-notes-toggle').addEventListener('click', () => 
 // Autosave draft when notes change
 document.getElementById('session-notes-input').addEventListener('input', saveSessionDraftDebounced);
 
+// Timer controls
+document.getElementById('session-timer').addEventListener('click', toggleSessionPause);
+document.getElementById('session-start-time').addEventListener('click', e => { e.stopPropagation(); toggleActiveTimeEdit(); });
+document.getElementById('save-active-start-btn').addEventListener('click', saveActiveStartTime);
+
 function renderActiveBanner() {
   const banner = document.getElementById('active-banner');
   if (!activeSession) { banner.innerHTML = ''; return; }
@@ -4350,13 +4421,17 @@ function renderActiveBanner() {
   const m = Math.floor(elapsed / 60);
   const completedSets = activeSession.exercises.reduce((a, ex) => a + ex.sets.filter(s=>s.completed).length, 0);
   const pauseLabel = sessionPausedAt ? '⏸ Paused' : 'Resume →';
-  banner.innerHTML = `<button class="session-bar" onclick="document.getElementById('active-session').classList.add('open');startTimer()" style="border:none;width:100%;text-align:left;font-family:inherit;color:inherit">
+  banner.innerHTML = `<button class="session-bar" id="resume-session-btn" style="border:none;width:100%;text-align:left;font-family:inherit;color:inherit">
     <div>
       <div class="session-bar-title">${escHtml(activeSession.title)}</div>
       <div style="font-size:11px;font-family:var(--mono)">${completedSets} sets completed</div>
     </div>
     <div class="session-bar-time">${m}m • ${pauseLabel}</div>
   </button>`;
+  banner.querySelector('#resume-session-btn')?.addEventListener('click', () => {
+    document.getElementById('active-session').classList.add('open');
+    startTimer();
+  });
 }
 
 // Finish session
@@ -4532,7 +4607,7 @@ async function viewWorkoutDetail(sessionId) {
     const name = getVariantDisplayName(ex.variantId);
     const sets = ex.sets.filter(s => s.completed);
     const pastIsVoltra = isVoltraVariant(ex.variantId);
-    const pastGridCols = pastIsVoltra ? '20px 1fr 1fr 1fr 1fr 28px' : '20px 1fr 1fr 28px';
+    const pastGridCols = '20px 1fr 1fr 28px';
     return `<div style="margin-bottom:14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);overflow:hidden">
       <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border)">
         <div style="font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</div>
@@ -4543,17 +4618,22 @@ async function viewWorkoutDetail(sessionId) {
       </div>
       <div style="padding:6px 10px">
         <div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;padding:2px 0 4px;font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center">
-          <div></div><div>LBS</div>${pastIsVoltra ? '<div>ECC</div><div>CHN</div>' : ''}<div>REPS</div><div></div>
+          <div></div><div>LBS</div><div>REPS</div><div></div>
         </div>
         ${sets.map((s, i) => {
           const origIdx = ex.sets.indexOf(s);
-          return `<div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;align-items:center;padding:2px 0;border-top:1px solid var(--border)">
-            <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
-            <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
-            ${pastIsVoltra ? `<input type="number" step="0.5" value="${s.weightEcc || ''}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weightEcc',this.value)">
-            <input type="number" step="0.5" value="${s.weightChains || ''}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weightChains',this.value)">` : ''}
-            <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
-            <button onclick="deletePastSet('${session.id}',${exI},${origIdx})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
+          const vTags = [];
+          if (s.weightEcc) vTags.push(`ECC ${s.weightEcc}`);
+          if (s.weightChains) vTags.push(`CHN ${s.weightChains}`);
+          if (s.weightInverse) vTags.push(`INV ${s.weightInverse}`);
+          return `<div style="border-top:1px solid var(--border);padding:2px 0">
+            <div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;align-items:center">
+              <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
+              <input type="number" step="0.5" value="${s.weight}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="decimal" onchange="editPastSet('${session.id}',${exI},${origIdx},'weight',this.value)">
+              <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" onchange="editPastSet('${session.id}',${exI},${origIdx},'reps',this.value)">
+              <button onclick="deletePastSet('${session.id}',${exI},${origIdx})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
+            </div>
+            ${vTags.length ? `<div style="padding:0 0 2px 20px" class="voltra-tags">${vTags.join(' · ')}</div>` : ''}
           </div>`;
         }).join('')}
         ${sets.length === 0 ? '<div style="font-size:12px;color:var(--text3);padding:6px 0">No sets completed</div>' : ''}
@@ -5127,93 +5207,17 @@ async function duplicatePlan(templateId) {
 
 function initTemplateDrag() {
   const list = document.getElementById('template-list');
-  const cards = [...list.querySelectorAll('.template-card')];
-  let dragging = null, startY = 0, startIdx = 0, origTranslate = 0;
-  let cardHeights = [];
-  let placeholder = null;
-
-  function getIdx(el) { return parseInt(el.dataset.idx); }
-
-  function onPointerDown(e) {
-    const handle = e.target.closest('.tmpl-drag-handle');
-    if (!handle) return;
-    const card = e.target.closest('.template-card');
-    if (!card) return;
-    e.preventDefault();
-
-    dragging = card;
-    startY = e.clientY ?? e.touches?.[0]?.clientY;
-    startIdx = getIdx(card);
-    cardHeights = [...list.querySelectorAll('.template-card')].map(c => c.getBoundingClientRect().height + 10);
-
-    // Create placeholder
-    placeholder = document.createElement('div');
-    placeholder.style.cssText = `height:${card.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:14px;flex-shrink:0`;
-    card.after(placeholder);
-
-    card.style.cssText += `;position:fixed;z-index:999;width:${card.offsetWidth}px;left:${card.getBoundingClientRect().left}px;top:${card.getBoundingClientRect().top}px;opacity:0.95;box-shadow:0 8px 30px rgba(0,0,0,0.4);pointer-events:none;transform:scale(1.02)`;
-    origTranslate = card.getBoundingClientRect().top;
-
-    document.addEventListener('pointermove', onPointerMove, {passive:false});
-    document.addEventListener('pointerup', onPointerUp);
-    document.addEventListener('touchmove', e=>e.preventDefault(), {passive:false,once:false});
-  }
-
-  function onPointerMove(e) {
-    if (!dragging) return;
-    e.preventDefault();
-    const y = e.clientY ?? e.touches?.[0]?.clientY;
-    const dy = y - startY;
-    dragging.style.top = (origTranslate + dy) + 'px';
-
-    // Find insertion point
-    const siblings = [...list.querySelectorAll('.template-card')];
-    const midY = dragging.getBoundingClientRect().top + dragging.offsetHeight / 2;
-
-    for (const sib of siblings) {
-      if (sib === dragging) continue;
-      const rect = sib.getBoundingClientRect();
-      if (midY < rect.top + rect.height / 2) {
-        sib.before(placeholder);
-        return;
+  initDragSort({
+    container: list,
+    itemSelector: '.template-card',
+    handleSelector: '.tmpl-drag-handle',
+    onReorder: (cont) => {
+      const newOrder = [...cont.querySelectorAll('.template-card')].map(c => c.dataset.tid);
+      if (JSON.stringify(newOrder) !== JSON.stringify(templateOrder)) {
+        templateOrder = newOrder;
+        saveTemplateOrder();
       }
     }
-    list.appendChild(placeholder);
-  }
-
-  function onPointerUp() {
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    if (!dragging) return;
-
-    // Restore card style
-    dragging.style.cssText = dragging.style.cssText
-      .replace(/position:fixed[^;]*;/g,'')
-      .replace(/z-index:\d+;/g,'')
-      .replace(/width:[^;]+;/g,'')
-      .replace(/left:[^;]+;/g,'')
-      .replace(/top:[^;]+;/g,'')
-      .replace(/opacity:[^;]+;/g,'')
-      .replace(/box-shadow:[^;]+;/g,'')
-      .replace(/pointer-events:[^;]+;/g,'')
-      .replace(/transform:[^;]+;/g,'');
-
-    placeholder.replaceWith(dragging);
-    placeholder = null;
-
-    // Rebuild order from DOM
-    const newOrder = [...list.querySelectorAll('.template-card')].map(c => c.dataset.tid);
-    if (JSON.stringify(newOrder) !== JSON.stringify(templateOrder)) {
-      templateOrder = newOrder;
-      saveTemplateOrder();
-    }
-
-    dragging = null;
-  }
-
-  // Attach to handles
-  list.querySelectorAll('.tmpl-drag-handle').forEach(h => {
-    h.addEventListener('pointerdown', onPointerDown);
   });
 }
 
@@ -5497,108 +5501,22 @@ function removeTmplSet(exIdx, setIdx) {
 
 function initTmplExDrag() {
   const list = document.getElementById('tmpl-exercises-list');
-  if (!list) return;
-  const allCards = [...list.querySelectorAll('.tmpl-ex-card')];
-  if (allCards.length < 2) return;
-
-  let dragging = null, startY = 0, origTop = 0, placeholder = null;
-  let touchMoveBlocker = null;
-
-  function onPointerDown(e) {
-    const handle = e.target.closest('.tmpl-ex-drag-handle');
-    if (!handle) return;
-    const card = e.target.closest('.tmpl-ex-card');
-    if (!card) return;
-    e.preventDefault();
-
-    dragging = card;
-    startY = e.clientY ?? e.touches?.[0]?.clientY;
-    const rect = card.getBoundingClientRect();
-    origTop = rect.top;
-
-    placeholder = document.createElement('div');
-    placeholder.style.cssText = `height:${card.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);flex-shrink:0`;
-    card.after(placeholder);
-
-    card.style.cssText += `;position:fixed;z-index:999;width:${card.offsetWidth}px;left:${rect.left}px;top:${rect.top}px;opacity:0.92;box-shadow:0 8px 30px rgba(0,0,0,0.4);pointer-events:none;transform:scale(1.02);transition:none`;
-
-    touchMoveBlocker = e2 => e2.preventDefault();
-    document.addEventListener('touchmove', touchMoveBlocker, {passive:false});
-    document.addEventListener('pointermove', onPointerMove, {passive:false});
-    document.addEventListener('pointerup', onPointerUp);
-  }
-
-  function onPointerMove(e) {
-    if (!dragging) return;
-    e.preventDefault();
-    const y = e.clientY ?? e.touches?.[0]?.clientY;
-    const dy = y - startY;
-    dragging.style.top = (origTop + dy) + 'px';
-
-    const allCurrent = [...list.querySelectorAll('.tmpl-ex-card:not([style*="position:fixed"])')];
-    const midY = dragging.getBoundingClientRect().top + dragging.offsetHeight / 2;
-
-    let inserted = false;
-    for (const sib of allCurrent) {
-      if (sib === dragging) continue;
-      const rect = sib.getBoundingClientRect();
-      if (midY < rect.top + rect.height / 2) {
-        sib.before(placeholder);
-        inserted = true;
-        break;
+  initDragSort({
+    container: list,
+    itemSelector: '.tmpl-ex-card',
+    handleSelector: '.tmpl-ex-drag-handle',
+    onReorder: (cont) => {
+      const newOrder = [...cont.querySelectorAll('.tmpl-ex-card')].map(el => parseInt(el.dataset.tmplExIdx)).filter(i => !isNaN(i));
+      const oldOrder = tmplExercises.map((_, i) => i);
+      if (JSON.stringify(newOrder) !== JSON.stringify(oldOrder) && newOrder.length === oldOrder.length) {
+        const reordered = newOrder.map(i => tmplExercises[i]);
+        tmplExercises = reordered;
+        if (tmplExpandedIdx !== null) {
+          const newExpandedPos = newOrder.indexOf(tmplExpandedIdx);
+          tmplExpandedIdx = newExpandedPos >= 0 ? newExpandedPos : null;
+        }
+        renderTemplateExercises(tmplExercises);
       }
-    }
-    if (!inserted) {
-      list.appendChild(placeholder);
-    }
-  }
-
-  function onPointerUp() {
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    if (touchMoveBlocker) {
-      document.removeEventListener('touchmove', touchMoveBlocker);
-      touchMoveBlocker = null;
-    }
-    if (!dragging) return;
-
-    dragging.style.cssText = dragging.style.cssText
-      .replace(/position:fixed[^;]*;/g,'')
-      .replace(/z-index:\d+;/g,'')
-      .replace(/width:[^;]+;/g,'')
-      .replace(/left:[^;]+;/g,'')
-      .replace(/top:[^;]+;/g,'')
-      .replace(/opacity:[^;]+;/g,'')
-      .replace(/box-shadow:[^;]+;/g,'')
-      .replace(/pointer-events:[^;]+;/g,'')
-      .replace(/transform:[^;]+;/g,'')
-      .replace(/transition:none[^;]*;/g,'');
-
-    placeholder.replaceWith(dragging);
-    placeholder = null;
-
-    // Read new order from DOM
-    const newOrder = [...list.querySelectorAll('.tmpl-ex-card')].map(el => parseInt(el.dataset.tmplExIdx)).filter(i => !isNaN(i));
-    const oldOrder = tmplExercises.map((_, i) => i);
-
-    if (JSON.stringify(newOrder) !== JSON.stringify(oldOrder) && newOrder.length === oldOrder.length) {
-      const reordered = newOrder.map(i => tmplExercises[i]);
-      tmplExercises = reordered;
-      // Preserve expanded index
-      if (tmplExpandedIdx !== null) {
-        const newExpandedPos = newOrder.indexOf(tmplExpandedIdx);
-        tmplExpandedIdx = newExpandedPos >= 0 ? newExpandedPos : null;
-      }
-      renderTemplateExercises(tmplExercises);
-    }
-
-    dragging = null;
-  }
-
-  allCards.forEach(card => {
-    const handle = card.querySelector('.tmpl-ex-drag-handle');
-    if (handle) {
-      handle.addEventListener('pointerdown', onPointerDown);
     }
   });
 }
@@ -5783,7 +5701,7 @@ document.getElementById('tmpl-add-ex-btn').addEventListener('click', () => {
 document.getElementById('tmpl-add-slot-btn').addEventListener('click', () => {
   const acts = PATTERN_SLOTS.map(s => ({
     label: s.label,
-    fn: `addTmplSlot('${s.id}')`
+    action: () => addTmplSlot(s.id)
   }));
   showActionSheet('Add Movement Slot', acts);
 });
@@ -7019,7 +6937,7 @@ async function migrateTemplateIds() {
 // ═══════════════════════════════════════════════════════════════
 function escHtml(str) {
   if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7885,34 +7803,42 @@ function moveExercise(exIdx, direction) {
   renderActiveSession();
 }
 
-function initExerciseDrag() {
-  if (!activeSession) return;
-  const body = document.getElementById('session-body');
-  if (!body) return;
-  const allBlocks = [...body.querySelectorAll('.ex-block')];
-  if (allBlocks.length < 2) return;
+// ═══════════════════════════════════════════════════════════════
+// SHARED DRAG-SORT HELPER
+// ═══════════════════════════════════════════════════════════════
+function initDragSort({ container, itemSelector, handleSelector, getTopLevel, onReorder }) {
+  if (!container) return;
+  const items = [...container.querySelectorAll(itemSelector)];
+  if (items.length < 2) return;
 
-  let dragging = null, startY = 0, origTop = 0, placeholder = null;
-  let touchMoveBlocker = null;
+  let dragging = null, startY = 0, origTop = 0, placeholder = null, touchMoveBlocker = null;
+
+  const DRAG_STYLES = ['position','z-index','width','left','top','opacity','box-shadow','pointer-events','transform','transition'];
+  function cleanDragStyles(el) {
+    DRAG_STYLES.forEach(p => el.style.removeProperty(p));
+  }
 
   function onPointerDown(e) {
-    const handle = e.target.closest('.ex-drag-handle');
+    const handle = e.target.closest(handleSelector);
     if (!handle) return;
-    const block = e.target.closest('.ex-block');
-    if (!block) return;
+    const item = e.target.closest(itemSelector);
+    if (!item) return;
     e.preventDefault();
 
-    dragging = block;
+    dragging = item;
     startY = e.clientY ?? e.touches?.[0]?.clientY;
-    const rect = block.getBoundingClientRect();
+    const rect = item.getBoundingClientRect();
     origTop = rect.top;
 
     placeholder = document.createElement('div');
-    placeholder.className = 'ex-drag-placeholder';
-    placeholder.style.cssText = `height:${block.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);flex-shrink:0;margin-bottom:8px`;
-    block.after(placeholder);
+    placeholder.style.cssText = `height:${item.offsetHeight}px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);flex-shrink:0;margin-bottom:8px`;
+    item.after(placeholder);
 
-    block.style.cssText += `;position:fixed;z-index:999;width:${block.offsetWidth}px;left:${rect.left}px;top:${rect.top}px;opacity:0.92;box-shadow:0 8px 30px rgba(0,0,0,0.4);pointer-events:none;transform:scale(1.02);transition:none`;
+    Object.assign(item.style, {
+      position:'fixed', zIndex:'999', width:item.offsetWidth+'px', left:rect.left+'px',
+      top:rect.top+'px', opacity:'0.92', boxShadow:'0 8px 30px rgba(0,0,0,0.4)',
+      pointerEvents:'none', transform:'scale(1.02)', transition:'none'
+    });
 
     touchMoveBlocker = e2 => e2.preventDefault();
     document.addEventListener('touchmove', touchMoveBlocker, {passive:false});
@@ -7924,35 +7850,23 @@ function initExerciseDrag() {
     if (!dragging) return;
     e.preventDefault();
     const y = e.clientY ?? e.touches?.[0]?.clientY;
-    const dy = y - startY;
-    dragging.style.top = (origTop + dy) + 'px';
+    dragging.style.top = (origTop + (y - startY)) + 'px';
 
-    const allCurrent = [...body.querySelectorAll('.ex-block:not([style*="position:fixed"])')];
+    const siblings = [...container.querySelectorAll(`${itemSelector}:not([style*="position: fixed"]):not([style*="position:fixed"])`)];
     const midY = dragging.getBoundingClientRect().top + dragging.offsetHeight / 2;
 
     let inserted = false;
-    for (const sib of allCurrent) {
+    for (const sib of siblings) {
       if (sib === dragging) continue;
       const rect = sib.getBoundingClientRect();
       if (midY < rect.top + rect.height / 2) {
-        // Insert placeholder before this sibling's top-level parent in session-body
-        const topLevel = getTopLevelSessionChild(sib, body);
-        if (topLevel) topLevel.before(placeholder);
+        const target = getTopLevel ? getTopLevel(sib, container) : sib;
+        if (target) target.before(placeholder);
         inserted = true;
         break;
       }
     }
-    if (!inserted) {
-      body.appendChild(placeholder);
-    }
-  }
-
-  function getTopLevelSessionChild(el, container) {
-    let node = el;
-    while (node && node.parentElement !== container) {
-      node = node.parentElement;
-    }
-    return node;
+    if (!inserted) container.appendChild(placeholder);
   }
 
   function onPointerUp() {
@@ -7964,44 +7878,39 @@ function initExerciseDrag() {
     }
     if (!dragging) return;
 
-    // Restore styles
-    dragging.style.cssText = dragging.style.cssText
-      .replace(/position:fixed[^;]*;/g,'')
-      .replace(/z-index:\d+;/g,'')
-      .replace(/width:[^;]+;/g,'')
-      .replace(/left:[^;]+;/g,'')
-      .replace(/top:[^;]+;/g,'')
-      .replace(/opacity:[^;]+;/g,'')
-      .replace(/box-shadow:[^;]+;/g,'')
-      .replace(/pointer-events:[^;]+;/g,'')
-      .replace(/transform:[^;]+;/g,'')
-      .replace(/transition:none[^;]*;/g,'');
-
+    cleanDragStyles(dragging);
     placeholder.replaceWith(dragging);
     placeholder = null;
 
-    // Read new order from DOM
-    const newOrder = [...body.querySelectorAll('.ex-block')].map(el => parseInt(el.id.replace('ex-block-', ''))).filter(i => !isNaN(i));
-    const oldOrder = activeSession.exercises.map((_, i) => i);
-
-    if (JSON.stringify(newOrder) !== JSON.stringify(oldOrder) && newOrder.length === oldOrder.length) {
-      const reordered = newOrder.map(i => activeSession.exercises[i]);
-      const newCollapsed = new Set();
-      newOrder.forEach((oldIdx, newIdx) => {
-        if (collapsedExercises.has(oldIdx)) newCollapsed.add(newIdx);
-      });
-      collapsedExercises = newCollapsed;
-      activeSession.exercises = reordered;
-      renderActiveSession();
-    }
-
+    onReorder(container);
     dragging = null;
   }
 
-  allBlocks.forEach(block => {
-    const handle = block.querySelector('.ex-drag-handle');
-    if (handle) {
-      handle.addEventListener('pointerdown', onPointerDown);
+  items.forEach(item => {
+    const handle = item.querySelector(handleSelector);
+    if (handle) handle.addEventListener('pointerdown', onPointerDown);
+  });
+}
+
+function initExerciseDrag() {
+  if (!activeSession) return;
+  const body = document.getElementById('session-body');
+  initDragSort({
+    container: body,
+    itemSelector: '.ex-block',
+    handleSelector: '.ex-drag-handle',
+    getTopLevel: (el, cont) => { let n = el; while (n && n.parentElement !== cont) n = n.parentElement; return n; },
+    onReorder: (cont) => {
+      const newOrder = [...cont.querySelectorAll('.ex-block')].map(el => parseInt(el.id.replace('ex-block-', ''))).filter(i => !isNaN(i));
+      const oldOrder = activeSession.exercises.map((_, i) => i);
+      if (JSON.stringify(newOrder) !== JSON.stringify(oldOrder) && newOrder.length === oldOrder.length) {
+        const reordered = newOrder.map(i => activeSession.exercises[i]);
+        const newCollapsed = new Set();
+        newOrder.forEach((oldIdx, newIdx) => { if (collapsedExercises.has(oldIdx)) newCollapsed.add(newIdx); });
+        collapsedExercises = newCollapsed;
+        activeSession.exercises = reordered;
+        renderActiveSession();
+      }
     }
   });
 }
@@ -8027,9 +7936,9 @@ function editPastWorkoutTitle(sessionId) {
   const catKeys = Object.keys(WORKOUT_CATEGORIES);
   const acts = catKeys.map(k => {
     const c = WORKOUT_CATEGORIES[k];
-    return { label: `${c.icon} ${c.label}`, fn: `savePastWorkoutCategory('${sessionId}','${k}')` };
+    return { label: `${c.icon} ${c.label}`, action: () => savePastWorkoutCategory(sessionId, k) };
   }).concat([
-    { label: '✏️ Rename', fn: `promptRenamePastWorkout('${sessionId}')` }
+    { label: '✏️ Rename', action: () => promptRenamePastWorkout(sessionId) }
   ]);
   showActionSheet('Edit Workout', acts);
 }
@@ -8606,38 +8515,53 @@ function migrateLegacyId(id) {
 }
 
 async function init() {
+  // ── Critical path: DB + first paint ──
   await openDB();
-  migrateToSupabase().catch(e => console.warn('Migration skipped:', e));
   await Promise.allSettled([
     loadVariantOverrides(),
     loadPRRecords(),
     loadExerciseNotes(),
   ]);
-  await seedBWData().catch(e => console.warn('seedBW skipped:', e));
-  await migrateBWToMeasurements().catch(e => console.warn('BW migration skipped:', e));
-  await seedInitialMeasurements().catch(e => console.warn('Meas seed skipped:', e));
-  await migrateTemplateIds().catch(e => console.warn('Template ID migration skipped:', e));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
-
   renderHome();
 
   // Restore in-progress session if browser was closed mid-workout
   if (!activeSession) await loadSessionDraft();
-}
 
-// Clear-on-focus for all number inputs not handled by attachSetInputListeners
+  // ── Background maintenance (non-blocking) ──
+  requestIdleCallback(() => {
+    migrateToSupabase().catch(e => console.warn('Migration skipped:', e));
+    seedBWData().catch(e => console.warn('seedBW skipped:', e));
+    migrateBWToMeasurements().catch(e => console.warn('BW migration skipped:', e));
+    seedInitialMeasurements().catch(e => console.warn('Meas seed skipped:', e));
+    migrateTemplateIds().catch(e => console.warn('Template ID migration skipped:', e));
+  });
+}
+// requestIdleCallback polyfill for Safari
+if (!window.requestIdleCallback) window.requestIdleCallback = fn => setTimeout(fn, 1);
+
+// Clear-on-first-keystroke for number inputs (not set-cell-inputs which have their own handling)
 document.addEventListener('focus', e => {
   if (e.target.matches('input[type="number"]') && !e.target.classList.contains('set-cell-input')) {
     e.target._prevValue = e.target.value;
-    setTimeout(() => { e.target.value = ''; }, 0);
+    e.target._cleared = false;
+  }
+}, true);
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input[type="number"]') && !e.target.classList.contains('set-cell-input') && '_prevValue' in e.target && !e.target._cleared) {
+    if (e.key >= '0' && e.key <= '9' || e.key === '.' || e.key === '-') {
+      e.target.value = '';
+      e.target._cleared = true;
+    }
   }
 }, true);
 document.addEventListener('blur', e => {
   if (e.target.matches('input[type="number"]') && !e.target.classList.contains('set-cell-input') && '_prevValue' in e.target) {
     if (e.target.value === '') e.target.value = e.target._prevValue;
     delete e.target._prevValue;
+    delete e.target._cleared;
     e.target.dispatchEvent(new Event('change', { bubbles: true }));
   }
 }, true);
