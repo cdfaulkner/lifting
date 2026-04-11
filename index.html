@@ -4532,6 +4532,30 @@ function resetCategoryPick() {
   document.getElementById('category-chosen').style.display = 'none';
 }
 
+
+let sessionLaunchInProgress = false;
+
+function setSessionLaunchPending(isPending) {
+  sessionLaunchInProgress = !!isPending;
+  const startBtns = Array.from(document.querySelectorAll('[data-action="start-template"], #start-empty-btn'));
+  startBtns.forEach(btn => {
+    if (!btn) return;
+    if (isPending) {
+      if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent.trim();
+      btn.disabled = true;
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.6';
+      if (btn.matches('[data-action="start-template"]')) btn.textContent = 'Starting…';
+      if (btn.id === 'start-empty-btn') btn.textContent = 'Starting…';
+    } else {
+      btn.disabled = false;
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+      if (btn.dataset.originalText) btn.textContent = btn.dataset.originalText;
+    }
+  });
+}
+
 document.getElementById('start-empty-btn').addEventListener('click', () => {
   closeModal('modal-new-workout');
   const cat = WORKOUT_CATEGORIES[pendingCategory];
@@ -4539,10 +4563,12 @@ document.getElementById('start-empty-btn').addEventListener('click', () => {
 });
 
 async function startFromTemplate(templateId) {
+  if (sessionLaunchInProgress) return;
+  setSessionLaunchPending(true);
   closeModal('modal-new-workout');
   let tmpl = null;
   try { tmpl = await dbGet('templates', templateId); } catch(e) {}
-  if (!tmpl) { showToast('Plan not found'); return; }
+  if (!tmpl) { setSessionLaunchPending(false); showToast('Plan not found'); return; }
   
   // Build session exercises one at a time so one failure can't block others
   // Pre-warm session cache so all getLastSetsForVariant calls reuse one fetch
@@ -4592,11 +4618,15 @@ async function startFromTemplate(templateId) {
       });
     }
   }
-  startSession({title: tmpl.name, exercises, category: tmpl.category || pendingCategory});
-  
-  // Single-use: delete the plan after launching
-  try { await dbDelete('templates', templateId); } catch(e) {}
-  renderTemplates();
+  try {
+    startSession({title: tmpl.name, exercises, category: tmpl.category || pendingCategory});
+    
+    // Single-use: delete the plan after launching
+    try { await dbDelete('templates', templateId); } catch(e) {}
+    renderTemplates();
+  } finally {
+    setSessionLaunchPending(false);
+  }
 }
 
 async function getLastSetsForVariant(variantId) {
