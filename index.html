@@ -819,55 +819,43 @@ select option { background: var(--bg3); }
 .set-row.completed { background: rgba(167,139,250,0.06); box-shadow: inset 3px 0 0 var(--accent2); }
 .set-row.completed .set-num { color: var(--accent); }
 
-/* ── Voltra auxiliary load block (clearly tied to one set) ── */
-.voltra-context {
-  margin: 2px 8px 6px 34px;
-  padding: 7px 8px 8px;
-  background: rgba(96,165,250,0.06);
-  border: 1px solid rgba(96,165,250,0.2);
-  border-left: 3px solid rgba(96,165,250,0.6);
-  border-radius: 10px;
+/* ── Voltra aux load (lightweight inline context) ── */
+.voltra-inline-wrap {
+  margin: 2px 8px 6px 38px;
+  padding-left: 8px;
+  border-left: 2px solid rgba(96,165,250,0.35);
 }
-.voltra-context-head {
+.voltra-inline-meta {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 6px;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
 }
-.voltra-context-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent-blue);
-  border: 1px solid rgba(96,165,250,0.35);
-  border-radius: 999px;
-  padding: 1px 6px;
-}
-.voltra-context-title {
+.voltra-inline-set {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text3);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .voltra-tags {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--accent);
-  opacity: 0.8;
+  opacity: 0.85;
   letter-spacing: 0.02em;
 }
-.voltra-context .voltra-tags {
-  color: var(--text2);
-  opacity: 1;
-  margin-left: auto;
+.voltra-tags-inline {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
 }
 
 .voltra-inline-edit {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
   padding: 0;
   background: transparent;
   border-top: none;
@@ -5225,13 +5213,12 @@ function renderSetRow(exIdx, si, set, isVoltra) {
     if (set.weightEcc) tags.push(`ECC ${set.weightEcc}`);
     if (set.weightChains) tags.push(`CHN ${set.weightChains}`);
     if (set.weightInverse) tags.push(`INV ${set.weightInverse}`);
-    const tagText = tags.length ? tags.join(' · ') : 'No eccentric/chains set';
+    const tagText = tags.length ? tags.join(' · ') : '—';
     voltraInline = `
-      <div class="voltra-context">
-        <div class="voltra-context-head">
-          <span class="voltra-context-badge">Set ${setLabel}</span>
-          <span class="voltra-context-title">Eccentric / Chains</span>
-          <div class="voltra-tags" id="voltra-tags-${exIdx}-${si}">${tagText}</div>
+      <div class="voltra-inline-wrap">
+        <div class="voltra-inline-meta">
+          <span class="voltra-inline-set">Set ${setLabel} aux</span>
+          <span class="voltra-tags-inline" id="voltra-tags-${exIdx}-${si}">${tagText}</span>
         </div>
         <div class="voltra-inline-edit">
           <div class="voltra-inline-field">
@@ -5352,7 +5339,7 @@ function attachSetInputListeners() {
           if (set.weightEcc) tags.push(`ECC ${set.weightEcc}`);
           if (set.weightChains) tags.push(`CHN ${set.weightChains}`);
           if (set.weightInverse) tags.push(`INV ${set.weightInverse}`);
-          tagsHost.textContent = tags.length ? tags.join(' · ') : 'No eccentric/chains set';
+          tagsHost.textContent = tags.length ? tags.join(' · ') : '—';
         }
       }
     };
