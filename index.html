@@ -3494,6 +3494,35 @@ function idbGetAll(store, indexName, query) {
   });
 }
 
+const SESSIONS_REMOTE_REFRESH_TTL = 60000; // 60 seconds
+let _sessionsRemoteRefreshAt = 0;
+let _sessionsRemoteRefreshInFlight = null;
+
+async function refreshSessionsFromSupabaseInBackground(force = false) {
+  const now = Date.now();
+  if (_sessionsRemoteRefreshInFlight) return _sessionsRemoteRefreshInFlight;
+  if (!force && (now - _sessionsRemoteRefreshAt) < SESSIONS_REMOTE_REFRESH_TTL) return null;
+  _sessionsRemoteRefreshAt = now;
+
+  _sessionsRemoteRefreshInFlight = (async () => {
+    try {
+      const remote = await sbGetAll('sessions');
+      if (Array.isArray(remote) && remote.length > 0) {
+        for (const row of remote) {
+          try { await idbPut('sessions', row); } catch (_) {}
+        }
+        if (typeof invalidateSessionCache === 'function') invalidateSessionCache();
+      }
+    } catch (_) {
+      // best-effort refresh; local history remains source of truth when offline
+    } finally {
+      _sessionsRemoteRefreshInFlight = null;
+    }
+  })();
+
+  return _sessionsRemoteRefreshInFlight;
+}
+
 function dbGet(store, key) {
   if (!SUPABASE_STORES.has(store)) return idbGet(store, key);
   return sbGet(store, key).catch(() => idbGet(store, key));
@@ -3510,6 +3539,24 @@ function dbDelete(store, key) {
 }
 function dbGetAll(store, indexName, query) {
   if (!SUPABASE_STORES.has(store)) return idbGetAll(store, indexName, query);
+  if (store === 'sessions') {
+    return idbGetAll(store, indexName, query)
+      .then(async localRows => {
+        if (localRows && localRows.length > 0) {
+          refreshSessionsFromSupabaseInBackground();
+          return localRows;
+        }
+        const remoteRows = await sbGetAll(store).catch(() => []);
+        if (remoteRows && remoteRows.length > 0) {
+          for (const row of remoteRows) {
+            try { await idbPut(store, row); } catch (_) {}
+          }
+          return remoteRows;
+        }
+        return localRows || [];
+      })
+      .catch(() => sbGetAll(store).catch(() => []));
+  }
   return sbGetAll(store)
     .then(async rows => {
       if (rows && rows.length > 0) return rows;
@@ -3980,18 +4027,38 @@ let editingSetContext = null; // {sessionExIndex, setIndex}
 // Session cache — avoids redundant DB/network calls when multiple functions
 // need sessions in rapid succession (template launch, prev-best loading, etc.)
 let _sessionCache = null;
+let _sortedSessionsCache = [];
 let _sessionCacheTime = 0;
-const SESSION_CACHE_TTL = 3000; // 3 seconds
+let _sessionCachePromise = null;
+const SESSION_CACHE_TTL = 60000; // 60 seconds
 
-function invalidateSessionCache() { _sessionCache = null; _sessionCacheTime = 0; if (typeof _prevBestHtmlCache !== 'undefined') for (const k in _prevBestHtmlCache) delete _prevBestHtmlCache[k]; }
+function invalidateSessionCache() {
+  _sessionCache = null;
+  _sortedSessionsCache = [];
+  _sessionCacheTime = 0;
+  _sessionCachePromise = null;
+  if (typeof _prevBestHtmlCache !== 'undefined') for (const k in _prevBestHtmlCache) delete _prevBestHtmlCache[k];
+}
 
 async function getSortedSessions() {
   const now = Date.now();
   if (_sessionCache && (now - _sessionCacheTime) < SESSION_CACHE_TTL) return _sessionCache;
-  const sessions = await dbGetAll('sessions');
-  _sessionCache = sessions.sort((a, b) => b.startTime - a.startTime);
-  _sessionCacheTime = now;
-  return _sessionCache;
+  if (_sessionCachePromise) return _sessionCachePromise;
+
+  _sessionCachePromise = (async () => {
+    const sessions = await dbGetAll('sessions');
+    const sorted = (sessions || []).slice().sort((a, b) => (Number(b.startTime) || 0) - (Number(a.startTime) || 0));
+    _sessionCache = sorted;
+    _sortedSessionsCache = sorted;
+    _sessionCacheTime = Date.now();
+    return sorted;
+  })();
+
+  try {
+    return await _sessionCachePromise;
+  } finally {
+    _sessionCachePromise = null;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4001,6 +4068,9 @@ let homeTab = 'workouts'; // 'workouts' | 'exercises'
 let homeWorkoutScope = 'recent'; // 'recent' | 'all'
 let homeWorkoutYear = 'all';
 let homeWorkoutMonth = 'all';
+let homeWorkoutCategory = 'all';
+let homeWorkoutSearch = '';
+let _homeHistorySearchTimer = null;
 const HOME_RECENT_LIMIT = 60;
 const HOME_MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -5644,7 +5714,8 @@ document.getElementById('home-category-filter')?.addEventListener('change', e =>
 document.getElementById('home-history-search')?.addEventListener('input', e => {
   homeWorkoutSearch = e.target.value || '';
   if (homeWorkoutSearch.trim()) homeWorkoutScope = 'all';
-  renderHome();
+  clearTimeout(_homeHistorySearchTimer);
+  _homeHistorySearchTimer = setTimeout(() => renderHome(), 180);
 });
 document.querySelectorAll('[data-lib-tab]').forEach(btn => {
   btn.addEventListener('click', () => setLibTab(btn.dataset.libTab));
@@ -5999,7 +6070,7 @@ async function showExerciseAnalytics(variantId, initialMode) {
   document.getElementById('ex-detail-footer').style.display = 'none';
 
   try {
-    const sessions = await dbGetAll('sessions');
+    const sessions = await getSortedSessions();
     // Include active session if present
     const allSessions = activeSession ? [...sessions, {...activeSession, startTime: activeSession.startTime || Date.now()}] : sessions;
     window._analyticsSessions = allSessions;
@@ -6997,11 +7068,35 @@ document.getElementById('tmpl-delete-btn').addEventListener('click', async () =>
 let pickerMuscleFilter = '';
 let pickerSlotFilter = null; // {pattern, muscles} when picker is opened for a slot
 let pickerCategoryFilter = null; // set by session or template context
+let pickerShowAllExercises = false; // override category filter and show every exercise
+let pickerShowAllVariants = false; // show full library variant tag list in variant step
 
 let pickerRecentItems = [];
 let pickerRecentLoadedAt = 0;
 const PICKER_RECENT_TTL = 10000;
 const PICKER_FAVORITES_KEY = '__picker_favorites_v1__';
+const PICKER_PREFS_KEY = '__picker_prefs_v1__';
+
+function loadPickerPrefs() {
+  try {
+    const raw = localStorage.getItem(PICKER_PREFS_KEY);
+    if (!raw) return;
+    const prefs = JSON.parse(raw);
+    pickerShowAllExercises = !!prefs?.showAllExercises;
+    pickerShowAllVariants = !!prefs?.showAllVariants;
+  } catch (e) {}
+}
+
+function savePickerPrefs() {
+  try {
+    localStorage.setItem(PICKER_PREFS_KEY, JSON.stringify({
+      showAllExercises: !!pickerShowAllExercises,
+      showAllVariants: !!pickerShowAllVariants
+    }));
+  } catch (e) {}
+}
+
+loadPickerPrefs();
 
 function getPickerFavorites() {
   try {
@@ -7124,16 +7219,55 @@ let pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], 
 function renderPickerFilters() {
   const container = document.getElementById('pick-ex-filters');
   const muscles = ['all', ...MUSCLE_GROUPS];
+  const cat = pickerCategoryFilter ? (WORKOUT_CATEGORIES[resolveCategory(pickerCategoryFilter)] || null) : null;
+  const categoryToggle = pickerCategoryFilter && pickerCategoryFilter !== 'other'
+    ? `<button class="filter-pill ${pickerShowAllExercises ? 'active' : ''}"
+        data-action="picker-toggle-all-exercises">
+        ${pickerShowAllExercises ? 'All Exercises On' : `Only ${escHtml(cat?.label || 'Category')}`}
+      </button>`
+    : '';
+  const variantToggle = `<button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}"
+      data-action="picker-toggle-all-variants">
+      ${pickerShowAllVariants ? 'All Variants On' : 'All Variants Off'}
+    </button>`;
+
   container.innerHTML = muscles.map(m => `
     <button class="filter-pill ${pickerMuscleFilter === (m==='all'?'':m) ? 'active' : ''}"
       data-action="picker-set-muscle" data-muscle="${m === 'all' ? '' : m}">
       ${m === 'all' ? 'All' : m}
-    </button>`).join('');
+    </button>`).join('') + categoryToggle + variantToggle;
 }
 
 function setPickerMuscle(m) {
   pickerMuscleFilter = m;
   renderPickerFilters();
+  renderPickerStep();
+}
+
+function pickerHasVariantStep(h) {
+  if (!h) return false;
+  return pickerShowAllVariants || (Array.isArray(h.variants) && h.variants.length > 0);
+}
+
+function pickerShouldApplyCategoryFilter() {
+  return !!pickerCategoryFilter && pickerCategoryFilter !== 'other' && !pickerShowAllExercises;
+}
+
+function pickerToggleAllExercises() {
+  pickerShowAllExercises = !pickerShowAllExercises;
+  savePickerPrefs();
+  renderPickerFilters();
+  renderPickerStep();
+}
+
+function pickerToggleAllVariants() {
+  pickerShowAllVariants = !pickerShowAllVariants;
+  savePickerPrefs();
+  const h = hierarchyMap[pickerState.liftId];
+  if (!pickerShowAllVariants && h) {
+    pickerState.variants = pickerState.variants.filter(v => (h.variants || []).includes(v));
+    if (pickerState.step === 'variant' && !pickerHasVariantStep(h)) pickerState.step = 'modifiers';
+  }
   renderPickerStep();
 }
 
@@ -7175,7 +7309,7 @@ function renderStepIndicator() {
   const el = document.getElementById('pick-ex-steps');
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
-  const hasVariants = h.variants.length > 0;
+  const hasVariants = pickerHasVariantStep(h);
   const steps = [
     { label: h.name, key: 'lift' },
     { label: 'Resistance', key: 'resistance' },
@@ -7298,7 +7432,7 @@ function renderPickerLiftList() {
   const patternOrder = ['push','pull','squat','hinge','isolation','core','cardio'];
 
   EXERCISE_HIERARCHY.forEach(h => {
-    if (pickerCategoryFilter) {
+    if (pickerShouldApplyCategoryFilter()) {
       if (!exerciseMatchesCategory(h, pickerCategoryFilter)) return;
     }
     if (pickerSlotFilter) {
@@ -7320,7 +7454,7 @@ function renderPickerLiftList() {
   const quickResults = q ? getPickerQuickSearchResults(q).filter(entry => {
     const h = hierarchyMap[entry.liftId];
     if (!h) return false;
-    if (pickerCategoryFilter && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
+    if (pickerShouldApplyCategoryFilter() && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
     if (pickerSlotFilter) {
       if (h.pattern !== pickerSlotFilter.pattern) return false;
       if (pickerSlotFilter.muscles.length > 0) {
@@ -7354,7 +7488,7 @@ function renderPickerLiftList() {
     const info = variantMap[item.variantId];
     const h = info && info.parent ? hierarchyMap[info.parent.id] : null;
     if (!h) return false;
-    if (pickerCategoryFilter && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
+    if (pickerShouldApplyCategoryFilter() && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
     if (pickerSlotFilter) {
       if (h.pattern !== pickerSlotFilter.pattern) return false;
       if (pickerSlotFilter.muscles.length > 0) {
@@ -7372,7 +7506,7 @@ function renderPickerLiftList() {
     if (!info || !info.parent) return false;
     const h = hierarchyMap[info.parent.id];
     if (!h) return false;
-    if (pickerCategoryFilter && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
+    if (pickerShouldApplyCategoryFilter() && !exerciseMatchesCategory(h, pickerCategoryFilter)) return false;
     if (pickerSlotFilter) {
       if (h.pattern !== pickerSlotFilter.pattern) return false;
       if (pickerSlotFilter.muscles.length > 0) {
@@ -7465,7 +7599,7 @@ function pickerSelectLift(liftId) {
   if (h.resistances.length === 1) {
     // Auto-select single resistance
     pickerState.resistance = h.resistances[0];
-    if (h.variants.length > 0) {
+    if (pickerHasVariantStep(h)) {
       pickerState.step = 'variant';
     } else {
       pickerState.step = 'modifiers';
@@ -7494,7 +7628,7 @@ function renderPickerResistance() {
 function pickerSelectResistance(r) {
   pickerState.resistance = r;
   const h = hierarchyMap[pickerState.liftId];
-  if (h && h.variants.length > 0) {
+  if (h && pickerHasVariantStep(h)) {
     pickerState.step = 'variant';
   } else {
     pickerState.step = 'modifiers';
@@ -7506,9 +7640,15 @@ function renderPickerVariant() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
+  const variantOptions = Array.from(new Set(pickerShowAllVariants ? VARIANT_TYPES : (h.variants || [])));
+  const modeHint = pickerShowAllVariants ? 'Showing all library variant tags' : `${h.name} variants`;
 
-  list.innerHTML = `<div class="picker-section-label">Select Variants <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
-    <div class="picker-grid">${h.variants.map(v => `
+  list.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+      <div class="picker-section-label" style="margin:0">Select Variants <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
+      <button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}" data-action="picker-toggle-all-variants" style="font-size:11px;padding:3px 9px;flex-shrink:0">${pickerShowAllVariants ? 'All Variants On' : 'All Variants Off'}</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">${escHtml(modeHint)}</div>
+    <div class="picker-grid">${variantOptions.map(v => `
       <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}">
         <div class="picker-option-name">${escHtml(v)}</div>
       </div>`).join('')}
@@ -7575,7 +7715,7 @@ function updatePickerPreview() {
 function pickerGoBack() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) { pickerState.step = 'lift'; renderPickerStep(); return; }
-  const hasVariants = h.variants.length > 0;
+  const hasVariants = pickerHasVariantStep(h);
   const hasMultiRes = h.resistances.length > 1;
 
   if (pickerState.step === 'modifiers') {
@@ -8522,6 +8662,12 @@ document.addEventListener('click', (event) => {
       return;
     case 'picker-set-muscle':
       setPickerMuscle(actionEl.dataset.muscle || '');
+      return;
+    case 'picker-toggle-all-exercises':
+      pickerToggleAllExercises();
+      return;
+    case 'picker-toggle-all-variants':
+      pickerToggleAllVariants();
       return;
     case 'picker-select-lift':
       pickerSelectLift(actionEl.dataset.liftId);
