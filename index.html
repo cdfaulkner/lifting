@@ -133,6 +133,22 @@ body::after {
 .nav-btn svg { width: 20px; height: 20px; }
 .nav-btn.active { color: var(--accent); }
 .nav-btn.active svg { stroke: var(--accent); }
+.release-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+  background: var(--bg3);
+}
+.release-indicator.needs { color: #f59e0b; border-color: rgba(245,158,11,0.35); }
+.release-indicator.live { color: #34d399; border-color: rgba(52,211,153,0.35); }
+.release-indicator.ok { color: var(--text2); }
 
 #content {
   flex: 1;
@@ -2609,6 +2625,7 @@ input:focus, textarea:focus, select:focus {
             <span id="sync-dot" title="Checking sync…"></span>
           </div>
           <div class="page-sub" id="home-stats-sub"></div>
+          <div id="release-indicator" class="release-indicator" title="Release/deploy status"></div>
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm btn-icon" id="home-admin-btn" title="Admin">
@@ -2692,10 +2709,10 @@ input:focus, textarea:focus, select:focus {
       <div id="template-list" class="template-list"></div>
     </div>
 
-    <!-- ══ BODY ══ -->
+    <!-- ══ WEIGHT & MEASUREMENTS ══ -->
     <div id="screen-progress" class="screen">
       <div class="page-header" style="justify-content:space-between">
-        <div class="page-title">Body</div>
+        <div class="page-title">Weight & Measurements</div>
         <button id="open-meas-btn" class="btn btn-primary btn-sm">+ Log</button>
       </div>
       <div class="bw-chart-wrap">
@@ -2712,11 +2729,11 @@ input:focus, textarea:focus, select:focus {
       </div>
     </div>
 
-    <!-- ══ MOBILITY ══ -->
+    <!-- ══ MOBILITY & FOUNDATION ══ -->
     <div id="screen-mobility" class="screen">
       <div class="page-header" style="justify-content:space-between">
         <div>
-          <div class="page-title">Mobility</div>
+          <div class="page-title">Mobility & Foundation</div>
           <div class="page-sub" id="mobility-date-sub"></div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
@@ -2736,6 +2753,23 @@ input:focus, textarea:focus, select:focus {
       </div>
       <div id="mobility-fun-strip" class="mobility-fun-strip"></div>
       <div id="mobility-list" style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- ══ FLEXIBILITY (WIP) ══ -->
+    <div id="screen-flexibility" class="screen">
+      <div class="page-header" style="justify-content:space-between">
+        <div>
+          <div class="page-title">Flexibility</div>
+          <div class="page-sub">WIP section</div>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="empty-state" style="margin-top:10px">
+          <div class="empty-state-icon">🧘</div>
+          <div class="empty-state-title">Flexibility is coming soon</div>
+          <div class="empty-state-sub">Plan: guided stretches, ROM tracking, and weekly mobility/flexibility split.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2775,16 +2809,44 @@ input:focus, textarea:focus, select:focus {
   <!-- ══ NAV ══ -->
   <nav id="nav-bar">
     <button class="nav-btn active" data-screen="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Home
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="1" y="7" width="2" height="10" rx="1"></rect>
+        <rect x="4" y="6" width="2" height="12" rx="1"></rect>
+        <line x1="6" y1="12" x2="18" y2="12"></line>
+        <rect x="18" y="6" width="2" height="12" rx="1"></rect>
+        <rect x="21" y="7" width="2" height="10" rx="1"></rect>
+      </svg>
+      Lifting
     </button>
     <button class="nav-btn" data-screen="progress">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Body
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M4 9h16a2 2 0 0 1 2 2v6a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-6a2 2 0 0 1 2-2z"></path>
+        <path d="M8 9V7a4 4 0 0 1 8 0v2"></path>
+        <path d="M12 12l2.5 2"></path>
+        <circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"></circle>
+      </svg>
+      Measure
     </button>
     <button class="nav-btn" data-screen="mobility">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M12 11v4M8 17c0-2.2 1.8-4 4-4s4 1.8 4 4"/><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-      Mobility
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="2" y="5" width="9" height="5" rx="1"></rect>
+        <rect x="13" y="5" width="9" height="5" rx="1"></rect>
+        <rect x="2" y="12" width="6" height="5" rx="1"></rect>
+        <rect x="9" y="12" width="6" height="5" rx="1"></rect>
+        <rect x="16" y="12" width="6" height="5" rx="1"></rect>
+      </svg>
+      Foundation
+    </button>
+    <button class="nav-btn" data-screen="flexibility">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="4.5" r="2"></circle>
+        <path d="M12 7v4"></path>
+        <path d="M12 11l-6 3"></path>
+        <path d="M12 11l6 3"></path>
+        <path d="M6 14l-3 5"></path>
+        <path d="M18 14l3 5"></path>
+      </svg>
+      Flexibility
     </button>
   </nav>
   </div>
@@ -3331,6 +3393,8 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
+const RELEASE_ID = '2026.04.19-03';
+const LAST_DEPLOYED_RELEASE_KEY = '__last_deployed_release_id__';
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -3343,6 +3407,44 @@ function updateSyncDot(status) {
   // Brief pulse animation
   dot.classList.add('syncing');
   setTimeout(() => dot.classList.remove('syncing'), 600);
+}
+
+function isLikelyDeployedHost() {
+  const host = (location.hostname || '').toLowerCase();
+  if (host.endsWith('.vercel.app') || host === 'calcutta-phi.vercel.app') return true;
+  // GitHub Pages deployment for this repo
+  return host === 'cdfaulkner.github.io' && (location.pathname || '').startsWith('/lifting');
+}
+
+function updateReleaseIndicator() {
+  const el = document.getElementById('release-indicator');
+  if (!el) return;
+
+  let lastDeployed = null;
+  try { lastDeployed = localStorage.getItem(LAST_DEPLOYED_RELEASE_KEY); } catch (_) {}
+
+  // If this code is running on a deployed host, treat this release as deployed.
+  if (isLikelyDeployedHost()) {
+    lastDeployed = RELEASE_ID;
+    try { localStorage.setItem(LAST_DEPLOYED_RELEASE_KEY, RELEASE_ID); } catch (_) {}
+    el.className = 'release-indicator live';
+    el.textContent = `Live v${RELEASE_ID}`;
+    return;
+  }
+
+  if (!lastDeployed) {
+    el.className = 'release-indicator';
+    el.textContent = `Local v${RELEASE_ID} · deploy status unknown`;
+    return;
+  }
+
+  if (lastDeployed === RELEASE_ID) {
+    el.className = 'release-indicator ok';
+    el.textContent = `Local v${RELEASE_ID} · matches latest deploy`;
+  } else {
+    el.className = 'release-indicator needs';
+    el.textContent = `Local v${RELEASE_ID} · redeploy needed`;
+  }
 }
 
 async function sbRequest(method, path, body) {
@@ -4089,6 +4191,7 @@ function showScreen(name) {
   document.getElementById(`screen-${name}`)?.classList.add('active');
   document.querySelector(`[data-screen="${name}"]`)?.classList.add('active');
 
+  if (name === 'home') updateReleaseIndicator();
   if (name === 'home') { if (homeTab === 'workouts') renderHome(); else renderLibrary(); }
   if (name === 'templates') { renderTemplates(); document.querySelector('[data-screen="home"]')?.classList.add('active'); }
   if (name === 'progress') renderProgress();
@@ -4460,6 +4563,7 @@ function buildFinishReceipt(session, previousSameCategory) {
 // HOME SCREEN
 // ═══════════════════════════════════════════════════════════════
 async function renderHome() {
+  updateReleaseIndicator();
   const sessions = await getSortedSessions();
 
   const sub = document.getElementById('home-stats-sub');
@@ -10714,6 +10818,7 @@ async function init() {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
+  updateReleaseIndicator();
   renderHome();
 
   // Restore in-progress session if browser was closed mid-workout
@@ -10775,6 +10880,7 @@ init().catch(e => {
   // Show app anyway so user isn't stuck on loading screen
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
+  updateReleaseIndicator();
   renderHome();
   // Restore in-progress session if browser was closed mid-workout
   if (!activeSession) loadSessionDraft();
@@ -11077,7 +11183,27 @@ function makeSwipeable(el, onDeleteFn) {
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    let reloading = false;
+    const safeReload = () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', safeReload);
+    // Relative registration works for both root-hosted (Vercel) and subpath-hosted (GitHub Pages) deployments.
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      reg.addEventListener('updatefound', () => {
+        const installing = reg.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            installing.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+    }).catch(() => {});
   });
 }
 </script>

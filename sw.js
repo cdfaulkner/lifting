@@ -1,5 +1,38 @@
-const CACHE_NAME = 'ironlog-v1';
-const ASSETS = ['/', '/index.html', '/bw_data.json', '/manifest.json'];
+const CACHE_NAME = 'ironlog-v2';
+const ASSETS = ['./', './index.html', './bw_data.json', './manifest.json'];
+
+function isCacheableRequest(request) {
+  return request && request.method === 'GET' && request.url.startsWith(self.location.origin);
+}
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await fetch(request);
+    if (response && response.ok && isCacheableRequest(request)) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (_) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw _;
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  const fetchPromise = fetch(request)
+    .then(response => {
+      if (response && response.ok && isCacheableRequest(request)) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => null);
+  return cached || fetchPromise;
+}
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -15,17 +48,13 @@ self.addEventListener('activate', e => {
   );
 });
 
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(resp => {
-        if (resp.ok && e.request.method === 'GET') {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        }
-        return resp;
-      }).catch(() => cached);
-    })
-  );
+  if (!isCacheableRequest(e.request)) return;
+  const url = new URL(e.request.url);
+  const isNavigation = e.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('/index.html');
+  e.respondWith(isNavigation ? networkFirst(e.request) : staleWhileRevalidate(e.request));
 });
