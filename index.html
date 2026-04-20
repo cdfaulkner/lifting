@@ -11,6 +11,8 @@
 <meta name="apple-mobile-web-app-title" content="Baseline">
 <link rel="apple-touch-icon" sizes="180x180" href="baseline-icon.svg">
 <link rel="manifest" href="manifest.json">
+<link rel="canonical" href="https://cdfaulkner.github.io/lifting/">
+<meta property="og:url" content="https://cdfaulkner.github.io/lifting/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -3449,7 +3451,8 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-11';
+const RELEASE_ID = '2026.04.19-14';
+const APP_MAIN_URL = 'https://cdfaulkner.github.io/lifting/';
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -3464,9 +3467,33 @@ function updateSyncDot(status) {
   setTimeout(() => dot.classList.remove('syncing'), 600);
 }
 
+function redirectLegacyHostsToMainUrl() {
+  const host = (location.hostname || '').toLowerCase();
+  const path = location.pathname || '/';
+  if (host.endsWith('.vercel.app')) {
+    const target = new URL(APP_MAIN_URL);
+    target.search = location.search || '';
+    target.hash = location.hash || '';
+    if (target.href !== location.href) location.replace(target.href);
+    return true;
+  }
+  if (host === 'cdfaulkner.github.io' && !path.startsWith('/lifting')) {
+    const target = new URL(APP_MAIN_URL);
+    target.search = location.search || '';
+    target.hash = location.hash || '';
+    if (target.href !== location.href) location.replace(target.href);
+    return true;
+  }
+  return false;
+}
+
+redirectLegacyHostsToMainUrl();
+
 function isGitHubPagesHost() {
   const host = (location.hostname || '').toLowerCase();
-  return host === 'cdfaulkner.github.io' && (location.pathname || '').startsWith('/lifting');
+  const main = new URL(APP_MAIN_URL);
+  const expectedPath = main.pathname || '/';
+  return host === main.hostname && (location.pathname || '').startsWith(expectedPath);
 }
 
 function updateReleaseIndicator() {
@@ -9039,7 +9066,7 @@ document.addEventListener('input', (event) => {
 // ═══════════════════════════════════════════════════════════════
 const MOBILITY_DEFAULTS_VERSION = 6;
 const MOBILITY_REP_IDS = new Set(['mob_9090', 'mob_dead_bugs', 'mob_wgs', 'mob_shoulder_rot', 'mob_tspine']);
-const MOBILITY_UNILATERAL_IDS = new Set(['mob_9090']);
+const MOBILITY_UNILATERAL_IDS = new Set(['mob_9090', 'mob_tspine']);
 const MOBILITY_REP_NAME_KEYS = new Set([
   '90_90_hip_swivels',
   '90_90_hip_rotation',
@@ -9056,7 +9083,9 @@ const MOBILITY_REP_NAME_KEYS = new Set([
 const MOBILITY_UNILATERAL_NAME_KEYS = new Set([
   '90_90_hip_swivels',
   '90_90_hip_rotation',
-  '90_90_hip_rotations'
+  '90_90_hip_rotations',
+  't_spine_rotation',
+  't_spine_rotations'
 ]);
 const DEFAULT_MOBILITY_EXERCISES = [
   { id:'mob_split_squat',  name:'Split Squat Hold',               targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'A', order:0 },
@@ -9067,13 +9096,23 @@ const DEFAULT_MOBILITY_EXERCISES = [
   { id:'mob_wgs',          name:"World's Greatest Stretch",       targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:5 },
   { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:6 },
   { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetMode:'seconds', targetSeconds:45, bilateral:true,  day:'B', order:7 },
-  { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:8 },
+  { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:false, day:'B', order:8 },
   { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetMode:'seconds', targetSeconds:120,bilateral:false, day:'B', order:9 },
 ];
 const MOBILITY_SECONDS_MIGRATION_RULES = {
   mob_back_ext: { from: new Set([30]), to: 120 },
   mob_iso_back_ext: { from: new Set([30]), to: 45 },
   mob_deep_squat: { from: new Set([30]), to: 120 },
+};
+const MOBILITY_SECONDS_MIGRATION_NAME_RULES = {
+  back_extension_hold: { from: new Set([30]), to: 120 },
+  back_extensions_hold: { from: new Set([30]), to: 120 },
+  back_extension: { from: new Set([30]), to: 120 },
+  isolateral_back_extension_hold: { from: new Set([30]), to: 45 },
+  isolateral_back_extensions_hold: { from: new Set([30]), to: 45 },
+  isolateral_back_extension: { from: new Set([30]), to: 45 },
+  deep_squat_hold: { from: new Set([30]), to: 120 },
+  deep_squat: { from: new Set([30]), to: 120 },
 };
 
 let mobilityExercises = [];
@@ -9107,6 +9146,12 @@ function getMigratedDefaultSeconds(exId, prevSeconds, defSeconds) {
   if (!rule) return prevSeconds;
   if (typeof prevSeconds !== 'number') return defSeconds;
   return rule.from.has(prevSeconds) ? rule.to : prevSeconds;
+}
+
+function getSecondsMigrationRuleForExercise(ex) {
+  if (!ex) return null;
+  if (MOBILITY_SECONDS_MIGRATION_RULES[ex.id]) return MOBILITY_SECONDS_MIGRATION_RULES[ex.id];
+  return MOBILITY_SECONDS_MIGRATION_NAME_RULES[normalizeMobilityName(ex.name)] || null;
 }
 
 function getMobilityTargetMode(ex) {
@@ -9207,6 +9252,20 @@ async function loadMobility() {
     if (shouldForceMobilityUnilateral(ex) && ex.bilateral) {
       ex.bilateral = false;
       changed = true;
+    }
+    const mode = getMobilityTargetMode(ex);
+    if (mode === 'seconds') {
+      const rule = getSecondsMigrationRuleForExercise(ex);
+      if (rule) {
+        const current = parseInt(ex.targetSeconds, 10);
+        const next = Number.isFinite(current)
+          ? (rule.from.has(current) ? rule.to : null)
+          : rule.to;
+        if (next && current !== next) {
+          ex.targetSeconds = next;
+          changed = true;
+        }
+      }
     }
     if (changed) await dbPut('mobility_exercises', ex);
   }
