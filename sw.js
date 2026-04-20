@@ -1,5 +1,5 @@
 const CACHE_NAME = 'ironlog-v2';
-const ASSETS = ['./', './index.html', './bw_data.json', './manifest.json'];
+const ASSETS = ['./', './index.html', './bw_data.json', './manifest.json', './baseline-icon.svg'];
 
 function isCacheableRequest(request) {
   return request && request.method === 'GET' && request.url.startsWith(self.location.origin);

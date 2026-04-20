@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Baseline icon">
+  <defs>
+    <linearGradient id="g" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="0.55" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="#0d0b14"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="url(#g)" stroke-width="14"/>
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#2a2440" stroke-width="4"/>
+  <circle cx="256" cy="154" r="24" fill="none" stroke="url(#g)" stroke-width="11"/>
+  <path d="M256 180 L256 296" fill="none" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M170 232 L342 232" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M190 192 L256 228 L322 192" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 296 L196 388" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M256 296 L316 388" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M256 296 L172 348" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M256 296 L340 348" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="232" r="8" fill="#22d3ee"/>
+  <circle cx="256" cy="296" r="8" fill="#22d3ee"/>
+</svg>
