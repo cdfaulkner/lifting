@@ -1,0 +1,362 @@
+{
+  "_ironlog_backup": true,
+  "version": 1,
+  "exportedAt": "2026-04-19T16:46:43.544Z",
+  "stores": {
+    "sessions": [
+      {
+        "id": "session_2026_04_13_lower_monday",
+        "title": "Lower",
+        "category": "lower",
+        "startTime": 1776097500000,
+        "endTime": 1776101100000,
+        "durationMinutes": 60,
+        "notes": "Imported workout from Monday 2026-04-13",
+        "exercises": [
+          {
+            "variantId": "squat__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 180,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776097620000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 1,
+                "weight": 270,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776097710000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 2,
+                "weight": 360,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776097800000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 3,
+                "weight": 450,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776097890000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 4,
+                "weight": 450,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776097980000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 5,
+                "weight": 450,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098070000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 6,
+                "weight": 450,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098160000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              },
+              {
+                "index": 7,
+                "weight": 450,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098250000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": "Leg Press"
+              }
+            ]
+          },
+          {
+            "variantId": "back_extension__bw",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 0,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098460000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 30,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098550000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 60,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098640000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 60,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098730000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 60,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776098820000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "calf_raise__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 90,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 20,
+                "completed": true,
+                "completedAt": 1776099060000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 180,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776099150000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 180,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776099240000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 180,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776099330000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 180,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776099420000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "leg_extension__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776099660000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776099750000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776099840000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776099930000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776100020000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "ham_curl__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776100380000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776100470000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776100560000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

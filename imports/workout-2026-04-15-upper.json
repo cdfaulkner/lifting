@@ -1,0 +1,452 @@
+{
+  "_ironlog_backup": true,
+  "version": 1,
+  "exportedAt": "2026-04-19T16:45:04.115Z",
+  "stores": {
+    "sessions": [
+      {
+        "id": "session_2026_04_15_upper_new_gym",
+        "title": "Upper",
+        "category": "upper",
+        "startTime": 1776271200000,
+        "endTime": 1776274800000,
+        "durationMinutes": 60,
+        "notes": "Imported workout from 2026-04-15 (new gym equipment)",
+        "exercises": [
+          {
+            "variantId": "chest_press__machine__incline",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 25,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271320000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 50,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271410000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 65,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271500000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 65,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271590000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 65,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271680000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 5,
+                "weight": 65,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271770000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 6,
+                "weight": 65,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776271860000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "chest_fly__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 25,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272040000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 50,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272130000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 75,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272220000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272310000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272400000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 5,
+                "weight": 100,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272490000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "lat_pulldown__machine__neutral_wide",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 175,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272640000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 220,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272730000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 220,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272820000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 220,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776272910000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 220,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273000000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "dip__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 150,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 15,
+                "completed": true,
+                "completedAt": 1776273180000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 250,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273270000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 250,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273360000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 250,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273450000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 250,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273540000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 5,
+                "weight": 250,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776273630000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "upright_row__barbell",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 80,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776273900000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 80,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776273990000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 80,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776274080000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 80,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 12,
+                "completed": true,
+                "completedAt": 1776274170000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          },
+          {
+            "variantId": "crunch__machine",
+            "supersetId": null,
+            "sets": [
+              {
+                "index": 0,
+                "weight": 245,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776274320000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 1,
+                "weight": 245,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776274410000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 2,
+                "weight": 245,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776274500000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 3,
+                "weight": 245,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776274590000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              },
+              {
+                "index": 4,
+                "weight": 245,
+                "weightEcc": 0,
+                "weightChains": 0,
+                "reps": 10,
+                "completed": true,
+                "completedAt": 1776274680000,
+                "rpe": null,
+                "restSeconds": null,
+                "notes": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

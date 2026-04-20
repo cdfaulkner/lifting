@@ -3449,7 +3449,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-09';
+const RELEASE_ID = '2026.04.19-11';
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -9037,8 +9037,9 @@ document.addEventListener('input', (event) => {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY CHECKLIST
 // ═══════════════════════════════════════════════════════════════
-const MOBILITY_DEFAULTS_VERSION = 4;
+const MOBILITY_DEFAULTS_VERSION = 6;
 const MOBILITY_REP_IDS = new Set(['mob_9090', 'mob_dead_bugs', 'mob_wgs', 'mob_shoulder_rot', 'mob_tspine']);
+const MOBILITY_UNILATERAL_IDS = new Set(['mob_9090']);
 const MOBILITY_REP_NAME_KEYS = new Set([
   '90_90_hip_swivels',
   '90_90_hip_rotation',
@@ -9052,18 +9053,28 @@ const MOBILITY_REP_NAME_KEYS = new Set([
   't_spine_rotation',
   't_spine_rotations'
 ]);
+const MOBILITY_UNILATERAL_NAME_KEYS = new Set([
+  '90_90_hip_swivels',
+  '90_90_hip_rotation',
+  '90_90_hip_rotations'
+]);
 const DEFAULT_MOBILITY_EXERCISES = [
   { id:'mob_split_squat',  name:'Split Squat Hold',               targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'A', order:0 },
   { id:'mob_dead_hang',    name:'Dead Hang',                      targetMode:'seconds', targetSeconds:30, bilateral:false, day:'A', order:1 },
-  { id:'mob_back_ext',     name:'Back Extension Hold',            targetMode:'seconds', targetSeconds:30, bilateral:false, day:'A', order:2 },
-  { id:'mob_9090',         name:'90/90 Hip Swivels',              targetMode:'reps',    targetReps:10,   bilateral:true,  day:'A', order:3 },
+  { id:'mob_back_ext',     name:'Back Extension Hold',            targetMode:'seconds', targetSeconds:120,bilateral:false, day:'A', order:2 },
+  { id:'mob_9090',         name:'90/90 Hip Swivels',              targetMode:'reps',    targetReps:10,   bilateral:false, day:'A', order:3 },
   { id:'mob_dead_bugs',    name:'Dead Bugs',                      targetMode:'reps',    targetReps:10,   bilateral:false, day:'A', order:4 },
   { id:'mob_wgs',          name:"World's Greatest Stretch",       targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:5 },
   { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:6 },
-  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'B', order:7 },
+  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetMode:'seconds', targetSeconds:45, bilateral:true,  day:'B', order:7 },
   { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:8 },
-  { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetMode:'seconds', targetSeconds:30, bilateral:false, day:'B', order:9 },
+  { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetMode:'seconds', targetSeconds:120,bilateral:false, day:'B', order:9 },
 ];
+const MOBILITY_SECONDS_MIGRATION_RULES = {
+  mob_back_ext: { from: new Set([30]), to: 120 },
+  mob_iso_back_ext: { from: new Set([30]), to: 45 },
+  mob_deep_squat: { from: new Set([30]), to: 120 },
+};
 
 let mobilityExercises = [];
 // checks shape: { date, day, checks: { exId: { done, durationL, durationR, repsL, repsR, notes, ts } } }
@@ -9083,6 +9094,19 @@ function shouldForceMobilityReps(ex) {
   if (!ex) return false;
   if (MOBILITY_REP_IDS.has(ex.id)) return true;
   return MOBILITY_REP_NAME_KEYS.has(normalizeMobilityName(ex.name));
+}
+
+function shouldForceMobilityUnilateral(ex) {
+  if (!ex) return false;
+  if (MOBILITY_UNILATERAL_IDS.has(ex.id)) return true;
+  return MOBILITY_UNILATERAL_NAME_KEYS.has(normalizeMobilityName(ex.name));
+}
+
+function getMigratedDefaultSeconds(exId, prevSeconds, defSeconds) {
+  const rule = MOBILITY_SECONDS_MIGRATION_RULES[exId];
+  if (!rule) return prevSeconds;
+  if (typeof prevSeconds !== 'number') return defSeconds;
+  return rule.from.has(prevSeconds) ? rule.to : prevSeconds;
 }
 
 function getMobilityTargetMode(ex) {
@@ -9146,7 +9170,7 @@ async function seedMobilityExercises() {
     const merged = {
       ...prev,
       name: def.name,
-      bilateral: def.bilateral,
+      bilateral: shouldForceMobilityUnilateral(def) ? false : def.bilateral,
       day: def.day,
       order: def.order,
       targetMode: forcedMode,
@@ -9155,7 +9179,9 @@ async function seedMobilityExercises() {
     if (forcedMode === 'reps') {
       merged.targetReps = typeof prev.targetReps === 'number' ? prev.targetReps : (def.targetReps || 10);
     } else {
-      merged.targetSeconds = typeof prev.targetSeconds === 'number' ? prev.targetSeconds : (def.targetSeconds || 30);
+      const prevSeconds = typeof prev.targetSeconds === 'number' ? prev.targetSeconds : null;
+      const defSeconds = def.targetSeconds || 30;
+      merged.targetSeconds = getMigratedDefaultSeconds(def.id, prevSeconds, defSeconds);
     }
 
     await dbPut('mobility_exercises', merged);
@@ -9168,18 +9194,36 @@ async function loadMobility() {
   await seedMobilityExercises();
   const exList = await dbGetAll('mobility_exercises');
   for (const ex of exList) {
-    if (!shouldForceMobilityReps(ex)) continue;
-    const targetReps = Math.max(1, parseInt(ex.targetReps, 10) || parseInt(ex.targetSeconds, 10) || 10);
-    if (ex.targetMode === 'reps' && ex.targetReps === targetReps) continue;
-    ex.targetMode = 'reps';
-    ex.targetReps = targetReps;
-    delete ex.targetSeconds;
-    await dbPut('mobility_exercises', ex);
+    let changed = false;
+    if (shouldForceMobilityReps(ex)) {
+      const targetReps = Math.max(1, parseInt(ex.targetReps, 10) || parseInt(ex.targetSeconds, 10) || 10);
+      if (ex.targetMode !== 'reps' || ex.targetReps !== targetReps) {
+        ex.targetMode = 'reps';
+        ex.targetReps = targetReps;
+        delete ex.targetSeconds;
+        changed = true;
+      }
+    }
+    if (shouldForceMobilityUnilateral(ex) && ex.bilateral) {
+      ex.bilateral = false;
+      changed = true;
+    }
+    if (changed) await dbPut('mobility_exercises', ex);
   }
   mobilityExercises = exList.sort((a,b) => (a.order||0) - (b.order||0));
   mobilityDay = getMobilityDay();
   const checkData = await dbGet('mobility_checks', todayStr());
   mobilityChecks = (checkData && checkData.day === mobilityDay) ? (checkData.checks || {}) : {};
+  let checksChanged = false;
+  for (const ex of mobilityExercises) {
+    if (!shouldForceMobilityUnilateral(ex)) continue;
+    const c = mobilityChecks[ex.id];
+    if (c && !c.done && (c.doneL || c.doneR)) {
+      c.done = true;
+      checksChanged = true;
+    }
+  }
+  if (checksChanged) await saveMobilityChecks();
 }
 
 async function saveMobilityChecks() {
@@ -9195,9 +9239,9 @@ function getDayExercises(day) {
 
 function isMobExDone(ex) {
   const c = mobilityChecks[ex.id];
-  if (!c || !c.done) return false;
-  if (ex.bilateral) return c.doneL && c.doneR;
-  return true;
+  if (!c) return false;
+  if (ex.bilateral) return !!c.done && !!c.doneL && !!c.doneR;
+  return !!(c.done || c.doneL);
 }
 
 function fmtTimer(s) {
@@ -9314,7 +9358,7 @@ function renderSideTimer(ex, side, label, c) {
   const mode = getMobilityTargetMode(ex);
   const key = `${ex.id}_${side}`;
   const timer = mobilityTimers[key];
-  const sideDone = side === 'L' ? (ex.bilateral ? c.doneL : c.done) : c.doneR;
+  const sideDone = side === 'L' ? (ex.bilateral ? c.doneL : (c.done || c.doneL)) : c.doneR;
   const sideValue = side === 'L'
     ? (mode === 'reps' ? (c.repsL || 0) : (c.durationL || 0))
     : (mode === 'reps' ? (c.repsR || 0) : (c.durationR || 0));
@@ -9641,8 +9685,8 @@ async function openMobilityHistory(exId) {
         : 'R: —';
       timeStr = `${lStr}  ·  ${rStr}`;
     } else {
-      if (mode === 'reps') timeStr = c.done ? `${c.repsL || fallbackTarget} reps` : '✓';
-      else timeStr = c.durationL ? `${c.durationL}s` : '✓';
+      if (mode === 'reps') timeStr = (c.done || c.doneL) ? `${c.repsL || fallbackTarget} reps` : '✓';
+      else timeStr = c.durationL ? `${c.durationL}s` : ((c.done || c.doneL) ? '✓' : '—');
     }
     const noteStr = c.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(c.notes)}</div>` : '';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
