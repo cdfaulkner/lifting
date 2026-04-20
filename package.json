@@ -3,6 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "vercel-build": "echo 'Static site: no build step required'"
+    "build": "echo 'Static site: no build step required'"
   }
 }

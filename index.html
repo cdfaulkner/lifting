@@ -2046,15 +2046,15 @@ textarea { resize: none; }
 }
 .loading-logo span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .brand-mark {
-  width: 52px;
-  height: 52px;
+  width: 68px;
+  height: 68px;
   display: block;
-  margin: 0 auto 4px;
+  margin: 0 auto 6px;
   filter: drop-shadow(0 0 8px rgba(167,139,250,0.45));
 }
 .brand-mark-sm {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   display: block;
   filter: drop-shadow(0 0 8px rgba(167,139,250,0.45));
 }
@@ -3132,7 +3132,7 @@ input:focus, textarea:focus, select:focus {
       </div>
       <div style="display:flex;gap:12px;margin-bottom:12px">
         <div class="input-group" style="flex:1">
-          <div class="input-label">Target (seconds)</div>
+          <div class="input-label" id="mobility-target-label">Target (seconds)</div>
           <input id="mobility-dur-input" type="number" inputmode="numeric" value="30" min="5" max="300">
         </div>
         <div class="input-group" style="flex:1">
@@ -3449,8 +3449,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-07';
-const LAST_DEPLOYED_RELEASE_KEY = '__last_deployed_release_id__';
+const RELEASE_ID = '2026.04.19-09';
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -3465,10 +3464,8 @@ function updateSyncDot(status) {
   setTimeout(() => dot.classList.remove('syncing'), 600);
 }
 
-function isLikelyDeployedHost() {
+function isGitHubPagesHost() {
   const host = (location.hostname || '').toLowerCase();
-  if (host.endsWith('.vercel.app') || host === 'calcutta-phi.vercel.app') return true;
-  // GitHub Pages deployment for this repo
   return host === 'cdfaulkner.github.io' && (location.pathname || '').startsWith('/lifting');
 }
 
@@ -3476,31 +3473,14 @@ function updateReleaseIndicator() {
   const el = document.getElementById('release-indicator');
   if (!el) return;
 
-  let lastDeployed = null;
-  try { lastDeployed = localStorage.getItem(LAST_DEPLOYED_RELEASE_KEY); } catch (_) {}
-
-  // If this code is running on a deployed host, treat this release as deployed.
-  if (isLikelyDeployedHost()) {
-    lastDeployed = RELEASE_ID;
-    try { localStorage.setItem(LAST_DEPLOYED_RELEASE_KEY, RELEASE_ID); } catch (_) {}
+  if (isGitHubPagesHost()) {
     el.className = 'release-indicator live';
     el.textContent = `Live v${RELEASE_ID}`;
     return;
   }
 
-  if (!lastDeployed) {
-    el.className = 'release-indicator';
-    el.textContent = `Local v${RELEASE_ID} · deploy status unknown`;
-    return;
-  }
-
-  if (lastDeployed === RELEASE_ID) {
-    el.className = 'release-indicator ok';
-    el.textContent = `Local v${RELEASE_ID} · matches latest deploy`;
-  } else {
-    el.className = 'release-indicator needs';
-    el.textContent = `Local v${RELEASE_ID} · redeploy needed`;
-  }
+  el.className = 'release-indicator needs';
+  el.textContent = `Local v${RELEASE_ID} · push to GitHub to deploy`;
 }
 
 async function sbRequest(method, path, body) {
@@ -8982,6 +8962,17 @@ document.addEventListener('click', (event) => {
     case 'open-mobility-history':
       openMobilityHistory(actionEl.dataset.exId);
       return;
+    case 'complete-mob-reps': {
+      const exId = actionEl.dataset.exId;
+      const side = actionEl.dataset.side || 'L';
+      const row = actionEl.closest('.mobility-side-row');
+      const input = row ? row.querySelector('.mobility-target-input') : null;
+      const ex = mobilityExercises.find(e => e.id === exId);
+      const fallback = ex ? getMobilityTargetValue(ex) : 10;
+      const reps = Math.max(1, Math.min(100, parseInt(input?.value, 10) || fallback));
+      completeMobSide(exId, side, reps);
+      return;
+    }
     case 'reset-mob-side':
       resetMobSide(actionEl.dataset.exId, actionEl.dataset.side);
       return;
@@ -9046,22 +9037,36 @@ document.addEventListener('input', (event) => {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY CHECKLIST
 // ═══════════════════════════════════════════════════════════════
-const MOBILITY_DEFAULTS_VERSION = 2;
+const MOBILITY_DEFAULTS_VERSION = 4;
+const MOBILITY_REP_IDS = new Set(['mob_9090', 'mob_dead_bugs', 'mob_wgs', 'mob_shoulder_rot', 'mob_tspine']);
+const MOBILITY_REP_NAME_KEYS = new Set([
+  '90_90_hip_swivels',
+  '90_90_hip_rotation',
+  '90_90_hip_rotations',
+  'dead_bugs',
+  'dead_bug',
+  'world_s_greatest_stretch',
+  'worlds_greatest_stretch',
+  'shoulder_rotations',
+  'shoulder_rotation',
+  't_spine_rotation',
+  't_spine_rotations'
+]);
 const DEFAULT_MOBILITY_EXERCISES = [
-  { id:'mob_split_squat',  name:'Split Squat Hold',               targetSeconds:30, bilateral:true,  day:'A', order:0 },
-  { id:'mob_dead_hang',    name:'Dead Hang',                      targetSeconds:30, bilateral:false, day:'A', order:1 },
-  { id:'mob_back_ext',     name:'Back Extension Hold',            targetSeconds:30, bilateral:false, day:'A', order:2 },
-  { id:'mob_9090',         name:'90/90 Hip Rotations',            targetSeconds:30, bilateral:true,  day:'A', order:3 },
-  { id:'mob_dead_bugs',    name:'Dead Bugs',                      targetSeconds:30, bilateral:false, day:'A', order:4 },
-  { id:'mob_wgs',          name:"World's Greatest Stretch",       targetSeconds:30, bilateral:true,  day:'B', order:5 },
-  { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetSeconds:30, bilateral:true,  day:'B', order:6 },
-  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetSeconds:30, bilateral:true,  day:'B', order:7 },
-  { id:'mob_tspine',       name:'T-Spine Rotation',               targetSeconds:30, bilateral:true,  day:'B', order:8 },
-  { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetSeconds:30, bilateral:false, day:'B', order:9 },
+  { id:'mob_split_squat',  name:'Split Squat Hold',               targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'A', order:0 },
+  { id:'mob_dead_hang',    name:'Dead Hang',                      targetMode:'seconds', targetSeconds:30, bilateral:false, day:'A', order:1 },
+  { id:'mob_back_ext',     name:'Back Extension Hold',            targetMode:'seconds', targetSeconds:30, bilateral:false, day:'A', order:2 },
+  { id:'mob_9090',         name:'90/90 Hip Swivels',              targetMode:'reps',    targetReps:10,   bilateral:true,  day:'A', order:3 },
+  { id:'mob_dead_bugs',    name:'Dead Bugs',                      targetMode:'reps',    targetReps:10,   bilateral:false, day:'A', order:4 },
+  { id:'mob_wgs',          name:"World's Greatest Stretch",       targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:5 },
+  { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:6 },
+  { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'B', order:7 },
+  { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:8 },
+  { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetMode:'seconds', targetSeconds:30, bilateral:false, day:'B', order:9 },
 ];
 
 let mobilityExercises = [];
-// checks shape: { date, day, checks: { exId: { done, durationL, durationR, notes, ts } } }
+// checks shape: { date, day, checks: { exId: { done, durationL, durationR, repsL, repsR, notes, ts } } }
 let mobilityChecks = {};
 let mobilityDay = null; // 'A' or 'B'
 let mobilityEditMode = false;
@@ -9069,6 +9074,29 @@ let mobilityTimers = {}; // { exId_side: { interval, remaining, running } }
 let editingMobilityId = null;
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function normalizeMobilityName(name) {
+  return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function shouldForceMobilityReps(ex) {
+  if (!ex) return false;
+  if (MOBILITY_REP_IDS.has(ex.id)) return true;
+  return MOBILITY_REP_NAME_KEYS.has(normalizeMobilityName(ex.name));
+}
+
+function getMobilityTargetMode(ex) {
+  if (!ex) return 'seconds';
+  if (shouldForceMobilityReps(ex)) return 'reps';
+  if (ex.targetMode === 'reps' || ex.targetMode === 'seconds') return ex.targetMode;
+  return 'seconds';
+}
+
+function getMobilityTargetValue(ex) {
+  const mode = getMobilityTargetMode(ex);
+  if (mode === 'reps') return Math.max(1, parseInt(ex.targetReps, 10) || 10);
+  return Math.max(5, parseInt(ex.targetSeconds, 10) || 30);
+}
 
 function getMobilityDay() {
   // Auto-alternate based on last completed day, or manual override
@@ -9109,17 +9137,28 @@ async function seedMobilityExercises() {
   const byId = new Map(existing.map(ex => [ex.id, ex]));
   for (const def of DEFAULT_MOBILITY_EXERCISES) {
     const prev = byId.get(def.id);
-    await dbPut('mobility_exercises', prev
-      ? {
-          ...prev,
-          name: def.name,
-          bilateral: def.bilateral,
-          day: def.day,
-          order: def.order,
-          targetSeconds: typeof prev.targetSeconds === 'number' ? prev.targetSeconds : def.targetSeconds,
-        }
-      : { ...def }
-    );
+    if (!prev) {
+      await dbPut('mobility_exercises', { ...def });
+      continue;
+    }
+
+    const forcedMode = def.targetMode || (shouldForceMobilityReps(def) ? 'reps' : 'seconds');
+    const merged = {
+      ...prev,
+      name: def.name,
+      bilateral: def.bilateral,
+      day: def.day,
+      order: def.order,
+      targetMode: forcedMode,
+    };
+
+    if (forcedMode === 'reps') {
+      merged.targetReps = typeof prev.targetReps === 'number' ? prev.targetReps : (def.targetReps || 10);
+    } else {
+      merged.targetSeconds = typeof prev.targetSeconds === 'number' ? prev.targetSeconds : (def.targetSeconds || 30);
+    }
+
+    await dbPut('mobility_exercises', merged);
   }
 
   localStorage.setItem('mobility_defaults_version', String(MOBILITY_DEFAULTS_VERSION));
@@ -9128,6 +9167,15 @@ async function seedMobilityExercises() {
 async function loadMobility() {
   await seedMobilityExercises();
   const exList = await dbGetAll('mobility_exercises');
+  for (const ex of exList) {
+    if (!shouldForceMobilityReps(ex)) continue;
+    const targetReps = Math.max(1, parseInt(ex.targetReps, 10) || parseInt(ex.targetSeconds, 10) || 10);
+    if (ex.targetMode === 'reps' && ex.targetReps === targetReps) continue;
+    ex.targetMode = 'reps';
+    ex.targetReps = targetReps;
+    delete ex.targetSeconds;
+    await dbPut('mobility_exercises', ex);
+  }
   mobilityExercises = exList.sort((a,b) => (a.order||0) - (b.order||0));
   mobilityDay = getMobilityDay();
   const checkData = await dbGet('mobility_checks', todayStr());
@@ -9217,6 +9265,7 @@ async function renderMobility() {
 function renderMobExCard(ex) {
   const c = mobilityChecks[ex.id] || {};
   const done = isMobExDone(ex);
+  const mode = getMobilityTargetMode(ex);
   const editBtns = mobilityEditMode ? `
     <button class="btn btn-ghost btn-sm btn-icon" data-action="open-mobility-edit" data-ex-id="${ex.id}" aria-label="Edit exercise">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -9250,7 +9299,7 @@ function renderMobExCard(ex) {
       <div style="flex:1;min-width:0">
         <div style="font-size:15px;font-weight:600;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px">
-          <span style="font-size:11px;color:var(--text3)">${done ? 'Done' : (ex.bilateral ? '2 sides' : '1 timer')}</span>
+          <span style="font-size:11px;color:var(--text3)">${done ? 'Done' : (mode === 'reps' ? (ex.bilateral ? '2 sides · reps' : 'reps') : (ex.bilateral ? '2 sides' : '1 timer'))}</span>
           ${ex.cues ? `<div style="font-size:11px;color:var(--text3)">${escHtml(ex.cues)}</div>` : ''}
         </div>
       </div>
@@ -9262,19 +9311,36 @@ function renderMobExCard(ex) {
 }
 
 function renderSideTimer(ex, side, label, c) {
+  const mode = getMobilityTargetMode(ex);
   const key = `${ex.id}_${side}`;
   const timer = mobilityTimers[key];
   const sideDone = side === 'L' ? (ex.bilateral ? c.doneL : c.done) : c.doneR;
-  const sideTime = side === 'L' ? (c.durationL || 0) : (c.durationR || 0);
-  const target = ex.targetSeconds || 30;
+  const sideValue = side === 'L'
+    ? (mode === 'reps' ? (c.repsL || 0) : (c.durationL || 0))
+    : (mode === 'reps' ? (c.repsR || 0) : (c.durationR || 0));
+  const target = getMobilityTargetValue(ex);
 
   if (sideDone && !timer) {
     return `<div class="mobility-side-row done">
       ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      <span style="font-family:var(--mono);font-size:13px;color:var(--accent)">${fmtTimer(sideTime)}s</span>
+      <span style="font-family:var(--mono);font-size:13px;color:var(--accent)">${mode === 'reps' ? `${sideValue || target} reps` : `${fmtTimer(sideValue)}s`}</span>
       <div style="flex:1"></div>
       <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px" data-action="reset-mob-side" data-ex-id="${ex.id}" data-side="${side}">Redo</button>
+    </div>`;
+  }
+
+  if (mode === 'reps') {
+    return `<div class="mobility-side-row">
+      ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
+      <input type="number" inputmode="numeric" class="mobility-target-input" value="${target}" min="1" max="100"
+        data-change-action="update-mob-target" data-ex-id="${ex.id}" data-select-on-click>
+      <span style="font-size:10px;color:var(--text3)">reps</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:12px"
+        data-action="complete-mob-reps" data-ex-id="${ex.id}" data-side="${side}">
+        Done
+      </button>
     </div>`;
   }
 
@@ -9303,7 +9369,8 @@ function toggleMobTimer(exId, side) {
   const key = `${exId}_${side}`;
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
-  const target = ex.targetSeconds || 30;
+  if (getMobilityTargetMode(ex) === 'reps') return;
+  const target = getMobilityTargetValue(ex);
   let timer = mobilityTimers[key];
 
   if (!timer) {
@@ -9343,16 +9410,31 @@ function tickMobTimer(exId, side) {
   }
 }
 
-async function completeMobSide(exId, side, duration) {
+async function completeMobSide(exId, side, value) {
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
+  const mode = getMobilityTargetMode(ex);
+  const target = getMobilityTargetValue(ex);
+  const parsedValue = mode === 'reps'
+    ? Math.max(1, parseInt(value, 10) || target)
+    : Math.max(1, parseInt(value, 10) || target);
   if (!mobilityChecks[exId]) mobilityChecks[exId] = {};
   const c = mobilityChecks[exId];
   if (side === 'L') {
-    if (ex.bilateral) { c.doneL = true; c.durationL = duration; }
-    else { c.done = true; c.doneL = true; c.durationL = duration; }
+    if (ex.bilateral) {
+      c.doneL = true;
+      if (mode === 'reps') c.repsL = parsedValue;
+      else c.durationL = parsedValue;
+    } else {
+      c.done = true;
+      c.doneL = true;
+      if (mode === 'reps') c.repsL = parsedValue;
+      else c.durationL = parsedValue;
+    }
   } else {
-    c.doneR = true; c.durationR = duration;
+    c.doneR = true;
+    if (mode === 'reps') c.repsR = parsedValue;
+    else c.durationR = parsedValue;
   }
   c.ts = Date.now();
   // Clear timer state
@@ -9379,8 +9461,16 @@ async function completeMobSide(exId, side, duration) {
 async function resetMobSide(exId, side) {
   const c = mobilityChecks[exId];
   if (!c) return;
-  if (side === 'L') { c.doneL = false; c.durationL = 0; c.done = false; }
-  else { c.doneR = false; c.durationR = 0; }
+  if (side === 'L') {
+    c.doneL = false;
+    c.durationL = 0;
+    c.repsL = 0;
+    c.done = false;
+  } else {
+    c.doneR = false;
+    c.durationR = 0;
+    c.repsR = 0;
+  }
   delete mobilityTimers[`${exId}_${side}`];
   await saveMobilityChecks();
   renderMobility();
@@ -9393,14 +9483,37 @@ async function saveMobNote(exId, val) {
 }
 
 async function updateMobTarget(exId, val) {
-  const secs = Math.max(5, Math.min(300, parseInt(val) || 30));
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
-  ex.targetSeconds = secs;
+  const mode = getMobilityTargetMode(ex);
+  ex.targetMode = mode;
+  if (mode === 'reps') {
+    ex.targetReps = Math.max(1, Math.min(100, parseInt(val, 10) || 10));
+  } else {
+    ex.targetSeconds = Math.max(5, Math.min(300, parseInt(val, 10) || 30));
+  }
   await dbPut('mobility_exercises', ex);
 }
 
 // ── Edit mode & exercise CRUD ──
+function setMobilityTargetEditor(mode, value) {
+  const targetLabel = document.getElementById('mobility-target-label');
+  const targetInput = document.getElementById('mobility-dur-input');
+  const normalized = mode === 'reps' ? 'reps' : 'seconds';
+  targetInput.dataset.targetMode = normalized;
+  if (normalized === 'reps') {
+    targetLabel.textContent = 'Target (reps)';
+    targetInput.min = '1';
+    targetInput.max = '100';
+    targetInput.value = Math.max(1, parseInt(value, 10) || 10);
+  } else {
+    targetLabel.textContent = 'Target (seconds)';
+    targetInput.min = '5';
+    targetInput.max = '300';
+    targetInput.value = Math.max(5, parseInt(value, 10) || 30);
+  }
+}
+
 function toggleMobilityEditMode() {
   mobilityEditMode = !mobilityEditMode;
   const btn = document.getElementById('mobility-edit-btn');
@@ -9414,9 +9527,11 @@ function openMobilityEdit(exId) {
   editingMobilityId = exId;
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
+  const mode = getMobilityTargetMode(ex);
+  const target = getMobilityTargetValue(ex);
   document.getElementById('mobility-modal-title').textContent = 'Edit Exercise';
   document.getElementById('mobility-name-input').value = ex.name;
-  document.getElementById('mobility-dur-input').value = ex.targetSeconds || 30;
+  setMobilityTargetEditor(mode, target);
   document.getElementById('mobility-day-input').value = ex.day || 'A';
   document.getElementById('mobility-bilateral-input').checked = !!ex.bilateral;
   document.getElementById('mobility-notes-input').value = ex.cues || '';
@@ -9428,7 +9543,7 @@ function openMobilityAdd() {
   editingMobilityId = null;
   document.getElementById('mobility-modal-title').textContent = 'Add Exercise';
   document.getElementById('mobility-name-input').value = '';
-  document.getElementById('mobility-dur-input').value = 30;
+  setMobilityTargetEditor('seconds', 30);
   document.getElementById('mobility-day-input').value = mobilityDay || 'A';
   document.getElementById('mobility-bilateral-input').checked = false;
   document.getElementById('mobility-notes-input').value = '';
@@ -9449,7 +9564,11 @@ document.getElementById('mobility-reset-btn').addEventListener('click', async ()
 document.getElementById('mobility-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('mobility-name-input').value.trim();
   if (!name) { showToast('Enter an exercise name'); return; }
-  const targetSeconds = parseInt(document.getElementById('mobility-dur-input').value) || 30;
+  const targetInput = document.getElementById('mobility-dur-input');
+  const targetMode = targetInput.dataset.targetMode === 'reps' ? 'reps' : 'seconds';
+  const rawTarget = parseInt(targetInput.value, 10);
+  const targetReps = Math.max(1, Math.min(100, rawTarget || 10));
+  const targetSeconds = Math.max(5, Math.min(300, rawTarget || 30));
   const day = document.getElementById('mobility-day-input').value;
   const bilateral = document.getElementById('mobility-bilateral-input').checked;
   const cues = document.getElementById('mobility-notes-input').value.trim();
@@ -9457,11 +9576,20 @@ document.getElementById('mobility-save-btn').addEventListener('click', async () 
   if (editingMobilityId) {
     const idx = mobilityExercises.findIndex(e => e.id === editingMobilityId);
     if (idx >= 0) {
-      Object.assign(mobilityExercises[idx], { name, targetSeconds, day, bilateral, cues });
+      Object.assign(mobilityExercises[idx], { name, targetMode, day, bilateral, cues });
+      if (targetMode === 'reps') {
+        mobilityExercises[idx].targetReps = targetReps;
+        delete mobilityExercises[idx].targetSeconds;
+      } else {
+        mobilityExercises[idx].targetSeconds = targetSeconds;
+        delete mobilityExercises[idx].targetReps;
+      }
       await dbPut('mobility_exercises', mobilityExercises[idx]);
     }
   } else {
-    const ex = { id: uid(), name, targetSeconds, day, bilateral, cues, order: mobilityExercises.length };
+    const ex = { id: uid(), name, targetMode, day, bilateral, cues, order: mobilityExercises.length };
+    if (targetMode === 'reps') ex.targetReps = targetReps;
+    else ex.targetSeconds = targetSeconds;
     await dbPut('mobility_exercises', ex);
   }
   closeModal('modal-mobility-add');
@@ -9484,6 +9612,8 @@ document.getElementById('mobility-delete-btn').addEventListener('click', async (
 async function openMobilityHistory(exId) {
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
+  const mode = getMobilityTargetMode(ex);
+  const fallbackTarget = getMobilityTargetValue(ex);
   document.getElementById('mobility-history-title').textContent = ex.name;
   const body = document.getElementById('mobility-history-body');
   body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">Loading…</div>';
@@ -9503,11 +9633,16 @@ async function openMobilityHistory(exId) {
     const dateStr = new Date(dc.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
     let timeStr;
     if (ex.bilateral) {
-      const lStr = c.doneL ? `L: ${c.durationL || 0}s` : 'L: —';
-      const rStr = c.doneR ? `R: ${c.durationR || 0}s` : 'R: —';
+      const lStr = c.doneL
+        ? (mode === 'reps' ? `L: ${c.repsL || fallbackTarget} reps` : `L: ${c.durationL || 0}s`)
+        : 'L: —';
+      const rStr = c.doneR
+        ? (mode === 'reps' ? `R: ${c.repsR || fallbackTarget} reps` : `R: ${c.durationR || 0}s`)
+        : 'R: —';
       timeStr = `${lStr}  ·  ${rStr}`;
     } else {
-      timeStr = c.durationL ? `${c.durationL}s` : '✓';
+      if (mode === 'reps') timeStr = c.done ? `${c.repsL || fallbackTarget} reps` : '✓';
+      else timeStr = c.durationL ? `${c.durationL}s` : '✓';
     }
     const noteStr = c.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(c.notes)}</div>` : '';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
@@ -11282,7 +11417,7 @@ if ('serviceWorker' in navigator) {
     };
 
     navigator.serviceWorker.addEventListener('controllerchange', safeReload);
-    // Relative registration works for both root-hosted (Vercel) and subpath-hosted (GitHub Pages) deployments.
+    // Relative registration works for subpath-hosted GitHub Pages deployment.
     navigator.serviceWorker.register('./sw.js').then(reg => {
       if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       reg.addEventListener('updatefound', () => {
