@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0b14">
-<title>Iron Log</title>
+<title>Baseline</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20x%3D%2750%27%20y%3D%2750%27%20font-size%3D%2772%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27central%27%3E%F0%9F%A6%BE%3C%2Ftext%3E%3C%2Fsvg%3E">
-<meta name="apple-mobile-web-app-title" content="Iron Log">
+<meta name="apple-mobile-web-app-title" content="Baseline">
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27112%27%20fill%3D%27%230d0b14%27%2F%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20font-size%3D%27300%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27central%27%3E%F0%9F%A6%BE%3C%2Ftext%3E%3C%2Fsvg%3E">
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Iron%20Log%22%2C%22short_name%22%3A%22IronLog%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d0b14%22%2C%22theme_color%22%3A%22%230d0b14%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520192%2520192%2527%253E%253Crect%2520width%253D%2527192%2527%2520height%253D%2527192%2527%2520rx%253D%252742%2527%2520fill%253D%2527%25230d0b14%2527%252F%253E%253Ctext%2520x%253D%252750%2525%2527%2520y%253D%252750%2525%2527%2520font-size%253D%2527112%2527%2520text-anchor%253D%2527middle%2527%2520dominant-baseline%253D%2527central%2527%253E%25F0%259F%25A6%25BE%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520512%2520512%2527%253E%253Crect%2520width%253D%2527512%2527%2520height%253D%2527512%2527%2520rx%253D%2527112%2527%2520fill%253D%2527%25230d0b14%2527%252F%253E%253Ctext%2520x%253D%252750%2525%2527%2520y%253D%252750%2525%2527%2520font-size%253D%2527300%2527%2520text-anchor%253D%2527middle%2527%2520dominant-baseline%253D%2527central%2527%253E%25F0%259F%25A6%25BE%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1053,6 +1053,33 @@ select option { background: var(--bg3); }
 }
 .set-detail.open { display: flex; }
 .set-detail-row { display: flex; gap: 8px; }
+
+/* Past workout Voltra aux edit row */
+.past-aux-row {
+  display: grid;
+  grid-template-columns: 20px repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  align-items: center;
+  margin-top: 3px;
+}
+.past-aux-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.past-aux-input {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 5px;
+  text-align: center;
+  width: 100%;
+}
 
 /* Add set / history row */
 .ex-block-footer {
@@ -2591,7 +2618,7 @@ input:focus, textarea:focus, select:focus {
 <div id="loading">
   <div class="loading-logo">
     <div style="font-size:52px;margin-bottom:4px">🦾</div>
-    Iron<span>Log</span>
+    Base<span>line</span>
   </div>
   <div class="spinner"></div>
   <div class="loading-sub">Loading your data...</div>
@@ -2645,7 +2672,7 @@ input:focus, textarea:focus, select:focus {
         <div>
           <div class="page-title" style="display:flex;align-items:center;gap:8px">
             <span style="font-size:24px;line-height:1;filter:drop-shadow(0 0 8px rgba(167,139,250,0.5))">🦾</span>
-            Iron<span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span>
+            <span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Baseline</span>
             <span id="sync-dot" title="Checking sync…"></span>
           </div>
           <div class="page-sub" id="home-stats-sub"></div>
@@ -3417,7 +3444,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-03';
+const RELEASE_ID = '2026.04.19-05';
 const LAST_DEPLOYED_RELEASE_KEY = '__last_deployed_release_id__';
 
 // Sync status tracking
@@ -3959,6 +3986,7 @@ const PATTERN_SLOTS = [
 const WORKOUT_CATEGORIES = {
   upper:     { label: 'Upper',      icon: '🔱', muscles: ['chest','back','shoulders'], color: '#a78bfa' },
   lower:     { label: 'Lower',      icon: '🛞', muscles: ['quads','hamstrings','glutes','calves'], color: '#f59e0b' },
+  full_body: { label: 'Full Body',  icon: '🧱', all: true, color: '#22d3ee' },
   arms_core: { label: 'Arms & Core',icon: '🍬', muscles: ['biceps','triceps','core'], color: '#f472b6' },
   cardio:    { label: 'Cardio',     icon: '🫠', ids: ['concept2'], color: '#f87171' },
   other:     { label: 'Other',      icon: '🎲', all: true, color: '#60a5fa' },
@@ -3967,6 +3995,7 @@ const WORKOUT_CATEGORIES = {
 // Map legacy category keys to current ones
 function resolveCategory(key) {
   if (key === 'arms' || key === 'core') return 'arms_core';
+  if (key === 'fullbody' || key === 'full-body') return 'full_body';
   return WORKOUT_CATEGORIES[key] ? key : 'other';
 }
 
@@ -6075,10 +6104,6 @@ async function viewWorkoutDetail(sessionId) {
         </div>
         ${sets.map((s, i) => {
           const origIdx = ex.sets.indexOf(s);
-          const vTags = [];
-          if (s.weightEcc) vTags.push(`ECC ${s.weightEcc}`);
-          if (s.weightChains) vTags.push(`CHN ${s.weightChains}`);
-          if (s.weightInverse) vTags.push(`INV ${s.weightInverse}`);
           return `<div style="border-top:1px solid var(--border);padding:2px 0">
             <div style="display:grid;grid-template-columns:${pastGridCols};gap:4px;align-items:center">
               <span style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center">${i+1}</span>
@@ -6086,7 +6111,17 @@ async function viewWorkoutDetail(sessionId) {
               <input type="number" value="${s.reps}" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 6px;text-align:center;width:100%" inputmode="numeric" data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="reps">
               <button data-action="delete-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px;border-radius:4px;opacity:0.5;line-height:1" title="Delete set">×</button>
             </div>
-            ${vTags.length ? `<div style="padding:0 0 2px 20px" class="voltra-tags">${vTags.join(' · ')}</div>` : ''}
+            ${pastIsVoltra ? `
+              <div class="past-aux-row">
+                <span class="past-aux-label">aux</span>
+                <input class="past-aux-input" type="number" step="0.5" value="${s.weightEcc || ''}" placeholder="ECC" inputmode="decimal"
+                  data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="weightEcc">
+                <input class="past-aux-input" type="number" step="0.5" value="${s.weightChains || ''}" placeholder="CHN" inputmode="decimal"
+                  data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="weightChains">
+                <input class="past-aux-input" type="number" step="0.5" value="${s.weightInverse || ''}" placeholder="INV" inputmode="decimal"
+                  data-change-action="edit-past-set" data-session-id="${session.id}" data-ex-idx="${exI}" data-set-idx="${origIdx}" data-field="weightInverse">
+              </div>
+            ` : ''}
           </div>`;
         }).join('')}
         ${sets.length === 0 ? '<div style="font-size:12px;color:var(--text3);padding:6px 0">No sets completed</div>' : ''}
@@ -10137,7 +10172,18 @@ async function addSetToPastWorkout(sessionId, exIdx) {
   if (!session || !session.exercises[exIdx]) return;
   const sets = session.exercises[exIdx].sets;
   const last = sets.filter(s => s.completed).pop() || sets[sets.length - 1] || {weight: 0, reps: 8};
-  sets.push({weight: last.weight, weightEcc: last.weightEcc || 0, weightChains: last.weightChains || 0, reps: last.reps, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''});
+  sets.push({
+    weight: last.weight,
+    weightEcc: last.weightEcc || 0,
+    weightChains: last.weightChains || 0,
+    weightInverse: last.weightInverse || 0,
+    reps: last.reps,
+    completed: true,
+    completedAt: Date.now(),
+    rpe: null,
+    restSeconds: null,
+    notes: ''
+  });
   await dbPut('sessions', session);
   viewWorkoutDetail(sessionId);
 }
@@ -10168,7 +10214,18 @@ function addExToPastWorkout(sessionId) {
     session.exercises.push({
       variantId,
       supersetId: null,
-      sets: [{weight: 0, reps: 8, completed: true, completedAt: Date.now(), rpe: null, restSeconds: null, notes: ''}]
+      sets: [{
+        weight: 0,
+        weightEcc: 0,
+        weightChains: 0,
+        weightInverse: 0,
+        reps: 8,
+        completed: true,
+        completedAt: Date.now(),
+        rpe: null,
+        restSeconds: null,
+        notes: ''
+      }]
     });
     await dbPut('sessions', session);
     viewWorkoutDetail(sessionId);
@@ -10315,7 +10372,7 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
     const a = document.createElement('a');
     const date = new Date().toISOString().slice(0,10);
     a.href = url;
-    a.download = `ironlog-backup-${date}.json`;
+    a.download = `baseline-backup-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('Backup downloaded');
@@ -10337,7 +10394,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
     const text = await file.text();
     const data = JSON.parse(text);
     if (!data._ironlog_backup || !data.stores) {
-      showToast('Not a valid IronLog backup');
+      showToast('Not a valid Baseline backup');
       return;
     }
     const storeNames = Object.keys(data.stores).filter(s => BACKUP_STORES.includes(s));
@@ -10373,7 +10430,7 @@ async function buildClaudeExport() {
   const lines = [];
   const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
 
-  lines.push(`# IronLog Training Summary`);
+  lines.push(`# Baseline Training Summary`);
   lines.push(`Generated: ${today}`);
   if (latestBW) {
     lines.push(`Bodyweight: ${latestBW.weight} lbs (${latestBW.date})`);
@@ -10675,7 +10732,7 @@ function migrateLegacyId(id) {
 }
 
 
-const HISTORICAL_WORKOUT_CLASSIFY_VERSION = 'historical_workout_classify_v2';
+const HISTORICAL_WORKOUT_CLASSIFY_VERSION = 'historical_workout_classify_v3';
 
 function formatSessionMonthDay(epoch) {
   const d = new Date(epoch || Date.now());
@@ -10742,19 +10799,23 @@ function inferHistoricalWorkoutClassification(session) {
 
   let category = 'other';
   let titleBase = 'Other';
+  const strengthCount = counts.upper + counts.lower + counts.arms + counts.core;
 
-  if (counts.cardio > 0 && counts.upper + counts.lower + counts.arms + counts.core === 0) {
+  if (counts.cardio > 0 && strengthCount === 0) {
     category = 'cardio';
     titleBase = 'Cardio';
-  } else if (counts.upper === 0 && counts.lower === 0 && counts.cardio === 0 && (counts.arms > 0 || counts.core > 0)) {
+  } else if (counts.lower > 0 && (counts.upper > 0 || counts.arms > 0 || counts.core > 0)) {
+    category = 'full_body';
+    titleBase = 'Full Body';
+  } else if (counts.upper === 0 && counts.lower === 0 && (counts.arms > 0 || counts.core > 0)) {
     category = 'arms_core';
     if (counts.core > 0 && counts.arms === 0) titleBase = 'Core';
     else if (counts.arms > 0 && counts.core === 0) titleBase = 'Arms';
     else titleBase = 'Arms & Core';
-  } else if (counts.lower > 0 && counts.upper === 0 && counts.cardio === 0) {
+  } else if (counts.lower > 0 && counts.upper === 0) {
     category = 'lower';
     titleBase = 'Lower';
-  } else if (counts.upper > 0 && counts.lower === 0 && counts.cardio === 0) {
+  } else if (counts.upper > 0 && counts.lower === 0) {
     category = 'upper';
     titleBase = 'Upper';
   } else {

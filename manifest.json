@@ -1,6 +1,6 @@
 {
-  "name": "Iron Log",
-  "short_name": "Iron Log",
+  "name": "Baseline",
+  "short_name": "Baseline",
   "description": "Personal workout tracker",
   "start_url": "/lifting/",
   "display": "standalone",
