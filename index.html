@@ -3451,7 +3451,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-14';
+const RELEASE_ID = '2026.04.19-16';
 const APP_MAIN_URL = 'https://cdfaulkner.github.io/lifting/';
 
 // Sync status tracking
@@ -9299,7 +9299,7 @@ function getDayExercises(day) {
 function isMobExDone(ex) {
   const c = mobilityChecks[ex.id];
   if (!c) return false;
-  if (ex.bilateral) return !!c.done && !!c.doneL && !!c.doneR;
+  if (ex.bilateral) return !!c.doneL && !!c.doneR;
   return !!(c.done || c.doneL);
 }
 
@@ -9539,19 +9539,11 @@ async function completeMobSide(exId, side, value) {
     if (mode === 'reps') c.repsR = parsedValue;
     else c.durationR = parsedValue;
   }
+  if (ex.bilateral) c.done = !!c.doneL && !!c.doneR;
   c.ts = Date.now();
   // Clear timer state
   delete mobilityTimers[`${exId}_${side}`];
   softHaptic(12);
-  // Play a short beep
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value = 880; gain.gain.value = 0.3;
-    osc.start(); osc.stop(ctx.currentTime + 0.15);
-  } catch(e) {}
   const allDoneNow = getDayExercises().length > 0 && getDayExercises().every(item => isMobExDone(item));
   await saveMobilityChecks();
   if (allDoneNow) {
@@ -9573,6 +9565,7 @@ async function resetMobSide(exId, side) {
     c.doneR = false;
     c.durationR = 0;
     c.repsR = 0;
+    if (c.doneL) c.done = false;
   }
   delete mobilityTimers[`${exId}_${side}`];
   await saveMobilityChecks();
