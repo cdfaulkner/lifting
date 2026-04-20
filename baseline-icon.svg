@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Baseline icon">
   <defs>
     <linearGradient id="g" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#8b5cf6"/>
-      <stop offset="0.55" stop-color="#22d3ee"/>
-      <stop offset="1" stop-color="#34d399"/>
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="0.55" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#d946ef"/>
     </linearGradient>
   </defs>
   <rect x="0" y="0" width="512" height="512" rx="112" fill="#0d0b14"/>
@@ -17,6 +17,6 @@
   <path d="M256 296 L316 388" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round"/>
   <path d="M256 296 L172 348" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
   <path d="M256 296 L340 348" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/>
-  <circle cx="256" cy="232" r="8" fill="#22d3ee"/>
-  <circle cx="256" cy="296" r="8" fill="#22d3ee"/>
+  <circle cx="256" cy="232" r="8" fill="#c4b5fd"/>
+  <circle cx="256" cy="296" r="8" fill="#c4b5fd"/>
 </svg>

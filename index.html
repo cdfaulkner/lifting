@@ -2045,6 +2045,19 @@ textarea { resize: none; }
   text-align: center;
 }
 .loading-logo span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  display: block;
+  margin: 0 auto 4px;
+  filter: drop-shadow(0 0 8px rgba(167,139,250,0.45));
+}
+.brand-mark-sm {
+  width: 24px;
+  height: 24px;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(167,139,250,0.45));
+}
 .loading-sub { font-family: var(--mono); font-size: 12px; color: var(--text3); }
 .spinner {
   width: 32px;
@@ -2617,7 +2630,7 @@ input:focus, textarea:focus, select:focus {
 
 <div id="loading">
   <div class="loading-logo">
-    <div style="font-size:52px;margin-bottom:4px">🦾</div>
+    <img src="baseline-icon.svg" alt="" class="brand-mark">
     Base<span>line</span>
   </div>
   <div class="spinner"></div>
@@ -2671,7 +2684,7 @@ input:focus, textarea:focus, select:focus {
       <div class="page-header" style="justify-content:space-between">
         <div>
           <div class="page-title" style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:24px;line-height:1;filter:drop-shadow(0 0 8px rgba(167,139,250,0.5))">🦾</span>
+            <img src="baseline-icon.svg" alt="" class="brand-mark-sm">
             <span style="background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Baseline</span>
             <span id="sync-dot" title="Checking sync…"></span>
           </div>
@@ -3436,7 +3449,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-06';
+const RELEASE_ID = '2026.04.19-07';
 const LAST_DEPLOYED_RELEASE_KEY = '__last_deployed_release_id__';
 
 // Sync status tracking
