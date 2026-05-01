@@ -474,40 +474,56 @@ select option { background: var(--bg3); }
 }
 .home-history-search { flex:1 1 180px; min-width:160px; }
 .session-context {
-  margin: 0 14px 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(167,139,250,0.06), rgba(167,139,250,0.03));
-  border: 1px solid rgba(167,139,250,0.12);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.session-context::-webkit-scrollbar {
+  display: none;
 }
 .session-context-grid {
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap:8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: max-content;
 }
 .session-context-stat {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.03);
-  border-radius: 10px;
-  padding: 8px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(167,139,250,0.06);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 .session-context-stat .label {
   font-family: var(--mono);
   font-size:10px;
   color: var(--text3);
-  margin-bottom:4px;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 .session-context-stat .value {
-  font-size:12px;
+  font-size:11px;
   color: var(--text2);
   font-weight:600;
-  line-height:1.3;
+  line-height:1;
 }
 .session-context-trend {
-  margin-top:8px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
 }
 .session-context-chip {
   padding:4px 8px;
@@ -517,12 +533,23 @@ select option { background: var(--bg3); }
   border: 1px solid rgba(96,165,250,0.14);
   font-size:10px;
   font-family: var(--mono);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 .session-context-note {
-  margin-top:8px;
-  font-size:11px;
+  margin-top: 0;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  font-size: 10px;
   color: var(--text2);
-  line-height:1.4;
+  font-family: var(--mono);
+  flex: 0 0 auto;
 }
 .finish-topset-list {
   margin-top: 12px;
@@ -551,7 +578,7 @@ select option { background: var(--bg3); }
   line-height:1.4;
 }
 @media (max-width: 520px) {
-  .session-context-grid { grid-template-columns: 1fr; }
+  .session-context-note { max-width: 160px; }
 }
 
 /* ════════════════════════════════════
@@ -1090,6 +1117,7 @@ select option { background: var(--bg3); }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 /* ── Superset grouping ── */
@@ -1141,6 +1169,9 @@ select option { background: var(--bg3); }
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text3);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
 }
 .prev-best span { color: var(--text2); }
 
@@ -1946,6 +1977,12 @@ textarea { resize: none; }
   align-items: flex-start;
   gap: 8px;
 }
+.mobility-sides-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
 .mobility-side-row {
   flex: 1;
   display: flex;
@@ -1955,10 +1992,36 @@ textarea { resize: none; }
   background: rgba(13,11,20,0.78);
   border-radius: var(--r2);
   border: 1px solid var(--border);
+  min-width: 0;
 }
 .mobility-side-row.done {
   border-color: var(--accent);
   background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(96,165,250,0.06));
+}
+.mobility-side-spacer {
+  flex: 1;
+  min-width: 4px;
+}
+.mobility-time-btn {
+  min-width: 62px;
+  padding: 4px 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: center;
+  cursor: pointer;
+}
+.mobility-time-btn.running {
+  border-color: rgba(167,139,250,0.75);
+  box-shadow: 0 0 0 1px rgba(167,139,250,0.2);
+}
+.mobility-time-btn:active {
+  transform: scale(0.98);
 }
 .mobility-target-input,
 .mobility-notes-input {
@@ -2005,6 +2068,27 @@ textarea { resize: none; }
   font-size: 11px;
   color: rgba(255,255,255,0.82);
   margin-top: 2px;
+}
+@media (max-width: 900px), (pointer: coarse) {
+  .mobility-sides-grid {
+    grid-template-columns: 1fr;
+  }
+  .mobility-side-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    padding: 8px 9px;
+  }
+  .mobility-side-spacer {
+    display: none;
+  }
+  .mobility-side-row .btn {
+    margin-left: auto;
+  }
+  .mobility-time-btn {
+    min-width: 54px;
+    font-size: 17px;
+    padding: 3px 8px;
+  }
 }
 
 /* ════════════════════════════════════
@@ -3029,6 +3113,7 @@ input:focus, textarea:focus, select:focus {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
         Delete
       </button>
+      <button class="btn btn-primary" id="ex-resume-btn" style="flex:1">Resume this workout</button>
       <button class="btn btn-secondary" id="ex-repeat-btn" style="flex:1">Repeat this workout</button>
     </div>
   </div>
@@ -3402,6 +3487,7 @@ input:focus, textarea:focus, select:focus {
     </div>
     <div class="modal-body" id="finish-receipt-body"></div>
     <div class="modal-footer" style="display:flex;gap:8px">
+      <button class="btn btn-secondary" id="finish-resume-btn" style="flex:1">Undo Finish</button>
       <button class="btn btn-secondary" id="finish-view-summary-btn" style="flex:1">View Summary</button>
       <button class="btn btn-primary" data-close-modal="modal-finish-receipt" style="flex:1">Done</button>
     </div>
@@ -3451,7 +3537,7 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.04.19-16';
+const RELEASE_ID = '2026.05.01-01';
 const APP_MAIN_URL = 'https://cdfaulkner.github.io/lifting/';
 
 // Sync status tracking
@@ -3861,7 +3947,7 @@ const EXERCISE_HIERARCHY = [
     resistances:["BW","Voltra","Misc","Band"],
     variants:["Unilateral"] },
   { id:"reverse_hyper", name:"Reverse Hyperextension", pattern:"hinge", muscles:["hamstrings","glutes"], sec:["back"],
-    resistances:["BW","Band"],
+    resistances:["BW","Voltra","Band"],
     variants:["Unilateral"] },
   // ── SHOULDERS ──
   { id:"overhead_press", name:"Overhead Press", pattern:"push", muscles:["shoulders"], sec:["triceps"],
@@ -4184,6 +4270,7 @@ let sessionStartEpoch = null;
 let sessionPausedAt = null;      // timestamp when paused, null when running
 let sessionPausedTotal = 0;      // accumulated pause ms
 let collapsedExercises = new Set();
+let finishReceiptSessionId = null;
 
 let editingTemplateId = null;
 let pendingPickExerciseCallback = null;
@@ -4585,6 +4672,7 @@ function openSummaryView() {
 }
 
 function buildFinishReceipt(session, previousSameCategory) {
+  finishReceiptSessionId = session.id;
   const body = document.getElementById('finish-receipt-body');
   const volume = computeSessionVolume(session);
   const sets = computeCompletedSets(session);
@@ -5667,16 +5755,19 @@ async function loadPrevBest(variantId, idx) {
       suggestion = `Match ${Number(prev.top.weight)||0}×${Number(prev.top.reps)||0}`;
     }
   }
-  const noteHtml = last.note ? `<div class="session-context-note">Last note: ${escHtml(last.note)}</div>` : '';
-  const manualCue = exerciseNotes[variantId] ? `<div class="session-context-note">Pinned cue: ${escHtml(exerciseNotes[variantId])}</div>` : '';
+  const noteHtml = last.note ? `<span class="session-context-note" title="Last note: ${escHtml(last.note)}">Note: ${escHtml(last.note)}</span>` : '';
+  const manualCue = exerciseNotes[variantId] ? `<span class="session-context-note" title="Pinned cue: ${escHtml(exerciseNotes[variantId])}">Cue: ${escHtml(exerciseNotes[variantId])}</span>` : '';
   const html = `
-    <div class="session-context-grid">
-      <div class="session-context-stat"><div class="label">Last time</div><div class="value">${Number(last.top.weight)||0}×${Number(last.top.reps)||0} <span style="color:var(--text3)">· ${lastDate}</span></div></div>
-      <div class="session-context-stat"><div class="label">Best recent</div><div class="value">${Number(best.top.weight)||0}×${Number(best.top.reps)||0} <span style="color:var(--text3)">· ${bestDate}</span></div></div>
-      <div class="session-context-stat"><div class="label">Next up</div><div class="value">${escHtml(suggestion || 'Build clean volume')}</div></div>
-    </div>
-    <div class="session-context-trend"><span class="session-context-chip">Recent: ${escHtml(trendBits)}</span><span class="session-context-chip">${history.length} logged session${history.length !== 1 ? 's' : ''}</span></div>
-    ${manualCue || noteHtml ? `<div>${manualCue}${noteHtml}</div>` : ''}`;
+    <div class="session-context">
+      <div class="session-context-grid">
+        <div class="session-context-stat"><span class="label">Last</span><span class="value">${Number(last.top.weight)||0}×${Number(last.top.reps)||0} <span style="color:var(--text3)">· ${lastDate}</span></span></div>
+        <div class="session-context-stat"><span class="label">Best</span><span class="value">${Number(best.top.weight)||0}×${Number(best.top.reps)||0} <span style="color:var(--text3)">· ${bestDate}</span></span></div>
+        <div class="session-context-stat"><span class="label">Next</span><span class="value">${escHtml(suggestion || 'Build clean volume')}</span></div>
+      </div>
+      <div class="session-context-trend"><span class="session-context-chip">Recent: ${escHtml(trendBits)}</span><span class="session-context-chip">${history.length} session${history.length !== 1 ? 's' : ''}</span></div>
+      ${manualCue}
+      ${noteHtml}
+    </div>`;
   _prevBestHtmlCache[variantId] = html;
   el.innerHTML = html;
 }
@@ -5894,6 +5985,7 @@ document.querySelectorAll('[data-analytics-mode]').forEach(btn => {
   btn.addEventListener('click', () => setAnalyticsMatchMode(btn.dataset.analyticsMode));
 });
 document.getElementById('home-summary-card')?.addEventListener('click', openSummaryView);
+document.getElementById('finish-resume-btn')?.addEventListener('click', () => resumeFinishedWorkout(finishReceiptSessionId));
 document.getElementById('finish-view-summary-btn')?.addEventListener('click', () => { closeModal('modal-finish-receipt'); openSummaryView(); });
 document.addEventListener('click', e => {
   const closeBtn = e.target.closest('[data-close-modal]');
@@ -5973,6 +6065,51 @@ function clearSessionDraft() {
   localStorage.removeItem(SESSION_DRAFT_KEY);
 }
 
+async function resumeFinishedWorkout(sessionId) {
+  if (!sessionId) return;
+  if (activeSession && activeSession.id === sessionId) {
+    closeModal('modal-finish-receipt');
+    closeModal('modal-exercise-detail');
+    document.getElementById('active-session').classList.add('open');
+    startTimer();
+    showToast('Resumed in-progress workout');
+    return;
+  }
+  if (activeSession && activeSession.id !== sessionId) {
+    if (!confirm('Replace your current in-progress workout with this saved workout?')) return;
+  }
+
+  const session = await dbGet('sessions', sessionId);
+  if (!session) {
+    showToast('Saved workout not found');
+    return;
+  }
+
+  clearInterval(sessionTimerInterval);
+  skipRestTimer();
+  resetSessionPRTracking();
+
+  const finishedAt = Number(session.endTime) || 0;
+  activeSession = JSON.parse(JSON.stringify(session));
+  activeSession.endTime = null;
+  activeSession.durationMinutes = null;
+
+  sessionStartEpoch = Number(activeSession.startTime) || Date.now();
+  sessionPausedAt = null;
+  sessionPausedTotal = Math.max(0, Number(activeSession.pausedTotalMs) || 0) + (finishedAt ? Math.max(0, Date.now() - finishedAt) : 0);
+  collapsedExercises = new Set();
+
+  document.getElementById('session-notes-input').value = activeSession.notes || '';
+  closeModal('modal-finish-receipt');
+  closeModal('modal-exercise-detail');
+  document.getElementById('active-session').classList.add('open');
+  renderActiveSession();
+  renderActiveBanner();
+  saveSessionDraft();
+  startTimer();
+  showToast('Workout moved back in progress');
+}
+
 // Debounced draft save — called on every set-input keystroke & notes edit
 let _draftTimer = null;
 function saveSessionDraftDebounced() {
@@ -5990,11 +6127,13 @@ document.getElementById('session-finish-btn').addEventListener('click', async ()
   clearInterval(sessionTimerInterval);
   skipRestTimer();
   const priorSessions = await getSortedSessions();
-  const previousSameCategory = priorSessions.find(s => resolveCategory(s.category) === resolveCategory(activeSession.category));
+  const previousSameCategory = priorSessions.find(s => s.id !== activeSession.id && resolveCategory(s.category) === resolveCategory(activeSession.category));
   activeSession.endTime = Date.now();
   // If still paused at finish, count pause time up to now
   const finalPaused = sessionPausedAt ? sessionPausedTotal + (Date.now() - sessionPausedAt) : sessionPausedTotal;
-  activeSession.durationMinutes = Math.round((activeSession.endTime - activeSession.startTime - finalPaused) / 60000);
+  activeSession.pausedTotalMs = finalPaused;
+  activeSession.activeDurationMs = Math.max(0, activeSession.endTime - activeSession.startTime - finalPaused);
+  activeSession.durationMinutes = Math.round(activeSession.activeDurationMs / 60000);
   activeSession.notes = document.getElementById('session-notes-input').value.trim();
 
   // Remove any unfilled slots before saving
@@ -6057,19 +6196,19 @@ async function viewWorkoutDetail(sessionId) {
   const endDT = session.endTime ? toLocalDatetimeStr(session.endTime) : '';
   const durVal = session.durationMinutes || '';
   const timeEditHtml = `<div id="workout-time-edit" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3)">
-    <div style="display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center">
+    <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center">
       <label style="font-size:11px;color:var(--text3)">Duration</label>
-      <div style="display:flex;align-items:center;gap:4px">
+      <div style="display:flex;align-items:center;gap:4px;justify-self:start">
         <input type="number" id="edit-duration" value="${durVal}" placeholder="min" inputmode="numeric" min="1"
           style="width:70px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);text-align:center">
         <span style="font-size:11px;color:var(--text3)">min</span>
       </div>
-      <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;grid-row:1/4" data-action="save-workout-time-edit">Save</button>
       <label style="font-size:11px;color:var(--text3)">Start</label>
       <input type="datetime-local" id="edit-start-time" value="${startDT}" style="padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
       <label style="font-size:11px;color:var(--text3)">End</label>
       <input type="datetime-local" id="edit-end-time" value="${endDT}" style="padding:5px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
     </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%;padding:6px 10px;font-size:12px" data-action="save-workout-time-edit">Save Time</button>
   </div>`;
 
   const notesHtml = session.notes
@@ -9000,12 +9139,31 @@ document.addEventListener('click', (event) => {
       completeMobSide(exId, side, reps);
       return;
     }
+    case 'complete-mob-timed': {
+      const exId = actionEl.dataset.exId;
+      const side = actionEl.dataset.side || 'L';
+      const row = actionEl.closest('.mobility-side-row');
+      const input = row ? row.querySelector('.mobility-target-input') : null;
+      const ex = mobilityExercises.find(e => e.id === exId);
+      const fallback = ex ? getMobilityTargetValue(ex) : 30;
+      const timer = mobilityTimers[`${exId}_${side}`];
+      const seconds = Math.max(
+        1,
+        Math.min(300, parseInt(input?.value, 10) || timer?.started || fallback)
+      );
+      completeMobSide(exId, side, seconds);
+      return;
+    }
     case 'reset-mob-side':
       resetMobSide(actionEl.dataset.exId, actionEl.dataset.side);
       return;
-    case 'toggle-mob-timer':
-      toggleMobTimer(actionEl.dataset.exId, actionEl.dataset.side);
+    case 'toggle-mob-timer': {
+      const row = actionEl.closest('.mobility-side-row');
+      const input = row ? row.querySelector('.mobility-target-input') : null;
+      const secondsInput = input ? parseInt(input.value, 10) : NaN;
+      toggleMobTimer(actionEl.dataset.exId, actionEl.dataset.side, secondsInput);
       return;
+    }
     default:
       return;
   }
@@ -9064,9 +9222,10 @@ document.addEventListener('input', (event) => {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY CHECKLIST
 // ═══════════════════════════════════════════════════════════════
-const MOBILITY_DEFAULTS_VERSION = 6;
+const MOBILITY_DEFAULTS_VERSION = 9;
 const MOBILITY_REP_IDS = new Set(['mob_9090', 'mob_dead_bugs', 'mob_wgs', 'mob_shoulder_rot', 'mob_tspine']);
-const MOBILITY_UNILATERAL_IDS = new Set(['mob_9090', 'mob_tspine']);
+const MOBILITY_UNILATERAL_IDS = new Set([]);
+const MOBILITY_BILATERAL_IDS = new Set(['mob_9090', 'mob_tspine']);
 const MOBILITY_REP_NAME_KEYS = new Set([
   '90_90_hip_swivels',
   '90_90_hip_rotation',
@@ -9080,7 +9239,8 @@ const MOBILITY_REP_NAME_KEYS = new Set([
   't_spine_rotation',
   't_spine_rotations'
 ]);
-const MOBILITY_UNILATERAL_NAME_KEYS = new Set([
+const MOBILITY_UNILATERAL_NAME_KEYS = new Set([]);
+const MOBILITY_BILATERAL_NAME_KEYS = new Set([
   '90_90_hip_swivels',
   '90_90_hip_rotation',
   '90_90_hip_rotations',
@@ -9089,14 +9249,14 @@ const MOBILITY_UNILATERAL_NAME_KEYS = new Set([
 ]);
 const DEFAULT_MOBILITY_EXERCISES = [
   { id:'mob_split_squat',  name:'Split Squat Hold',               targetMode:'seconds', targetSeconds:30, bilateral:true,  day:'A', order:0 },
-  { id:'mob_dead_hang',    name:'Dead Hang',                      targetMode:'seconds', targetSeconds:30, bilateral:false, day:'A', order:1 },
+  { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetMode:'reps',    targetReps:10,   bilateral:true,  day:'A', order:1 },
   { id:'mob_back_ext',     name:'Back Extension Hold',            targetMode:'seconds', targetSeconds:120,bilateral:false, day:'A', order:2 },
-  { id:'mob_9090',         name:'90/90 Hip Swivels',              targetMode:'reps',    targetReps:10,   bilateral:false, day:'A', order:3 },
+  { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:true,  day:'A', order:3 },
   { id:'mob_dead_bugs',    name:'Dead Bugs',                      targetMode:'reps',    targetReps:10,   bilateral:false, day:'A', order:4 },
   { id:'mob_wgs',          name:"World's Greatest Stretch",       targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:5 },
-  { id:'mob_shoulder_rot', name:'Shoulder Rotations',             targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:6 },
+  { id:'mob_dead_hang',    name:'Dead Hang',                      targetMode:'seconds', targetSeconds:30, bilateral:false, day:'B', order:6 },
   { id:'mob_iso_back_ext', name:'Isolateral Back Extension Hold', targetMode:'seconds', targetSeconds:45, bilateral:true,  day:'B', order:7 },
-  { id:'mob_tspine',       name:'T-Spine Rotation',               targetMode:'reps',    targetReps:10,   bilateral:false, day:'B', order:8 },
+  { id:'mob_9090',         name:'90/90 Hip Swivels',              targetMode:'reps',    targetReps:10,   bilateral:true,  day:'B', order:8 },
   { id:'mob_deep_squat',   name:'Deep Squat Hold',                targetMode:'seconds', targetSeconds:120,bilateral:false, day:'B', order:9 },
 ];
 const MOBILITY_SECONDS_MIGRATION_RULES = {
@@ -9120,7 +9280,7 @@ let mobilityExercises = [];
 let mobilityChecks = {};
 let mobilityDay = null; // 'A' or 'B'
 let mobilityEditMode = false;
-let mobilityTimers = {}; // { exId_side: { interval, remaining, running } }
+let mobilityTimers = {}; // { exId_side: { interval, remaining, running, started, endsAt } }
 let editingMobilityId = null;
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
@@ -9139,6 +9299,12 @@ function shouldForceMobilityUnilateral(ex) {
   if (!ex) return false;
   if (MOBILITY_UNILATERAL_IDS.has(ex.id)) return true;
   return MOBILITY_UNILATERAL_NAME_KEYS.has(normalizeMobilityName(ex.name));
+}
+
+function shouldForceMobilityBilateral(ex) {
+  if (!ex) return false;
+  if (MOBILITY_BILATERAL_IDS.has(ex.id)) return true;
+  return MOBILITY_BILATERAL_NAME_KEYS.has(normalizeMobilityName(ex.name));
 }
 
 function getMigratedDefaultSeconds(exId, prevSeconds, defSeconds) {
@@ -9212,10 +9378,13 @@ async function seedMobilityExercises() {
     }
 
     const forcedMode = def.targetMode || (shouldForceMobilityReps(def) ? 'reps' : 'seconds');
+    const forcedBilateral = shouldForceMobilityUnilateral(def)
+      ? false
+      : (shouldForceMobilityBilateral(def) ? true : def.bilateral);
     const merged = {
       ...prev,
       name: def.name,
-      bilateral: shouldForceMobilityUnilateral(def) ? false : def.bilateral,
+      bilateral: forcedBilateral,
       day: def.day,
       order: def.order,
       targetMode: forcedMode,
@@ -9251,6 +9420,10 @@ async function loadMobility() {
     }
     if (shouldForceMobilityUnilateral(ex) && ex.bilateral) {
       ex.bilateral = false;
+      changed = true;
+    }
+    if (shouldForceMobilityBilateral(ex) && !ex.bilateral) {
+      ex.bilateral = true;
       changed = true;
     }
     const mode = getMobilityTargetMode(ex);
@@ -9307,6 +9480,34 @@ function fmtTimer(s) {
   const m = Math.floor(s / 60);
   const sec = s % 60;
   return m > 0 ? `${m}:${sec.toString().padStart(2,'0')}` : `${sec}`;
+}
+
+function splitMobilityTimerKey(key) {
+  if (typeof key !== 'string' || key.length < 3) return { exId: key, side: 'L' };
+  if (key.endsWith('_R')) return { exId: key.slice(0, -2), side: 'R' };
+  if (key.endsWith('_L')) return { exId: key.slice(0, -2), side: 'L' };
+  return { exId: key, side: 'L' };
+}
+
+function getMobTimerRemaining(timer) {
+  if (!timer) return 0;
+  if (timer.running && timer.endsAt) {
+    const liveRemaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
+    timer.remaining = liveRemaining;
+    return liveRemaining;
+  }
+  return Math.max(0, parseInt(timer.remaining, 10) || 0);
+}
+
+function clearMobilityTimer(key) {
+  const timer = mobilityTimers[key];
+  if (!timer) return;
+  if (timer.interval) clearInterval(timer.interval);
+  delete mobilityTimers[key];
+}
+
+function clearAllMobilityTimers() {
+  Object.keys(mobilityTimers).forEach(clearMobilityTimer);
 }
 
 async function renderMobility() {
@@ -9382,7 +9583,7 @@ function renderMobExCard(ex) {
   let timerSection;
   if (ex.bilateral) {
     timerSection = `
-      <div style="display:flex;gap:6px;margin-top:8px">
+      <div class="mobility-sides-grid">
         ${renderSideTimer(ex, 'L', 'Left', c)}
         ${renderSideTimer(ex, 'R', 'Right', c)}
       </div>`;
@@ -9428,7 +9629,7 @@ function renderSideTimer(ex, side, label, c) {
       ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       <span style="font-family:var(--mono);font-size:13px;color:var(--accent)">${mode === 'reps' ? `${sideValue || target} reps` : `${fmtTimer(sideValue)}s`}</span>
-      <div style="flex:1"></div>
+      <div class="mobility-side-spacer"></div>
       <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px" data-action="reset-mob-side" data-ex-id="${ex.id}" data-side="${side}">Redo</button>
     </div>`;
   }
@@ -9439,7 +9640,7 @@ function renderSideTimer(ex, side, label, c) {
       <input type="number" inputmode="numeric" class="mobility-target-input" value="${target}" min="1" max="100"
         data-change-action="update-mob-target" data-ex-id="${ex.id}" data-select-on-click>
       <span style="font-size:10px;color:var(--text3)">reps</span>
-      <div style="flex:1"></div>
+      <div class="mobility-side-spacer"></div>
       <button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:12px"
         data-action="complete-mob-reps" data-ex-id="${ex.id}" data-side="${side}">
         Done
@@ -9447,46 +9648,62 @@ function renderSideTimer(ex, side, label, c) {
     </div>`;
   }
 
-  const remaining = timer ? timer.remaining : target;
+  const remaining = timer ? getMobTimerRemaining(timer) : target;
   const running = timer ? timer.running : false;
   const canEdit = !timer;
-
-  const timerDisplay = canEdit
-    ? `<input type="number" inputmode="numeric" class="mobility-target-input" value="${target}" min="5" max="300"
-        data-change-action="update-mob-target" data-ex-id="${ex.id}" data-select-on-click>`
-    : `<div style="font-family:var(--mono);font-size:20px;font-weight:600;min-width:42px;text-align:center;${remaining <= 5 && running ? 'color:var(--accent)' : ''}" id="mob-timer-${key}">${fmtTimer(remaining)}</div>`;
+  const timerText = fmtTimer(remaining);
+  const timerHint = running ? 'Tap time to pause' : (timer ? 'Tap time to resume' : 'Tap time to start');
+  const timerStyle = remaining <= 5 && running ? 'color:var(--accent)' : '';
 
   return `<div class="mobility-side-row">
     ${label ? `<span style="font-size:11px;font-weight:600;color:var(--text3);min-width:30px">${label}</span>` : ''}
-    ${timerDisplay}
-    ${canEdit ? '<span style="font-size:10px;color:var(--text3)">s</span>' : ''}
-    <div style="flex:1"></div>
-    <button class="btn ${running ? 'btn-ghost' : 'btn-primary'} btn-sm" style="padding:4px 12px;font-size:12px"
-      data-action="toggle-mob-timer" data-ex-id="${ex.id}" data-side="${side}">
-      ${running ? 'Pause' : (timer ? 'Resume' : 'Start')}
+    ${canEdit
+      ? `<input type="number" inputmode="numeric" class="mobility-target-input" value="${target}" min="5" max="300"
+          data-change-action="update-mob-target" data-ex-id="${ex.id}" data-select-on-click>
+        <span style="font-size:10px;color:var(--text3)">s</span>`
+      : `<span style="font-size:10px;color:var(--text3);min-width:42px;text-align:center">${target}s target</span>`}
+    <button class="mobility-time-btn ${running ? 'running' : ''}" style="${timerStyle}" id="mob-timer-${key}"
+      aria-label="${timerHint}" title="${timerHint}"
+      data-action="toggle-mob-timer" data-ex-id="${ex.id}" data-side="${side}">${timerText}</button>
+    <div class="mobility-side-spacer"></div>
+    <button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:12px"
+      title="Mark done without running timer" aria-label="Mark done without running timer"
+      data-action="complete-mob-timed" data-ex-id="${ex.id}" data-side="${side}">
+      Done
     </button>
   </div>`;
 }
 
-function toggleMobTimer(exId, side) {
+function toggleMobTimer(exId, side, secondsInput = NaN) {
   const key = `${exId}_${side}`;
   const ex = mobilityExercises.find(e => e.id === exId);
   if (!ex) return;
   if (getMobilityTargetMode(ex) === 'reps') return;
-  const target = getMobilityTargetValue(ex);
+  const hasManualSeconds = Number.isFinite(secondsInput);
+  const manualSeconds = hasManualSeconds ? Math.max(5, Math.min(300, parseInt(secondsInput, 10) || 30)) : null;
+  const target = manualSeconds || getMobilityTargetValue(ex);
   let timer = mobilityTimers[key];
 
   if (!timer) {
+    if (manualSeconds && ex.targetSeconds !== manualSeconds) {
+      ex.targetSeconds = manualSeconds;
+      dbPut('mobility_exercises', ex);
+    }
     // Start new timer
-    timer = { remaining: target, running: true, started: target };
+    timer = { remaining: target, running: true, started: target, endsAt: Date.now() + (target * 1000) };
     mobilityTimers[key] = timer;
     timer.interval = setInterval(() => tickMobTimer(exId, side), 1000);
   } else if (timer.running) {
     // Pause
+    timer.remaining = getMobTimerRemaining(timer);
     clearInterval(timer.interval);
+    timer.interval = null;
+    timer.endsAt = null;
     timer.running = false;
   } else {
     // Resume
+    if (timer.remaining <= 0) timer.remaining = target;
+    timer.endsAt = Date.now() + (timer.remaining * 1000);
     timer.running = true;
     timer.interval = setInterval(() => tickMobTimer(exId, side), 1000);
   }
@@ -9498,7 +9715,7 @@ function tickMobTimer(exId, side) {
   const timer = mobilityTimers[key];
   if (!timer || !timer.running) return;
 
-  timer.remaining--;
+  timer.remaining = getMobTimerRemaining(timer);
   const el = document.getElementById(`mob-timer-${key}`);
   if (el) {
     el.textContent = fmtTimer(Math.max(0, timer.remaining));
@@ -9507,11 +9724,32 @@ function tickMobTimer(exId, side) {
 
   if (timer.remaining <= 0) {
     clearInterval(timer.interval);
+    timer.interval = null;
+    timer.endsAt = null;
     timer.running = false;
     // Mark side complete
     completeMobSide(exId, side, timer.started);
   }
 }
+
+function syncRunningMobilityTimers() {
+  const keys = Object.keys(mobilityTimers);
+  if (!keys.length) return;
+  let touched = false;
+  for (const key of keys) {
+    const timer = mobilityTimers[key];
+    if (!timer || !timer.running) continue;
+    const { exId, side } = splitMobilityTimerKey(key);
+    tickMobTimer(exId, side);
+    touched = true;
+  }
+  if (touched) renderMobility();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') syncRunningMobilityTimers();
+});
+window.addEventListener('focus', syncRunningMobilityTimers);
 
 async function completeMobSide(exId, side, value) {
   const ex = mobilityExercises.find(e => e.id === exId);
@@ -9542,7 +9780,7 @@ async function completeMobSide(exId, side, value) {
   if (ex.bilateral) c.done = !!c.doneL && !!c.doneR;
   c.ts = Date.now();
   // Clear timer state
-  delete mobilityTimers[`${exId}_${side}`];
+  clearMobilityTimer(`${exId}_${side}`);
   softHaptic(12);
   const allDoneNow = getDayExercises().length > 0 && getDayExercises().every(item => isMobExDone(item));
   await saveMobilityChecks();
@@ -9567,7 +9805,7 @@ async function resetMobSide(exId, side) {
     c.repsR = 0;
     if (c.doneL) c.done = false;
   }
-  delete mobilityTimers[`${exId}_${side}`];
+  clearMobilityTimer(`${exId}_${side}`);
   await saveMobilityChecks();
   renderMobility();
 }
@@ -9650,7 +9888,7 @@ function openMobilityAdd() {
 document.getElementById('mobility-edit-btn').addEventListener('click', toggleMobilityEditMode);
 document.getElementById('mobility-reset-btn').addEventListener('click', async () => {
   mobilityChecks = {};
-  mobilityTimers = {};
+  clearAllMobilityTimers();
   await saveMobilityChecks();
   renderMobility();
   softHaptic(8);
@@ -10556,6 +10794,11 @@ document.getElementById('ex-repeat-btn').addEventListener('click', async () => {
   renderActiveSession();
   updatePauseUI();
   showToast('Repeating workout');
+});
+
+document.getElementById('ex-resume-btn').addEventListener('click', async () => {
+  if (!repeatWorkoutSessionId) return;
+  await resumeFinishedWorkout(repeatWorkoutSessionId);
 });
 
 document.getElementById('ex-delete-btn').addEventListener('click', async () => {
