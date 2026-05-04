@@ -4910,7 +4910,7 @@ async function startFromTemplate(templateId) {
         slotPattern: te.slotPattern,
         slotMuscles: te.slotMuscles || [],
         sets: (te.defaultSets || [{weight:0,reps:8},{weight:0,reps:8},{weight:0,reps:8}]).map((s,i) => ({
-          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
+          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, weightInverse: s.weightInverse || 0, reps: s.reps || 8,
           completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
         }))
       });
@@ -4929,6 +4929,7 @@ async function startFromTemplate(templateId) {
           weight: s.weight || 0,
           weightEcc: s.weightEcc || 0,
           weightChains: s.weightChains || 0,
+          weightInverse: s.weightInverse || 0,
           reps: s.reps || 8,
           completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
         }))
@@ -4962,7 +4963,13 @@ async function getLastSetsForVariant(variantId) {
   for (const s of sorted) {
     const ex = s.exercises.find(e => e.variantId === variantId);
     if (ex && ex.sets.some(st => st.completed)) {
-      return ex.sets.filter(st => st.completed).map(st => ({weight: st.weight, weightEcc: st.weightEcc || 0, weightChains: st.weightChains || 0, reps: st.reps}));
+      return ex.sets.filter(st => st.completed).map(st => ({
+        weight: st.weight,
+        weightEcc: st.weightEcc || 0,
+        weightChains: st.weightChains || 0,
+        weightInverse: st.weightInverse || 0,
+        reps: st.reps
+      }));
     }
   }
   return [{weight: 0, reps: 8}, {weight: 0, reps: 8}, {weight: 0, reps: 8}];
@@ -5320,7 +5327,7 @@ function fillSessionSlot(exIdx) {
       const lastSets = await getLastSetsForVariant(variantId);
       if (lastSets && activeSession && activeSession.exercises[exIdx] && activeSession.exercises[exIdx].variantId === variantId) {
         activeSession.exercises[exIdx].sets = lastSets.map((s,i) => ({
-          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, reps: s.reps || 8,
+          index: i, weight: s.weight || 0, weightEcc: s.weightEcc || 0, weightChains: s.weightChains || 0, weightInverse: s.weightInverse || 0, reps: s.reps || 8,
           completed: false, completedAt: null, rpe: null, restSeconds: null, notes: ''
         }));
         renderActiveSession();
@@ -5543,6 +5550,7 @@ function addSetToExercise(exIdx) {
     weight: lastSet.weight,
     weightEcc: lastSet.weightEcc || 0,
     weightChains: lastSet.weightChains || 0,
+    weightInverse: lastSet.weightInverse || 0,
     reps: lastSet.reps,
     completed: false,
     completedAt: null,
@@ -5705,11 +5713,12 @@ document.getElementById('superset-unlink-btn').addEventListener('click', () => {
 // Build prefilled sets for a variant from last session history
 async function buildPrevSets(variantId) {
   const raw = await getLastSetsForVariant(variantId);
-  // getLastSetsForVariant returns [{weight, reps, weightEcc?}] — normalize to full set objects
+  // getLastSetsForVariant returns lightweight set data — normalize to full set objects
   return raw.map(s => ({
     weight: s.weight || 0,
     weightEcc: s.weightEcc || 0,
     weightChains: s.weightChains || 0,
+    weightInverse: s.weightInverse || 0,
     reps: s.reps || 8,
     completed: false,
     completedAt: null,
@@ -7125,7 +7134,13 @@ function addTmplSet(exIdx) {
   if (!tmplExercises[exIdx]) return;
   const sets = tmplExercises[exIdx].defaultSets || [];
   const last = sets[sets.length - 1] || {weight: 0, reps: 8};
-  sets.push({weight: last.weight, reps: last.reps});
+  sets.push({
+    weight: last.weight || 0,
+    weightEcc: last.weightEcc || 0,
+    weightChains: last.weightChains || 0,
+    weightInverse: last.weightInverse || 0,
+    reps: last.reps || 8
+  });
   tmplExercises[exIdx].defaultSets = sets;
   renderTemplateExercises(tmplExercises);
 }
@@ -9281,6 +9296,7 @@ let mobilityChecks = {};
 let mobilityDay = null; // 'A' or 'B'
 let mobilityEditMode = false;
 let mobilityTimers = {}; // { exId_side: { interval, remaining, running, started, endsAt } }
+let mobilityLastCompletedByExId = {};
 let editingMobilityId = null;
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
@@ -9510,8 +9526,28 @@ function clearAllMobilityTimers() {
   Object.keys(mobilityTimers).forEach(clearMobilityTimer);
 }
 
+async function loadMobilityLastCompletedDates() {
+  const allChecks = await dbGetAll('mobility_checks');
+  const byExId = {};
+  for (const dayCheck of allChecks) {
+    if (!dayCheck || !dayCheck.checks) continue;
+    for (const [exId, check] of Object.entries(dayCheck.checks)) {
+      if (!check || !(check.done || check.doneL || check.doneR)) continue;
+      if (!byExId[exId] || dayCheck.date > byExId[exId]) byExId[exId] = dayCheck.date;
+    }
+  }
+  mobilityLastCompletedByExId = byExId;
+}
+
+function formatMobilityLastDone(dateStr) {
+  if (!dateStr) return 'Not completed yet';
+  const date = new Date(`${dateStr}T12:00:00`);
+  return `Last done ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+}
+
 async function renderMobility() {
   await loadMobility();
+  await loadMobilityLastCompletedDates();
   const subEl = document.getElementById('mobility-date-sub');
   const today = new Date();
   subEl.textContent = today.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
@@ -9570,6 +9606,7 @@ function renderMobExCard(ex) {
   const c = mobilityChecks[ex.id] || {};
   const done = isMobExDone(ex);
   const mode = getMobilityTargetMode(ex);
+  const lastDoneText = formatMobilityLastDone(mobilityLastCompletedByExId[ex.id]);
   const editBtns = mobilityEditMode ? `
     <button class="btn btn-ghost btn-sm btn-icon" data-action="open-mobility-edit" data-ex-id="${ex.id}" aria-label="Edit exercise">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -9604,6 +9641,7 @@ function renderMobExCard(ex) {
         <div style="font-size:15px;font-weight:600;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px">
           <span style="font-size:11px;color:var(--text3)">${done ? 'Done' : (mode === 'reps' ? (ex.bilateral ? '2 sides · reps' : 'reps') : (ex.bilateral ? '2 sides' : '1 timer'))}</span>
+          <span style="font-size:11px;color:var(--accent-blue)">${escHtml(lastDoneText)}</span>
           ${ex.cues ? `<div style="font-size:11px;color:var(--text3)">${escHtml(ex.cues)}</div>` : ''}
         </div>
       </div>
