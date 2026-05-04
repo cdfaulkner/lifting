@@ -3569,8 +3569,13 @@ input:focus, textarea:focus, select:focus {
 const SUPABASE_URL = 'https://dvahxqqmneahnboiuvnz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2YWh4cXFtbmVhaG5ib2l1dm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzE3MDUsImV4cCI6MjA4NzU0NzcwNX0.a4Zadt0iMJBeLqLYZmHYiBmbER-57lJxLHoN07rFgmc';
 const SUPABASE_STORES = new Set(['sessions', 'templates', 'bodyweight', 'measurements']);
-const RELEASE_ID = '2026.05.01-01';
 const APP_MAIN_URL = 'https://cdfaulkner.github.io/lifting/';
+const RELEASE_REPO_OWNER = 'cdfaulkner';
+const RELEASE_REPO_NAME = 'lifting';
+const RELEASE_REPO_BRANCH = 'main';
+const RELEASE_META_CACHE_KEY = '__release_meta_cache_v1__';
+const RELEASE_META_TTL_MS = 15 * 60 * 1000;
+let releaseMetaPromise = null;
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -3614,18 +3619,97 @@ function isGitHubPagesHost() {
   return host === main.hostname && (location.pathname || '').startsWith(expectedPath);
 }
 
+function readCachedReleaseMeta() {
+  try {
+    const raw = localStorage.getItem(RELEASE_META_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.meta || !parsed.fetchedAt) return null;
+    return parsed;
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeCachedReleaseMeta(meta) {
+  try {
+    localStorage.setItem(RELEASE_META_CACHE_KEY, JSON.stringify({
+      meta,
+      fetchedAt: Date.now()
+    }));
+  } catch (_) {}
+}
+
+function formatReleaseMeta(meta) {
+  if (!meta || !meta.sha) return 'unknown';
+  const shortSha = String(meta.sha).slice(0, 7);
+  const date = meta.date ? new Date(meta.date) : null;
+  const dateLabel = date && !isNaN(date.getTime())
+    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null;
+  return dateLabel ? `${shortSha} · ${dateLabel}` : shortSha;
+}
+
+function setReleaseIndicatorText(el, liveHost, meta, fallbackText) {
+  if (!el) return;
+  el.className = liveHost ? 'release-indicator live' : 'release-indicator needs';
+  if (meta) {
+    const label = formatReleaseMeta(meta);
+    el.textContent = liveHost ? `Live ${label}` : `Local copy · live ${label}`;
+    return;
+  }
+  el.textContent = fallbackText;
+}
+
+async function fetchReleaseMeta() {
+  const cached = readCachedReleaseMeta();
+  if (cached && (Date.now() - cached.fetchedAt) < RELEASE_META_TTL_MS) return cached.meta;
+  if (releaseMetaPromise) return releaseMetaPromise;
+
+  releaseMetaPromise = (async () => {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${RELEASE_REPO_OWNER}/${RELEASE_REPO_NAME}/branches/${RELEASE_REPO_BRANCH}`, {
+        headers: { 'Accept': 'application/vnd.github+json' }
+      });
+      if (!res.ok) throw new Error(`GitHub release lookup failed: ${res.status}`);
+      const data = await res.json();
+      const meta = {
+        sha: data?.commit?.sha || '',
+        date: data?.commit?.commit?.committer?.date || ''
+      };
+      if (meta.sha) writeCachedReleaseMeta(meta);
+      return meta.sha ? meta : (cached ? cached.meta : null);
+    } catch (_) {
+      return cached ? cached.meta : null;
+    } finally {
+      releaseMetaPromise = null;
+    }
+  })();
+
+  return releaseMetaPromise;
+}
+
 function updateReleaseIndicator() {
   const el = document.getElementById('release-indicator');
   if (!el) return;
+  const liveHost = isGitHubPagesHost();
+  const cached = readCachedReleaseMeta();
 
-  if (isGitHubPagesHost()) {
-    el.className = 'release-indicator live';
-    el.textContent = `Live v${RELEASE_ID}`;
-    return;
-  }
+  setReleaseIndicatorText(
+    el,
+    liveHost,
+    cached ? cached.meta : null,
+    liveHost ? 'Live · checking…' : 'Local copy · checking live…'
+  );
 
-  el.className = 'release-indicator needs';
-  el.textContent = `Local v${RELEASE_ID} · push to GitHub to deploy`;
+  fetchReleaseMeta().then(meta => {
+    setReleaseIndicatorText(
+      el,
+      liveHost,
+      meta,
+      liveHost ? 'Live · unavailable' : 'Local copy · live unknown'
+    );
+  });
 }
 
 async function sbRequest(method, path, body) {
