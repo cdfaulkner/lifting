@@ -2887,6 +2887,7 @@ input:focus, textarea:focus, select:focus {
           <div class="page-sub" id="mobility-date-sub"></div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-ghost btn-sm" id="mobility-full-history-btn" aria-label="View full foundation history">History</button>
           <button class="btn btn-ghost btn-sm" id="mobility-reset-btn" aria-label="Reset today's checklist">Reset</button>
           <button class="btn btn-ghost btn-sm" id="mobility-edit-btn" aria-label="Edit exercises">Edit</button>
         </div>
@@ -3258,6 +3259,37 @@ input:focus, textarea:focus, select:focus {
       </button>
     </div>
     <div id="mobility-history-body" style="overflow-y:auto;padding:0 20px 20px"></div>
+  </div>
+</div>
+
+<!-- Full Mobility History Modal -->
+<div class="modal-overlay" id="modal-mobility-all-history">
+  <div class="modal" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Foundation History</div>
+        <div id="mobility-all-history-count" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" data-close-modal="modal-mobility-all-history">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;overflow:hidden">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input id="mobility-all-history-search" type="search" placeholder="Filter by exercise name…" autocomplete="off">
+        <div style="display:flex;gap:8px">
+          <div class="input-group" style="flex:1">
+            <div class="input-label">Start date</div>
+            <input id="mobility-all-history-start" type="date">
+          </div>
+          <div class="input-group" style="flex:1">
+            <div class="input-label">End date</div>
+            <input id="mobility-all-history-end" type="date">
+          </div>
+        </div>
+      </div>
+      <div id="mobility-all-history-body" style="overflow-y:auto;padding-right:2px"></div>
+    </div>
   </div>
 </div>
 
@@ -9298,6 +9330,7 @@ let mobilityEditMode = false;
 let mobilityTimers = {}; // { exId_side: { interval, remaining, running, started, endsAt } }
 let mobilityLastCompletedByExId = {};
 let editingMobilityId = null;
+let mobilityAllHistoryFilters = { search: '', start: '', end: '' };
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 
@@ -9924,6 +9957,7 @@ function openMobilityAdd() {
 }
 
 document.getElementById('mobility-edit-btn').addEventListener('click', toggleMobilityEditMode);
+document.getElementById('mobility-full-history-btn').addEventListener('click', openMobilityAllHistory);
 document.getElementById('mobility-reset-btn').addEventListener('click', async () => {
   mobilityChecks = {};
   clearAllMobilityTimers();
@@ -9981,11 +10015,29 @@ document.getElementById('mobility-delete-btn').addEventListener('click', async (
 });
 
 // ── History ──
+function getMobilityHistoryExercise(exId) {
+  return mobilityExercises.find(e => e.id === exId) || MOBILITY_DEFAULTS.find(e => e.id === exId) || null;
+}
+
+function formatMobilityHistoryValue(ex, c) {
+  const mode = ex ? getMobilityTargetMode(ex) : ((c.repsL || c.repsR) ? 'reps' : 'seconds');
+  const fallbackTarget = ex ? getMobilityTargetValue(ex) : 0;
+  if (ex && ex.bilateral) {
+    const lStr = c.doneL
+      ? (mode === 'reps' ? `L: ${c.repsL || fallbackTarget} reps` : `L: ${c.durationL || 0}s`)
+      : 'L: —';
+    const rStr = c.doneR
+      ? (mode === 'reps' ? `R: ${c.repsR || fallbackTarget} reps` : `R: ${c.durationR || 0}s`)
+      : 'R: —';
+    return `${lStr}  ·  ${rStr}`;
+  }
+  if (mode === 'reps') return (c.done || c.doneL) ? `${c.repsL || fallbackTarget} reps` : '✓';
+  return c.durationL ? `${c.durationL}s` : ((c.done || c.doneL) ? '✓' : '—');
+}
+
 async function openMobilityHistory(exId) {
-  const ex = mobilityExercises.find(e => e.id === exId);
+  const ex = getMobilityHistoryExercise(exId);
   if (!ex) return;
-  const mode = getMobilityTargetMode(ex);
-  const fallbackTarget = getMobilityTargetValue(ex);
   document.getElementById('mobility-history-title').textContent = ex.name;
   const body = document.getElementById('mobility-history-body');
   body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">Loading…</div>';
@@ -10003,19 +10055,7 @@ async function openMobilityHistory(exId) {
   body.innerHTML = entries.map(dc => {
     const c = dc.checks[exId];
     const dateStr = new Date(dc.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-    let timeStr;
-    if (ex.bilateral) {
-      const lStr = c.doneL
-        ? (mode === 'reps' ? `L: ${c.repsL || fallbackTarget} reps` : `L: ${c.durationL || 0}s`)
-        : 'L: —';
-      const rStr = c.doneR
-        ? (mode === 'reps' ? `R: ${c.repsR || fallbackTarget} reps` : `R: ${c.durationR || 0}s`)
-        : 'R: —';
-      timeStr = `${lStr}  ·  ${rStr}`;
-    } else {
-      if (mode === 'reps') timeStr = (c.done || c.doneL) ? `${c.repsL || fallbackTarget} reps` : '✓';
-      else timeStr = c.durationL ? `${c.durationL}s` : ((c.done || c.doneL) ? '✓' : '—');
-    }
+    const timeStr = formatMobilityHistoryValue(ex, c);
     const noteStr = c.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(c.notes)}</div>` : '';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -10026,6 +10066,89 @@ async function openMobilityHistory(exId) {
     </div>`;
   }).join('');
 }
+
+async function renderMobilityAllHistory() {
+  await loadMobility();
+  const body = document.getElementById('mobility-all-history-body');
+  const countEl = document.getElementById('mobility-all-history-count');
+  const allChecks = await dbGetAll('mobility_checks');
+  const search = mobilityAllHistoryFilters.search.trim().toLowerCase();
+  const start = mobilityAllHistoryFilters.start;
+  const end = mobilityAllHistoryFilters.end;
+
+  const entries = [];
+  for (const dayCheck of allChecks) {
+    if (!dayCheck || !dayCheck.checks) continue;
+    if (start && dayCheck.date < start) continue;
+    if (end && dayCheck.date > end) continue;
+    for (const [exId, check] of Object.entries(dayCheck.checks)) {
+      if (!check || !(check.done || check.doneL || check.doneR)) continue;
+      const ex = getMobilityHistoryExercise(exId);
+      const name = ex?.name || exId;
+      if (search && !name.toLowerCase().includes(search)) continue;
+      entries.push({
+        ex,
+        exId,
+        name,
+        date: dayCheck.date,
+        value: formatMobilityHistoryValue(ex, check),
+        note: check.notes || '',
+        ts: Number(check.ts) || new Date(`${dayCheck.date}T12:00:00`).getTime()
+      });
+    }
+  }
+
+  entries.sort((a, b) => b.ts - a.ts || a.name.localeCompare(b.name));
+  countEl.textContent = `${entries.length} completed item${entries.length === 1 ? '' : 's'}`;
+
+  if (!entries.length) {
+    body.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px 0;font-size:13px">No completed foundation history matches those filters</div>';
+    return;
+  }
+
+  body.innerHTML = entries.map(entry => {
+    const dateStr = new Date(`${entry.date}T12:00:00`).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    const noteStr = entry.note ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(entry.note)}</div>` : '';
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(entry.name)}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px">${dateStr}</div>
+          ${noteStr}
+        </div>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:500;text-align:right;color:var(--text2)">${escHtml(entry.value)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openMobilityAllHistory() {
+  document.getElementById('mobility-all-history-search').value = mobilityAllHistoryFilters.search;
+  document.getElementById('mobility-all-history-start').value = mobilityAllHistoryFilters.start;
+  document.getElementById('mobility-all-history-end').value = mobilityAllHistoryFilters.end;
+  document.getElementById('mobility-all-history-body').innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px 0;font-size:13px">Loading…</div>';
+  document.getElementById('mobility-all-history-count').textContent = '';
+  openModal('modal-mobility-all-history');
+  await renderMobilityAllHistory();
+}
+
+document.getElementById('mobility-all-history-search').addEventListener('input', e => {
+  mobilityAllHistoryFilters.search = e.target.value || '';
+  renderMobilityAllHistory();
+});
+document.getElementById('mobility-all-history-start').addEventListener('change', e => {
+  mobilityAllHistoryFilters.start = e.target.value || '';
+  renderMobilityAllHistory();
+});
+document.getElementById('mobility-all-history-end').addEventListener('change', e => {
+  mobilityAllHistoryFilters.end = e.target.value || '';
+  renderMobilityAllHistory();
+});
 
 // ═══════════════════════════════════════════════════════════════
 // VARIANT EDITOR
