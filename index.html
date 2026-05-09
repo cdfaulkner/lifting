@@ -1972,6 +1972,24 @@ textarea { resize: none; }
   box-shadow: 0 10px 26px rgba(124,58,237,0.16);
   opacity: .82;
 }
+.mobility-card.needs-attention {
+  background:
+    radial-gradient(ellipse 120% 100% at 0% 0%, rgba(248,113,113,0.16), transparent 58%),
+    var(--bg2);
+  border-color: rgba(248,113,113,0.72);
+  box-shadow: 0 10px 28px rgba(248,113,113,0.14);
+}
+.mobility-attention-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fecaca;
+  background: rgba(248,113,113,0.13);
+  border: 1px solid rgba(248,113,113,0.42);
+}
 .mobility-card-head {
   display: flex;
   align-items: flex-start;
@@ -3223,7 +3241,7 @@ input:focus, textarea:focus, select:focus {
           <div class="input-label" id="mobility-target-label">Target (seconds)</div>
           <input id="mobility-dur-input" type="number" inputmode="numeric" value="30" min="5" max="300">
         </div>
-        <div class="input-group" style="flex:1">
+        <div class="input-group" id="mobility-day-group" style="display:none;flex:1">
           <div class="input-label">Day</div>
           <select id="mobility-day-input" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text);font-size:14px">
             <option value="A">Day A</option>
@@ -3575,7 +3593,104 @@ const RELEASE_REPO_NAME = 'lifting';
 const RELEASE_REPO_BRANCH = 'main';
 const RELEASE_META_CACHE_KEY = '__release_meta_cache_v1__';
 const RELEASE_META_TTL_MS = 15 * 60 * 1000;
+const APP_TIME_ZONE = 'America/Los_Angeles';
 let releaseMetaPromise = null;
+
+function getAppDateParts(input = Date.now()) {
+  const date = input instanceof Date ? input : new Date(input);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: APP_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+  const byType = {};
+  parts.forEach(part => { byType[part.type] = part.value; });
+  return { year: byType.year, month: byType.month, day: byType.day };
+}
+
+function getAppDateTimeParts(input = Date.now()) {
+  const date = input instanceof Date ? input : new Date(input);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: APP_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date);
+  const byType = {};
+  parts.forEach(part => { byType[part.type] = part.value; });
+  return { year: byType.year, month: byType.month, day: byType.day, hour: byType.hour, minute: byType.minute };
+}
+
+function appDateKey(input = Date.now()) {
+  const { year, month, day } = getAppDateParts(input);
+  return `${year}-${month}-${day}`;
+}
+
+function appDateFromKey(dateKey) {
+  const [year, month, day] = String(dateKey || '').split('-').map(Number);
+  if (!year || !month || !day) return new Date(dateKey);
+  return new Date(Date.UTC(year, month - 1, day, 20, 0, 0));
+}
+
+function formatAppDate(input = Date.now(), options = {}) {
+  return new Date(input).toLocaleDateString('en-US', { ...options, timeZone: APP_TIME_ZONE });
+}
+
+function formatAppTime(input = Date.now(), options = {}) {
+  return new Date(input).toLocaleTimeString('en-US', { ...options, timeZone: APP_TIME_ZONE });
+}
+
+function formatAppDateKey(dateKey, options = {}) {
+  return formatAppDate(appDateFromKey(dateKey), options);
+}
+
+function appTimeZoneOffsetMinutes(epoch) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: APP_TIME_ZONE,
+      timeZoneName: 'shortOffset'
+    }).formatToParts(new Date(epoch));
+    const zoneName = parts.find(part => part.type === 'timeZoneName')?.value || '';
+    const match = zoneName.match(/^GMT([+-])(\d{1,2})(?::?(\d{2}))?$/);
+    if (!match) return null;
+    const sign = match[1] === '-' ? -1 : 1;
+    return sign * ((Number(match[2]) * 60) + (Number(match[3]) || 0));
+  } catch (_) {
+    return null;
+  }
+}
+
+function appDateTimeLocalToEpoch(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!match) return new Date(value).getTime();
+  const [, year, month, day, hour, minute] = match.map(Number);
+  const wallClockUtc = Date.UTC(year, month - 1, day, hour, minute);
+  const firstOffset = appTimeZoneOffsetMinutes(wallClockUtc);
+  if (firstOffset === null) return new Date(value).getTime();
+  let epoch = wallClockUtc - firstOffset * 60000;
+  const finalOffset = appTimeZoneOffsetMinutes(epoch);
+  if (finalOffset !== null && finalOffset !== firstOffset) {
+    epoch = wallClockUtc - finalOffset * 60000;
+  }
+  return epoch;
+}
+
+function appDateKeyDayNumber(dateKey) {
+  const [year, month, day] = String(dateKey || '').split('-').map(Number);
+  if (!year || !month || !day) return null;
+  return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+}
+
+function daysBetweenAppDateKeys(startDateKey, endDateKey) {
+  const start = appDateKeyDayNumber(startDateKey);
+  const end = appDateKeyDayNumber(endDateKey);
+  if (start === null || end === null) return null;
+  return end - start;
+}
 
 // Sync status tracking
 let _syncStatus = 'unknown'; // 'online' | 'offline' | 'unknown'
@@ -3645,7 +3760,7 @@ function formatReleaseMeta(meta) {
   const shortSha = String(meta.sha).slice(0, 7);
   const date = meta.date ? new Date(meta.date) : null;
   const dateLabel = date && !isNaN(date.getTime())
-    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    ? formatAppDate(date, { month: 'short', day: 'numeric' })
     : null;
   return dateLabel ? `${shortSha} · ${dateLabel}` : shortSha;
 }
@@ -4593,7 +4708,7 @@ function populateHomeWorkoutFilters(sessions) {
   const categorySel = document.getElementById('home-category-filter');
   if (!yearSel || !monthSel || !categorySel) return;
 
-  const years = [...new Set(sessions.map(s => new Date(s.startTime).getFullYear()))].sort((a,b) => b-a);
+  const years = [...new Set(sessions.map(s => Number(getAppDateParts(s.startTime).year)))].sort((a,b) => b-a);
   yearSel.innerHTML = `<option value="all">All years</option>` + years.map(y => `<option value="${y}">${y}</option>`).join('');
   yearSel.value = years.includes(Number(homeWorkoutYear)) ? String(homeWorkoutYear) : 'all';
   if (yearSel.value === 'all') homeWorkoutYear = 'all';
@@ -4626,9 +4741,9 @@ function getFilteredHomeSessions(sessions) {
 
   if (hasDateFilter) {
     filtered = filtered.filter(s => {
-      const d = new Date(s.startTime);
-      if (homeWorkoutYear !== 'all' && d.getFullYear() !== Number(homeWorkoutYear)) return false;
-      if (homeWorkoutMonth !== 'all' && d.getMonth() !== Number(homeWorkoutMonth)) return false;
+      const parts = getAppDateParts(s.startTime);
+      if (homeWorkoutYear !== 'all' && Number(parts.year) !== Number(homeWorkoutYear)) return false;
+      if (homeWorkoutMonth !== 'all' && Number(parts.month) - 1 !== Number(homeWorkoutMonth)) return false;
       return true;
     });
   } else if (homeWorkoutScope === 'recent') {
@@ -4688,13 +4803,13 @@ function formatDelta(value, suffix='') {
 }
 
 function getTrainingDayStreak(sessions) {
-  const days = [...new Set(sessions.map(s => new Date(s.startTime).toISOString().slice(0,10)))].sort().reverse();
+  const days = [...new Set(sessions.map(s => appDateKey(s.startTime)))].sort().reverse();
   if (!days.length) return 0;
   let streak = 1;
-  let prev = new Date(days[0] + 'T00:00:00');
+  let prev = appDateKeyDayNumber(days[0]);
   for (let i = 1; i < days.length; i++) {
-    const cur = new Date(days[i] + 'T00:00:00');
-    const diff = Math.round((prev - cur) / 86400000);
+    const cur = appDateKeyDayNumber(days[i]);
+    const diff = prev - cur;
     if (diff === 1) {
       streak += 1;
       prev = cur;
@@ -4709,11 +4824,10 @@ function getSummaryStats(sessions) {
   const now = Date.now();
   const d7 = now - 7 * 86400000;
   const d30 = now - 30 * 86400000;
-  const monthStart = new Date();
-  monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const thisMonthKey = appDateKey(now).slice(0, 7);
   const last7 = sessions.filter(s => s.startTime >= d7);
   const last30 = sessions.filter(s => s.startTime >= d30);
-  const month = sessions.filter(s => s.startTime >= monthStart.getTime());
+  const month = sessions.filter(s => appDateKey(s.startTime).startsWith(thisMonthKey));
   const totalMinutes = sessions.reduce((a, s) => a + (Number(s.durationMinutes) || 0), 0);
   const categoryCounts = {};
   sessions.forEach(s => {
@@ -4807,14 +4921,14 @@ function buildFinishReceipt(session, previousSameCategory) {
       const delta = formatDelta(d.val, d.suffix || '');
       return `<div class="finish-delta ${delta.cls}">${d.label} ${delta.text}</div>`;
     }).join('');
-    const prevDate = new Date(previousSameCategory.startTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const prevDate = formatAppDate(previousSameCategory.startTime, {month:'short', day:'numeric'});
     return `<div class="finish-compare"><div class="finish-compare-title">Vs last ${escHtml((WORKOUT_CATEGORIES[resolveCategory(session.category)] || WORKOUT_CATEGORIES.other).label)} · ${prevDate}</div><div class="finish-delta-row">${deltas}</div></div>`;
   })() : `<div class="finish-compare"><div class="finish-compare-title">First saved workout in this category</div><div class="finish-delta-row"><div class="finish-delta flat">Nice starting point</div></div></div>`;
 
   body.innerHTML = `
     <div class="finish-receipt-hero">
       <div class="finish-receipt-title">${escHtml(session.title)}</div>
-      <div class="finish-receipt-sub">${new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'})} · ${(WORKOUT_CATEGORIES[resolveCategory(session.category)] || WORKOUT_CATEGORIES.other).label}</div>
+      <div class="finish-receipt-sub">${formatAppDate(session.startTime, {weekday:'short', month:'short', day:'numeric'})} · ${(WORKOUT_CATEGORIES[resolveCategory(session.category)] || WORKOUT_CATEGORIES.other).label}</div>
     </div>
     <div class="finish-receipt-grid">
       <div class="finish-stat-card"><div class="label">Duration</div><div class="value">${session.durationMinutes || 0}<span style="font-size:12px;color:var(--text2)">m</span></div></div>
@@ -4858,8 +4972,7 @@ async function renderHome() {
   }
 
   const cards = recent.map(s => {
-    const date = new Date(s.startTime);
-    const dateStr = date.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    const dateStr = formatAppDate(s.startTime, {month:'short', day:'numeric', year:'numeric'});
     const dur = s.durationMinutes ? `${s.durationMinutes}m` : '';
     const totalSets = s.exercises.reduce((acc, ex) => acc + ex.sets.filter(st => st.completed).length, 0);
     const exList = s.exercises.slice(0,8).map(ex => {
@@ -4916,7 +5029,7 @@ async function renderHome() {
 
   // Lazily patch in bodyweight data
   Promise.all(cards.map(async ({s}) => {
-    const d = new Date(s.startTime).toISOString().split('T')[0];
+    const d = appDateKey(s.startTime);
     try {
       const m = await dbGet('measurements', d);
       if (m && m.weight) {
@@ -5216,8 +5329,7 @@ function updatePauseUI() {
 function updateActiveStartTimeDisplay() {
   const el = document.getElementById('session-start-time');
   if (!el || !sessionStartEpoch) return;
-  const d = new Date(sessionStartEpoch);
-  el.textContent = d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  el.textContent = formatAppTime(sessionStartEpoch, {hour:'numeric', minute:'2-digit'});
 }
 
 function toggleActiveTimeEdit() {
@@ -5235,7 +5347,7 @@ function toggleActiveTimeEdit() {
 function saveActiveStartTime() {
   const val = document.getElementById('active-start-input').value;
   if (!val) { showToast('Enter a valid time'); return; }
-  const newEpoch = new Date(val).getTime();
+  const newEpoch = appDateTimeLocalToEpoch(val);
   if (isNaN(newEpoch)) { showToast('Invalid date'); return; }
   if (newEpoch > Date.now()) { showToast('Start can\'t be in the future'); return; }
 
@@ -5863,8 +5975,8 @@ async function loadPrevBest(variantId, idx) {
 
   const last = history[0];
   const best = history.slice().sort((a,b) => epley1RM(Number(b.top.weight)||0, Number(b.top.reps)||0) - epley1RM(Number(a.top.weight)||0, Number(a.top.reps)||0))[0];
-  const lastDate = new Date(last.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  const bestDate = new Date(best.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const lastDate = formatAppDate(last.date, {month:'short', day:'numeric'});
+  const bestDate = formatAppDate(best.date, {month:'short', day:'numeric'});
   const trendBits = history.slice(0,3).map(h => `${Number(h.top.weight)||0}×${Number(h.top.reps)||0}`).join(' · ');
   let suggestion = '';
   if (history.length >= 2) {
@@ -5927,7 +6039,7 @@ function openSetDetailModal(exIdx, si) {
   const tsEl = document.getElementById('detail-timestamp');
   if (set.completedAt) {
     const dt = new Date(set.completedAt);
-    tsEl.textContent = `Completed at ${dt.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+    tsEl.textContent = `Completed at ${formatAppTime(dt, {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
   } else {
     tsEl.textContent = '';
   }
@@ -6299,16 +6411,16 @@ async function viewWorkoutDetail(sessionId) {
   if (!session) return;
 
   // Look up bodyweight for that day
-  const sessionDate = new Date(session.startTime).toISOString().split('T')[0];
+  const sessionDate = appDateKey(session.startTime);
   const measEntry = await dbGet('measurements', sessionDate);
   const bwStr = measEntry && measEntry.weight ? ` · ${measEntry.weight} lbs` : '';
 
   const body = document.getElementById('ex-detail-body');
-  const date = new Date(session.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+  const date = formatAppDate(session.startTime, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
   const resolvedCat = resolveCategory(session.category || 'other');
   const catObj = WORKOUT_CATEGORIES[resolvedCat] || WORKOUT_CATEGORIES.other;
   document.getElementById('ex-detail-name').innerHTML = `<span data-action="edit-past-workout-title" data-session-id="${session.id}" style="cursor:pointer">${catObj.icon} ${escHtml(session.title)} <span style="font-size:11px;opacity:0.4">✏️</span></span>`;
-  const startTimeStr = new Date(session.startTime).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  const startTimeStr = formatAppTime(session.startTime, {hour:'numeric', minute:'2-digit'});
   document.getElementById('ex-detail-sub').innerHTML = `${date} · ${startTimeStr} · <span data-action="toggle-workout-time-edit" style="cursor:pointer;text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px">${session.durationMinutes || '?'}m</span>${bwStr}`;
 
   // Show repeat button
@@ -6583,7 +6695,7 @@ function renderExChart() {
   const xIndices = [0, Math.floor((data.length - 1) / 2), data.length - 1];
   const xLabels = xIndices.map(i => {
     const d = data[i];
-    const label = new Date(d.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const label = formatAppDate(d.date, {month:'short', day:'numeric'});
     return `<text x="${toX(i)}" y="${H - 4}" text-anchor="middle" fill="var(--text3)" font-size="9" font-family="DM Mono,monospace">${label}</text>`;
   }).join('');
 
@@ -6677,7 +6789,7 @@ function exChartShowTip(idx) {
   const prFlag = (exChartMetric === 'max_weight' && d.isPRWeight) || (exChartMetric === 'est_1rm' && d.isPR1RM) ? ' ★' : '';
   document.getElementById('ex-chart-tip-value').textContent = fmt + prFlag;
   document.getElementById('ex-chart-tip-label').textContent = label;
-  document.getElementById('ex-chart-tip-date').textContent = new Date(d.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  document.getElementById('ex-chart-tip-date').textContent = formatAppDate(d.date, {month:'short', day:'numeric', year:'numeric'});
   if (d.variantName && d.variantName !== getVariantDisplayName(currentAnalyticsVariantId)) {
     document.getElementById('ex-chart-tip-date').textContent += ' · ' + d.variantName;
   }
@@ -6804,7 +6916,7 @@ function renderAnalyticsBody(variantId, sessions) {
             <tr>
               <td>${r.rep} rep${r.rep > 1?'s':''}</td>
               <td>${r.weight} lbs</td>
-              <td>${r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : ''}</td>
+              <td>${r.date ? formatAppDate(r.date, {month:'short',day:'numeric',year:'2-digit'}) : ''}</td>
             </tr>`).join('')}
           ${repMaxes.every(r => !r.weight) ? '<tr><td colspan="3" style="color:var(--text3);text-align:center">No data yet</td></tr>' : ''}
         </tbody>
@@ -6821,7 +6933,7 @@ function renderAnalyticsBody(variantId, sessions) {
             const showName = mode === 'any_variant' && h.sets.some(s => s.variantId && s.variantId !== variantId);
             return `<tr>
               <td>
-                <div>${new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+                <div>${formatAppDate(h.date, {month:'short',day:'numeric'})}</div>
                 ${showName ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">${escHtml(getVariantDisplayName(h.sets.find(s=>s.variantId)?.variantId||variantId))}</div>` : ''}
               </td>
               <td><div class="sets-summary">${h.sets.map(s =>
@@ -8381,7 +8493,7 @@ function renderLibraryHistoryList(query) {
     if (!groups[pat]) return;
     html += `<div class="picker-section-label" style="padding:10px 16px 4px">${pat}</div>`;
     groups[pat].forEach(item => {
-      const lastDate = new Date(item.lastDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+      const lastDate = formatAppDate(item.lastDate, {month:'short', day:'numeric', year:'2-digit'});
       const sessionCount = item.sessions.size;
       html += `<div class="lib-history-item" data-action="show-exercise-analytics" data-variant-id="${item.variantId}">
         <div style="flex:1;min-width:0">
@@ -8485,7 +8597,7 @@ async function renderMeasChart() {
         <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${m.label}</div>
         <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text3)">—</div>
       </div>`;
-      const dateStr = new Date(info.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      const dateStr = formatAppDateKey(info.date, {month:'short', day:'numeric'});
       return `<div style="text-align:center;padding:8px 4px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);cursor:pointer" data-action="set-meas-metric" data-metric="${m.key}">
         <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${m.label}</div>
         <div style="font-family:var(--display);font-size:18px;font-weight:600">${info.val}<span style="font-size:11px;font-weight:400;color:var(--text2)"> ${m.unit}</span></div>
@@ -8502,7 +8614,7 @@ async function renderMeasChart() {
 
   const entries = allEntries.filter(e => e[measMetric] != null && e[measMetric] > 0);
   const cutoff = Date.now() - MEAS_PERIODS[measPeriod] * 86400000;
-  const filtered = entries.filter(e => new Date(e.date).getTime() >= cutoff);
+  const filtered = entries.filter(e => appDateFromKey(e.date).getTime() >= cutoff);
   const display = filtered.length > 0 ? filtered : entries.slice(-30);
 
   if (display.length > 0) {
@@ -8632,7 +8744,7 @@ function measChartShowTip(idx) {
   tooltip.style.top = '4px';
 
   document.getElementById('meas-tip-val').textContent = d[measMetric] + ' ' + metric.unit;
-  document.getElementById('meas-tip-date').textContent = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  document.getElementById('meas-tip-date').textContent = formatAppDateKey(d.date, {month:'short', day:'numeric', year:'numeric'});
   tooltip.classList.add('visible');
 }
 
@@ -8677,7 +8789,7 @@ async function renderMeasHistory() {
   }
 
   histEl.innerHTML = filtered.map(e => {
-    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+    const dateStr = formatAppDateKey(e.date, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
     let partsHtml;
     if (measMetric) {
       // Single metric selected — show just that value prominently
@@ -8709,7 +8821,7 @@ async function renderMeasHistory() {
 function openMeasModal(existingDate) {
   const editing = existingDate !== undefined;
   document.getElementById('meas-modal-title').textContent = editing ? 'Edit Measurements' : 'Log Measurements';
-  document.getElementById('meas-date-input').value = existingDate || new Date().toISOString().split('T')[0];
+  document.getElementById('meas-date-input').value = existingDate || appDateKey();
   document.getElementById('meas-date-input').readOnly = editing;
   document.getElementById('meas-date-input').style.opacity = editing ? '0.6' : '1';
   const delBtn = document.getElementById('meas-delete-btn');
@@ -8905,7 +9017,7 @@ function renderLiftsCards(sorted, headingText) {
 
   list.innerHTML = heading + sorted.map(([variantId, data], idx) => {
     const name = getVariantDisplayName(variantId);
-    const date = new Date(data.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+    const date = formatAppDate(data.date, {month:'short',day:'numeric',year:'2-digit'});
     const pattern = getMovementPatternForVariant(variantId);
     return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px" data-action="show-exercise-analytics" data-variant-id="${variantId}">
       <div style="min-width:22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">${idx + 1}</div>
@@ -8961,7 +9073,7 @@ async function seedBWData() {
 // ── Seed initial measurements ──────────────────────────────────
 async function seedInitialMeasurements() {
   if (localStorage.getItem('meas_initial_seeded')) return;
-  const today = new Date().toISOString().split('T')[0];
+  const today = appDateKey();
   const existing = await dbGet('measurements', today).catch(() => null);
   if (!existing) {
     await dbPut('measurements', {
@@ -9409,14 +9521,14 @@ const MOBILITY_SECONDS_MIGRATION_NAME_RULES = {
 let mobilityExercises = [];
 // checks shape: { date, day, checks: { exId: { done, durationL, durationR, repsL, repsR, notes, ts } } }
 let mobilityChecks = {};
-let mobilityDay = null; // 'A' or 'B'
+let mobilityDay = 'all';
 let mobilityEditMode = false;
 let mobilityTimers = {}; // { exId_side: { interval, remaining, running, started, endsAt } }
 let mobilityLastCompletedByExId = {};
 let editingMobilityId = null;
 let mobilityAllHistoryFilters = { search: '', start: '', end: '' };
 
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+function todayStr() { return appDateKey(); }
 
 function normalizeMobilityName(name) {
   return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
@@ -9483,7 +9595,7 @@ function getMobilityDay() {
 }
 
 function setMobilityDay(day) {
-  mobilityDay = day;
+  mobilityDay = 'all';
   localStorage.setItem('mobility_day_override', day);
   localStorage.setItem('mobility_day_override_date', todayStr());
   renderMobility();
@@ -9576,9 +9688,9 @@ async function loadMobility() {
     if (changed) await dbPut('mobility_exercises', ex);
   }
   mobilityExercises = exList.sort((a,b) => (a.order||0) - (b.order||0));
-  mobilityDay = getMobilityDay();
+  mobilityDay = 'all';
   const checkData = await dbGet('mobility_checks', todayStr());
-  mobilityChecks = (checkData && checkData.day === mobilityDay) ? (checkData.checks || {}) : {};
+  mobilityChecks = checkData ? (checkData.checks || {}) : {};
   let checksChanged = false;
   for (const ex of mobilityExercises) {
     if (!shouldForceMobilityUnilateral(ex)) continue;
@@ -9592,14 +9704,14 @@ async function loadMobility() {
 }
 
 async function saveMobilityChecks() {
-  await dbPut('mobility_checks', { date: todayStr(), day: mobilityDay, checks: mobilityChecks });
-  // Record which day we did today
-  localStorage.setItem('mobility_last_day', mobilityDay);
+  await dbPut('mobility_checks', { date: todayStr(), day: 'all', checks: mobilityChecks });
+  // Keep legacy keys harmless for older app copies.
+  localStorage.setItem('mobility_last_day', 'all');
   localStorage.setItem('mobility_last_date', todayStr());
 }
 
-function getDayExercises(day) {
-  return mobilityExercises.filter(ex => ex.day === (day || mobilityDay));
+function getVisibleMobilityExercises() {
+  return mobilityExercises;
 }
 
 function isMobExDone(ex) {
@@ -9658,31 +9770,44 @@ async function loadMobilityLastCompletedDates() {
 
 function formatMobilityLastDone(dateStr) {
   if (!dateStr) return 'Not completed yet';
-  const date = new Date(`${dateStr}T12:00:00`);
-  return `Last done ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  return `Last done ${formatAppDateKey(dateStr, { month: 'short', day: 'numeric' })}`;
+}
+
+function getMobilityDaysSinceLastDone(ex) {
+  const lastDone = mobilityLastCompletedByExId[ex.id];
+  if (!lastDone) return Infinity;
+  const days = daysBetweenAppDateKeys(lastDone, todayStr());
+  return days === null ? Infinity : Math.max(days, 0);
+}
+
+function isMobilityDue(ex) {
+  return !isMobExDone(ex) && getMobilityDaysSinceLastDone(ex) >= 2;
+}
+
+function formatMobilityDueText(ex) {
+  const days = getMobilityDaysSinceLastDone(ex);
+  if (!Number.isFinite(days)) return 'Due · never done';
+  return `Due · ${days}d ago`;
 }
 
 async function renderMobility() {
   await loadMobility();
   await loadMobilityLastCompletedDates();
   const subEl = document.getElementById('mobility-date-sub');
-  const today = new Date();
-  subEl.textContent = today.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+  subEl.textContent = formatAppDate(Date.now(), {weekday:'long', month:'long', day:'numeric'});
 
   const dayPills = document.getElementById('mobility-day-pills');
-  dayPills.innerHTML = ['A','B'].map(d => {
-    const emoji = d === 'A' ? '🧘' : '⚡';
-    return `<button class="period-pill mobility-day-pill ${mobilityDay === d ? 'active' : ''}" data-action="set-mobility-day" data-day="${d}">Day ${d} <span aria-hidden="true">${emoji}</span></button>`;
-  }).join('');
+  dayPills.innerHTML = '';
 
-  const dayExercises = getDayExercises();
-  const completedCount = dayExercises.filter(ex => isMobExDone(ex)).length;
-  const total = dayExercises.length;
+  const visibleExercises = getVisibleMobilityExercises();
+  const completedCount = visibleExercises.filter(ex => isMobExDone(ex)).length;
+  const dueCount = visibleExercises.filter(ex => isMobilityDue(ex)).length;
+  const total = visibleExercises.length;
   const remainingCount = Math.max(total - completedCount, 0);
   const allDone = total > 0 && completedCount === total;
 
   document.getElementById('mobility-progress-text').textContent =
-    allDone ? 'Flow complete' : `${completedCount}/${total} done`;
+    allDone ? 'Foundation complete' : `${completedCount}/${total} done today`;
   document.getElementById('mobility-progress-bar').style.width =
     total ? `${(completedCount/total*100)}%` : '0%';
 
@@ -9691,17 +9816,18 @@ async function renderMobility() {
   const mobilityStatusClass = allDone ? 'good' : (completedCount > 0 ? 'soft' : '');
   funStrip.innerHTML = `
     <div class="mobility-chip ${mobilityStatusClass}">${mobilityStatusLabel}</div>
-    <div class="mobility-chip">Day ${mobilityDay} · ${total} moves</div>
+    <div class="mobility-chip">All foundation · ${total} moves</div>
     <div class="mobility-chip ${completedCount ? 'good' : ''}">${completedCount} finished</div>
+    ${dueCount ? `<div class="mobility-chip" style="color:#fecaca;background:rgba(248,113,113,0.10);border-color:rgba(248,113,113,0.28)">${dueCount} due</div>` : ''}
     ${remainingCount ? `<div class="mobility-chip">${remainingCount} left</div>` : `<div class="mobility-chip good">Nice work</div>`}
   `;
 
   const list = document.getElementById('mobility-list');
-  if (dayExercises.length === 0) {
+  if (visibleExercises.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon" style="font-size:36px">🧘</div>
-      <div class="empty-state-title">No exercises on Day ${mobilityDay}</div>
-      <div class="empty-state-sub">Flip to the other day or add a few favorite resets.</div>
+      <div class="empty-state-title">No foundation exercises yet</div>
+      <div class="empty-state-sub">Add a few favorite resets to start tracking.</div>
     </div>`;
     return;
   }
@@ -9710,12 +9836,12 @@ async function renderMobility() {
     <div class="mobility-celebration">
       <div>
         <div style="font-size:14px;font-weight:700">Flow complete ✨</div>
-        <div class="mobility-celebration-sub">${total} movements done for Day ${mobilityDay}</div>
+        <div class="mobility-celebration-sub">${total} foundation movements done today</div>
       </div>
       <div style="font-size:22px" aria-hidden="true">🪩</div>
     </div>` : '';
 
-  list.innerHTML = celebration + dayExercises.map(ex => renderMobExCard(ex)).join('') +
+  list.innerHTML = celebration + visibleExercises.map(ex => renderMobExCard(ex)).join('') +
     (mobilityEditMode ? `<button class="btn btn-secondary" style="width:100%;margin-top:4px" data-action="open-mobility-add">+ Add Exercise</button>` : '');
 }
 
@@ -9723,6 +9849,7 @@ function renderMobExCard(ex) {
   const c = mobilityChecks[ex.id] || {};
   const done = isMobExDone(ex);
   const mode = getMobilityTargetMode(ex);
+  const due = isMobilityDue(ex);
   const lastDoneText = formatMobilityLastDone(mobilityLastCompletedByExId[ex.id]);
   const editBtns = mobilityEditMode ? `
     <button class="btn btn-ghost btn-sm btn-icon" data-action="open-mobility-edit" data-ex-id="${ex.id}" aria-label="Edit exercise">
@@ -9752,12 +9879,13 @@ function renderMobExCard(ex) {
         data-change-action="save-mob-note" data-ex-id="${ex.id}">
     </div>`;
 
-  return `<div class="mobility-card ${done ? 'done' : ''}">
+  return `<div class="mobility-card ${done ? 'done' : ''} ${due ? 'needs-attention' : ''}">
     <div class="mobility-card-head">
       <div style="flex:1;min-width:0">
         <div style="font-size:15px;font-weight:600;${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${escHtml(ex.name)}</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px">
           <span style="font-size:11px;color:var(--text3)">${done ? 'Done' : (mode === 'reps' ? (ex.bilateral ? '2 sides · reps' : 'reps') : (ex.bilateral ? '2 sides' : '1 timer'))}</span>
+          ${due ? `<span class="mobility-attention-label">${escHtml(formatMobilityDueText(ex))}</span>` : ''}
           <span style="font-size:11px;color:var(--accent-blue)">${escHtml(lastDoneText)}</span>
           ${ex.cues ? `<div style="font-size:11px;color:var(--text3)">${escHtml(ex.cues)}</div>` : ''}
         </div>
@@ -9937,7 +10065,8 @@ async function completeMobSide(exId, side, value) {
   // Clear timer state
   clearMobilityTimer(`${exId}_${side}`);
   softHaptic(12);
-  const allDoneNow = getDayExercises().length > 0 && getDayExercises().every(item => isMobExDone(item));
+  const visibleExercises = getVisibleMobilityExercises();
+  const allDoneNow = visibleExercises.length > 0 && visibleExercises.every(item => isMobExDone(item));
   await saveMobilityChecks();
   if (allDoneNow) {
     softHaptic([12, 40, 12]);
@@ -10033,7 +10162,7 @@ function openMobilityAdd() {
   document.getElementById('mobility-modal-title').textContent = 'Add Exercise';
   document.getElementById('mobility-name-input').value = '';
   setMobilityTargetEditor('seconds', 30);
-  document.getElementById('mobility-day-input').value = mobilityDay || 'A';
+  document.getElementById('mobility-day-input').value = 'A';
   document.getElementById('mobility-bilateral-input').checked = false;
   document.getElementById('mobility-notes-input').value = '';
   document.getElementById('mobility-delete-btn').style.display = 'none';
@@ -10100,7 +10229,7 @@ document.getElementById('mobility-delete-btn').addEventListener('click', async (
 
 // ── History ──
 function getMobilityHistoryExercise(exId) {
-  return mobilityExercises.find(e => e.id === exId) || MOBILITY_DEFAULTS.find(e => e.id === exId) || null;
+  return mobilityExercises.find(e => e.id === exId) || DEFAULT_MOBILITY_EXERCISES.find(e => e.id === exId) || null;
 }
 
 function formatMobilityHistoryValue(ex, c) {
@@ -10138,7 +10267,7 @@ async function openMobilityHistory(exId) {
 
   body.innerHTML = entries.map(dc => {
     const c = dc.checks[exId];
-    const dateStr = new Date(dc.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    const dateStr = formatAppDateKey(dc.date, {weekday:'short', month:'short', day:'numeric'});
     const timeStr = formatMobilityHistoryValue(ex, c);
     const noteStr = c.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(c.notes)}</div>` : '';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
@@ -10177,7 +10306,7 @@ async function renderMobilityAllHistory() {
         date: dayCheck.date,
         value: formatMobilityHistoryValue(ex, check),
         note: check.notes || '',
-        ts: Number(check.ts) || new Date(`${dayCheck.date}T12:00:00`).getTime()
+        ts: Number(check.ts) || appDateFromKey(dayCheck.date).getTime()
       });
     }
   }
@@ -10191,7 +10320,7 @@ async function renderMobilityAllHistory() {
   }
 
   body.innerHTML = entries.map(entry => {
-    const dateStr = new Date(`${entry.date}T12:00:00`).toLocaleDateString('en-US', {
+    const dateStr = formatAppDateKey(entry.date, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -10791,9 +10920,8 @@ let repeatWorkoutSessionId = null;
 let editingPastSessionId = null;
 
 function toLocalDatetimeStr(epoch) {
-  const d = new Date(epoch);
-  const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const { year, month, day, hour, minute } = getAppDateTimeParts(epoch);
+  return `${year}-${month}-${day}T${hour}:${minute}`;
 }
 
 function toggleWorkoutTimeEdit() {
@@ -10851,7 +10979,7 @@ async function saveWorkoutTimeEdit() {
 
   if (!startVal) { showToast('Start time is required'); return; }
 
-  const newStart = new Date(startVal).getTime();
+  const newStart = appDateTimeLocalToEpoch(startVal);
   if (isNaN(newStart)) { showToast('Invalid start time'); return; }
 
   session.startTime = newStart;
@@ -10862,7 +10990,7 @@ async function saveWorkoutTimeEdit() {
     session.durationMinutes = durMins;
     session.endTime = newStart + durMins * 60000;
   } else if (endVal) {
-    const newEnd = new Date(endVal).getTime();
+    const newEnd = appDateTimeLocalToEpoch(endVal);
     if (isNaN(newEnd) || newEnd <= newStart) { showToast('End must be after start'); return; }
     session.endTime = newEnd;
     session.durationMinutes = Math.round((newEnd - newStart) / 60000);
@@ -11094,7 +11222,7 @@ document.getElementById('backup-btn').addEventListener('click', async () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const date = new Date().toISOString().slice(0,10);
+    const date = appDateKey();
     a.href = url;
     a.download = `baseline-backup-${date}.json`;
     a.click();
@@ -11152,13 +11280,13 @@ async function buildClaudeExport() {
   const latestBW = weightEntries.length ? weightEntries[weightEntries.length - 1] : null;
 
   const lines = [];
-  const today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  const today = formatAppDate(Date.now(), {weekday:'long', month:'long', day:'numeric', year:'numeric'});
 
   lines.push(`# Baseline Training Summary`);
   lines.push(`Generated: ${today}`);
   if (latestBW) {
     lines.push(`Bodyweight: ${latestBW.weight} lbs (${latestBW.date})`);
-    const bw2w = weightEntries.filter(e => new Date(e.date) >= new Date(Date.now() - 14*86400000));
+    const bw2w = weightEntries.filter(e => appDateFromKey(e.date).getTime() >= Date.now() - 14*86400000);
     if (bw2w.length >= 2) {
       const change = bw2w[bw2w.length-1].weight - bw2w[0].weight;
       lines.push(`Bodyweight trend (14d): ${change >= 0 ? '+' : ''}${change.toFixed(1)} lbs`);
@@ -11182,7 +11310,7 @@ async function buildClaudeExport() {
     // Pattern frequency
     const patternDays = {};
     last4w.forEach(s => {
-      const day = new Date(s.startTime).toISOString().split('T')[0];
+      const day = appDateKey(s.startTime);
       s.exercises.forEach(ex => {
         const h = hierarchyMap[ex.variantId.split('__')[0]];
         if (!h) return;
@@ -11202,9 +11330,9 @@ async function buildClaudeExport() {
 
   const recent = sessions.slice(0, 8);
   for (const s of recent) {
-    const date = new Date(s.startTime).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+    const date = formatAppDate(s.startTime, {weekday:'short', month:'short', day:'numeric'});
     const dur = s.durationMinutes ? ` · ${s.durationMinutes}m` : '';
-    const bwDate = new Date(s.startTime).toISOString().split('T')[0];
+    const bwDate = appDateKey(s.startTime);
     const bw = measEntries.find(e => e.date === bwDate && e.weight);
     const bwStr = bw ? ` · ${bw.weight} lbs` : '';
     lines.push(`### ${s.title} — ${date}${dur}${bwStr}`);
@@ -11236,7 +11364,7 @@ async function buildClaudeExport() {
       // Check for PR on this session
       const sessionE1rm = completedSets.reduce((best, st) => Math.max(best, epley1RM(st.weight||0, st.reps||0)), 0);
       const prEntry = prRecords[ex.variantId];
-      const isPR = prEntry && Math.abs(prEntry.e1rm - sessionE1rm) < 0.5 && new Date(prEntry.date).toDateString() === new Date(s.startTime).toDateString();
+      const isPR = prEntry && Math.abs(prEntry.e1rm - sessionE1rm) < 0.5 && appDateKey(prEntry.date) === appDateKey(s.startTime);
 
       lines.push(`- **${displayName}**: ${setStrs.join(', ')}${isPR ? ' 🏆' : ''}`);
     }
@@ -11256,7 +11384,7 @@ async function buildClaudeExport() {
       .slice(0, 12);
     for (const r of sorted) {
       const { displayName } = getVariantInfo(r.vid);
-      const date = r.date ? new Date(r.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'}) : '';
+      const date = r.date ? formatAppDate(r.date, {month:'short', day:'numeric', year:'2-digit'}) : '';
       lines.push(`- **${displayName}**: ~${Math.round(r.e1rm)} lbs (${r.weight}×${r.reps}${date ? ', ' + date : ''})`);
     }
   }
@@ -11459,8 +11587,8 @@ function migrateLegacyId(id) {
 const HISTORICAL_WORKOUT_CLASSIFY_VERSION = 'historical_workout_classify_v3';
 
 function formatSessionMonthDay(epoch) {
-  const d = new Date(epoch || Date.now());
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  const { month, day } = getAppDateParts(epoch || Date.now());
+  return `${Number(month)}/${Number(day)}`;
 }
 
 function getSessionExerciseDomain(ex) {
