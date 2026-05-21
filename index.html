@@ -2845,7 +2845,7 @@ input:focus, textarea:focus, select:focus {
           </div>
           <!-- Search bars (toggled by tab) -->
           <div class="library-search-bar" id="lib-browse-search-wrap">
-            <input id="lib-search" type="search" placeholder="Search exercise or variant…" autocomplete="off">
+            <input id="lib-search" type="search" placeholder="Search exercise or setup…" autocomplete="off">
             <div class="library-filters" id="lib-filters"></div>
           </div>
           <div id="lib-history-search-wrap" style="display:none;padding:10px 16px 6px">
@@ -3121,8 +3121,8 @@ input:focus, textarea:focus, select:focus {
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0">Show:</span>
         <div style="display:flex;gap:4px">
-          <button id="ex-filter-exact" class="filter-pill active" data-analytics-mode="exact" style="font-size:11px;padding:3px 9px">Exact variants</button>
-          <button id="ex-filter-any-variant" class="filter-pill" data-analytics-mode="any_variant" style="font-size:11px;padding:3px 9px">Any variant</button>
+          <button id="ex-filter-exact" class="filter-pill active" data-analytics-mode="exact" style="font-size:11px;padding:3px 9px">Exact setup</button>
+          <button id="ex-filter-any-variant" class="filter-pill" data-analytics-mode="any_variant" style="font-size:11px;padding:3px 9px">Related setup</button>
         </div>
       </div>
     </div>
@@ -4117,10 +4117,10 @@ function getMusclesForVariant(variantId) {
 // NEW HIERARCHICAL EXERCISE TAXONOMY
 // ═══════════════════════════════════════════════════════════════
 // Each "lift" defines:
-//   resistances: which resistance types are valid (all drawn from RESISTANCE_TYPES)
-//   variants: which variant toggles are applicable (drawn from VARIANT_TYPES)
-//             variants are MULTI-SELECT; zero selection is allowed (skips variant step)
-// The picker flow: Main Lift → Resistance → Variants (multi-select, optional) → Confirm
+//   resistances: which resistance sources are valid (all drawn from RESISTANCE_TYPES)
+//   variants: legacy-compatible setup selections grouped by role below
+//             selections are MULTI-SELECT; zero selection is allowed
+// The picker flow: Main Lift -> Resistance -> Setup -> Confirm
 
 // ── Standard resistance types (uniform pool, each exercise picks from these) ──
 // "BW" = bodyweight / weighted vest / belt — no external implement required
@@ -4128,18 +4128,108 @@ const RESISTANCE_TYPES = ["Barbell","Dumbbell","Voltra","Landmine","BW","Band","
 const HIDDEN_PICKER_RESISTANCES = new Set(["Machine"]);
 function getVisiblePickerResistances(resistances) { return (resistances || []).filter(r => !HIDDEN_PICKER_RESISTANCES.has(r)); }
 
-// ── All possible variant toggles ──
-const VARIANT_TYPES = [
-  // Position / angle
-  "Flat","Incline","Decline","Seated","Standing","Kneeling","Overhead","Lying",
-  // Grip
-  "Wide","Narrow","Neutral","Supinated","Pronated","Close Grip","Reverse Grip",
-  // Load position / style
-  "Front","Back","Goblet","Zercher","Hack","Harness","Belt","Belt Squat",
-  "Preacher","Bar","Ring","Rope","Cossack","BSS","Walking","Stationary","Forward","Backward","Step-Up","Box","Pistol","Russian",
-  // Modifier
-  "Unilateral","Band","Paused","Tempo",
+// ── Structured setup roles ──
+// "Technique" is intentionally narrow: only execution details that do not
+// describe resistance, hand interface, body support, stance, or load path.
+const SETUP_OPTION_GROUPS = [
+  { id: "grip", label: "Grip / Hand Position", options: ["Wide","Narrow","Neutral","Supinated","Pronated","Close Grip","Reverse Grip"] },
+  { id: "hand_attachment", label: "Hand Attachment", options: [
+    "Bar","Ring","Rings","Rope","Straight Barbell","Trap Bar","EZ Bar","Tiny Bar","Shorty Bar","Longy Bar",
+    "Carbon Bar","Curved Cable Bar","D-Grips","Plastic D Handles","RO-T8 Handles","KAZ Handles","Swissie Bar Handles"
+  ] },
+  { id: "body_attachment", label: "Body Attachment", options: ["Harness","Belt"] },
+  { id: "connector", label: "Connector", options: ["Angle Strap"] },
+  { id: "body_support", label: "Body Support / Orientation", options: [
+    "Flat","Incline","Decline","Seated","Standing","Kneeling","Lying","Preacher","Box",
+    "Flat Bench","Adjustable Bench","Slant Board","Dip Bar","Pull-up Bar"
+  ] },
+  { id: "load_position", label: "Load Position", options: ["Front","Back","Overhead","Goblet","Zercher","Hack","Belt Squat"] },
+  { id: "stance_path", label: "Stance / Path", options: ["BSS","Walking","Stationary","Forward","Backward","Step-Up","Cossack","Pistol","Russian"] },
+  { id: "load_assist", label: "Load Assist", options: ["Band"] },
+  { id: "side", label: "Side", options: ["Unilateral"] },
+  { id: "technique", label: "Technique", options: ["Paused","Tempo"] },
 ];
+
+const SETUP_OPTION_META = {};
+SETUP_OPTION_GROUPS.forEach(group => {
+  group.options.forEach(option => {
+    SETUP_OPTION_META[option] = { groupId: group.id, groupLabel: group.label };
+  });
+});
+
+const TRUE_TECHNIQUE_TYPES = SETUP_OPTION_GROUPS.find(g => g.id === "technique").options;
+
+// Backward-compatible name used by ID parsing and admin override code.
+const VARIANT_TYPES = SETUP_OPTION_GROUPS.flatMap(group => group.options);
+
+const EQUIPMENT_CATALOG = [
+  { id: "straight_barbell", name: "Straight Barbell", roles: ["resistance_source","hand_interface"] },
+  { id: "trap_bar", name: "Trap Bar", roles: ["resistance_source","hand_interface"] },
+  { id: "ez_bar", name: "EZ Bar", roles: ["resistance_source","hand_interface","cable_attachment"] },
+  { id: "tiny_bar", name: "Tiny Bar", roles: ["hand_attachment","cable_attachment"] },
+  { id: "shorty_bar", name: "Shorty Bar", roles: ["hand_attachment","cable_attachment"] },
+  { id: "longy_bar", name: "Longy Bar", roles: ["hand_attachment","cable_attachment"] },
+  { id: "carbon_bar", name: "Carbon Bar", roles: ["hand_attachment","cable_attachment"] },
+  { id: "curved_cable_bar", name: "Curved Cable Bar", roles: ["hand_attachment","cable_attachment"] },
+  { id: "d_grips", name: "D-Grips", roles: ["hand_attachment","cable_attachment"] },
+  { id: "plastic_d_handles", name: "Plastic D Handles", roles: ["hand_attachment","cable_attachment"] },
+  { id: "ro_t8_handles", name: "RO-T8 Handles", roles: ["hand_attachment","rotating_handle","cable_attachment"] },
+  { id: "kaz_handles", name: "KAZ Handles", roles: ["hand_attachment","cable_attachment"] },
+  { id: "swissie_bar_handles", name: "Swissie Bar Handles", roles: ["hand_attachment","neutral_grip_attachment"] },
+  { id: "rings", name: "Rings", roles: ["hand_attachment","bodyweight_station","suspension_support"] },
+  { id: "dip_bar", name: "Dip Bar", roles: ["bodyweight_station","support_station"] },
+  { id: "pullup_bar", name: "Pull-up Bar", roles: ["bodyweight_station","anchor_point"] },
+  { id: "harness", name: "Harness", roles: ["body_attachment"] },
+  { id: "belt", name: "Belt", roles: ["body_attachment","load_attachment"] },
+  { id: "angle_strap", name: "Angle Strap", roles: ["connector"] },
+  { id: "egg_weights", name: "Egg Weights", roles: ["external_load","handheld_load"] },
+];
+
+function getSetupGroupForOption(option) {
+  return SETUP_OPTION_META[option] || { groupId: "custom", groupLabel: "Custom Setup" };
+}
+
+function groupSetupOptions(options) {
+  const allowed = new Set(options || []);
+  const groups = SETUP_OPTION_GROUPS
+    .map(group => ({ ...group, options: group.options.filter(option => allowed.has(option)) }))
+    .filter(group => group.options.length > 0);
+  const known = new Set(VARIANT_TYPES);
+  const custom = [...allowed].filter(option => !known.has(option));
+  if (custom.length) groups.push({ id: "custom", label: "Custom Setup", options: custom });
+  return groups;
+}
+
+function getSetupSummary(options) {
+  const groups = groupSetupOptions(options || []);
+  if (!groups.length) return "base setup";
+  return groups.map(group => `${group.label}: ${group.options.join(" + ")}`).join(" · ");
+}
+
+function getLiftSetupOptions(h) {
+  const options = new Set(h?.variants || []);
+  const resistances = new Set(h?.resistances || []);
+  if (resistances.has("Voltra") || resistances.has("Band") || resistances.has("Machine")) {
+    [
+      "Tiny Bar","Shorty Bar","Longy Bar","Carbon Bar","Curved Cable Bar",
+      "D-Grips","Plastic D Handles","RO-T8 Handles","KAZ Handles","Swissie Bar Handles",
+      "Angle Strap"
+    ].forEach(option => options.add(option));
+  }
+  if (resistances.has("Barbell")) options.add("Straight Barbell");
+  if (resistances.has("Trap Bar")) options.add("Trap Bar");
+  if (resistances.has("Landmine")) ["Angle Strap","KAZ Handles"].forEach(option => options.add(option));
+  if (resistances.has("BW") || resistances.has("Weight Belt")) {
+    ["Rings","Dip Bar","Pull-up Bar"].forEach(option => options.add(option));
+  }
+  if (["chest_press","chest_fly","row","pullover","shoulder_raise","rear_delt_fly","bicep_curl","tricep_extension","crunch"].includes(h?.id)) {
+    ["Flat Bench","Adjustable Bench"].forEach(option => options.add(option));
+  }
+  if (["squat","lunge","calf_raise","sissy_squat","reverse_nordic"].includes(h?.id)) {
+    options.add("Slant Board");
+  }
+  return [...options];
+}
 
 const EXERCISE_HIERARCHY = [
   // ── CHEST ──
@@ -4365,17 +4455,21 @@ const RES_ABBREV = {
   "BW+":"BW","Goblet":"Goblet","Cable":"Voltra","Plate":"Misc","Belt":"Belt Lever"
 };
 
+function slugPart(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/^_+|_+$/g,'');
+}
+
 // ── Generate a deterministic variant ID from picker selections ──
 // New format: "parentId__resistance__var1_var2_var3__other_text"
 // variants is an array of selected variant strings
 function buildVariantId(parentId, resistance, variants, mods) {
   let parts = [parentId];
-  parts.push(resistance.toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  parts.push(slugPart(resistance));
   const varArr = Array.isArray(variants) ? variants : (variants ? [variants] : []);
   if (varArr.length > 0) {
-    parts.push(varArr.map(v => v.toLowerCase().replace(/[^a-z0-9]/g,'_')).sort().join('_'));
+    parts.push(varArr.map(slugPart).sort().join('_'));
   }
-  if (mods && mods.other) parts.push(mods.other.toLowerCase().replace(/[^a-z0-9]/g,'_').slice(0,20));
+  if (mods && mods.other) parts.push(slugPart(mods.other).slice(0,20));
   return parts.join('__');
 }
 
@@ -7786,7 +7880,7 @@ function renderPickerFilters() {
     : '';
   const variantToggle = `<button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}"
       data-action="picker-toggle-all-variants">
-      ${pickerShowAllVariants ? 'All Variants On' : 'All Variants Off'}
+      ${pickerShowAllVariants ? 'All Setup On' : 'All Setup Off'}
     </button>`;
 
   container.innerHTML = muscles.map(m => `
@@ -7804,7 +7898,7 @@ function setPickerMuscle(m) {
 
 function pickerHasVariantStep(h) {
   if (!h) return false;
-  return pickerShowAllVariants || (Array.isArray(h.variants) && h.variants.length > 0);
+  return pickerShowAllVariants || getLiftSetupOptions(h).length > 0;
 }
 
 function pickerShouldApplyCategoryFilter() {
@@ -7823,7 +7917,8 @@ function pickerToggleAllVariants() {
   savePickerPrefs();
   const h = hierarchyMap[pickerState.liftId];
   if (!pickerShowAllVariants && h) {
-    pickerState.variants = pickerState.variants.filter(v => (h.variants || []).includes(v));
+    const allowed = new Set(getLiftSetupOptions(h));
+    pickerState.variants = pickerState.variants.filter(v => allowed.has(v));
     if (pickerState.step === 'variant' && !pickerHasVariantStep(h)) pickerState.step = 'modifiers';
   }
   renderPickerStep();
@@ -7872,7 +7967,7 @@ function renderStepIndicator() {
     { label: h.name, key: 'lift' },
     { label: 'Resistance', key: 'resistance' },
   ];
-  if (hasVariants) steps.push({ label: 'Variants', key: 'variant' });
+  if (hasVariants) steps.push({ label: 'Setup', key: 'variant' });
   steps.push({ label: 'Confirm', key: 'modifiers' });
 
   const currentIdx = steps.findIndex(s => s.key === pickerState.step);
@@ -7896,10 +7991,11 @@ function getPickerQuickIndex() {
   EXERCISE_HIERARCHY.forEach(h => {
     getVisiblePickerResistances(h.resistances).forEach(r => {
       const combos = [[]];
-      (h.variants || []).forEach(v => combos.push([v]));
-      for (let i = 0; i < (h.variants || []).length; i++) {
-        for (let j = i + 1; j < (h.variants || []).length; j++) {
-          combos.push([h.variants[i], h.variants[j]]);
+      const setupOptions = getLiftSetupOptions(h);
+      setupOptions.forEach(v => combos.push([v]));
+      for (let i = 0; i < setupOptions.length; i++) {
+        for (let j = i + 1; j < setupOptions.length; j++) {
+          combos.push([setupOptions[i], setupOptions[j]]);
         }
       }
       combos.forEach(combo => {
@@ -7913,7 +8009,7 @@ function getPickerQuickIndex() {
           resistance: r,
           variants: combo,
           label,
-          sub: `${h.pattern} · ${r}${combo.length ? ' · ' + combo.join(' + ') : ''}`,
+          sub: `${h.pattern} · ${r}${combo.length ? ' · ' + getSetupSummary(combo) : ''}`,
           search: [label, h.name, h.pattern, r, ...(combo || []), ...(h.muscles || []), ...((h.sec) || [])].join(' ').toLowerCase()
         });
       });
@@ -7958,7 +8054,7 @@ function ensureVariantExists(variantId, liftId, resistance, variants, mods, cust
       hierarchyParents.push(parent);
       parentMap[parent.id] = parent;
     }
-    const newVariant = { id: variantId, name: displayName, equipment: [resistance.toLowerCase().replace(/[^a-z0-9+]/g,'_')] };
+    const newVariant = { id: variantId, name: displayName, equipment: [slugPart(resistance)] };
     parent.variants.push(newVariant);
     variantMap[variantId] = { variant: newVariant, parent };
     dbPut('custom_variants', { id: variantId, parentId: parent.id, name: displayName, equipment: newVariant.equipment });
@@ -8198,22 +8294,27 @@ function renderPickerVariant() {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
-  const variantOptions = Array.from(new Set(pickerShowAllVariants ? VARIANT_TYPES : (h.variants || [])));
-  const modeHint = pickerShowAllVariants ? 'Showing all library variant tags' : `${h.name} variants`;
+  const variantOptions = Array.from(new Set(pickerShowAllVariants ? VARIANT_TYPES : getLiftSetupOptions(h)));
+  const modeHint = pickerShowAllVariants ? 'Showing all setup roles' : `${h.name} setup options`;
+  const optionGroups = groupSetupOptions(variantOptions);
+  const selectedCount = pickerState.variants.length;
 
   list.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
-      <div class="picker-section-label" style="margin:0">Select Variants <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
-      <button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}" data-action="picker-toggle-all-variants" style="font-size:11px;padding:3px 9px;flex-shrink:0">${pickerShowAllVariants ? 'All Variants On' : 'All Variants Off'}</button>
+      <div class="picker-section-label" style="margin:0">Select Setup <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
+      <button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}" data-action="picker-toggle-all-variants" style="font-size:11px;padding:3px 9px;flex-shrink:0">${pickerShowAllVariants ? 'All Setup On' : 'All Setup Off'}</button>
     </div>
     <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">${escHtml(modeHint)}</div>
-    <div class="picker-grid">${variantOptions.map(v => `
-      <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}">
-        <div class="picker-option-name">${escHtml(v)}</div>
-      </div>`).join('')}
-    </div>
+    ${optionGroups.map(group => `
+      <div class="picker-section-label" style="padding:8px 0 4px">${escHtml(group.label)}</div>
+      <div class="picker-grid">${group.options.map(v => `
+        <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}">
+          <div class="picker-option-name">${escHtml(v)}</div>
+        </div>`).join('')}
+      </div>
+    `).join('')}
     <div style="padding:12px 0;display:flex;gap:8px">
       <button class="btn btn-ghost" style="flex:0 0 auto" data-action="picker-variant-continue">Skip</button>
-      <button class="btn btn-primary" style="flex:1" data-action="picker-variant-continue">Continue${pickerState.variants.length > 0 ? ' (' + pickerState.variants.length + ' selected)' : ''}</button>
+      <button class="btn btn-primary" style="flex:1" data-action="picker-variant-continue">Continue${selectedCount > 0 ? ' (' + selectedCount + ' selected)' : ''}</button>
     </div>`;
 }
 
@@ -8254,8 +8355,8 @@ function renderPickerModifiers() {
       <button class="picker-inline-btn ${isPickerFavorite(resolveVariantId(pickerState.liftId, pickerState.resistance, pickerState.variants, pickerState.mods)) ? 'active' : ''}" type="button" data-action="picker-toggle-current-favorite">★ Pin this setup</button>
     </div>
     <div style="margin-top:10px">
-      <div class="input-label" style="margin-bottom:4px">Notes (optional)</div>
-      <input id="picker-other-input" type="text" placeholder="e.g. Close Grip, Paused, Tempo…" value="${escHtml(pickerState.mods.other)}" data-input-action="picker-other-note">
+      <div class="input-label" style="margin-bottom:4px">Setup details (optional)</div>
+      <input id="picker-other-input" type="text" placeholder="e.g. bench 30 deg, box 18 in, high anchor" value="${escHtml(pickerState.mods.other)}" data-input-action="picker-other-note">
     </div>`;
 }
 
@@ -8375,18 +8476,19 @@ function renderLibraryBrowse(query) {
           data-action="lib-select-res" data-exercise-id="${h.id}" data-resistance="${r}" data-stop-click="true">${r}</button>`
       ).join('');
 
-      // Build variant chips for selected resistance — show all variants
-      const varChips = h.variants.length > 0
-        ? `<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin:6px 0 2px;text-transform:uppercase;letter-spacing:0.05em">Variants</div>
+      // Build setup chips for selected resistance — grouped by equipment/setup role.
+      const setupGroups = groupSetupOptions(getLiftSetupOptions(h));
+      const varChips = setupGroups.length > 0
+        ? setupGroups.map(group => `<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin:6px 0 2px;text-transform:uppercase;letter-spacing:0.05em">${escHtml(group.label)}</div>
            <div class="lib-variant-grid">
-             ${h.variants.map(v =>
+             ${group.options.map(v =>
                `<button class="lib-variant-chip" data-action="lib-open-variant-analytics" data-exercise-id="${h.id}" data-resistance="${selRes}" data-variant="${escHtml(v)}" data-stop-click="true">${v}</button>`
              ).join('')}
-           </div>`
+           </div>`).join('')
         : '';
 
       const baseBtn = `<button class="lib-variant-chip" style="border-color:var(--accent);color:var(--accent)"
-        data-action="show-exercise-analytics" data-variant-id="${h.id}__${selRes}" data-match-mode="any_variant" data-stop-click="true">
+        data-action="show-exercise-analytics" data-variant-id="${h.id}__${slugPart(selRes)}" data-match-mode="any_variant" data-stop-click="true">
         ${h.name} (${selRes}) →
       </button>`;
 
@@ -8424,8 +8526,8 @@ function libSelectRes(exerciseId, res) {
 }
 
 function libOpenVariantAnalytics(exerciseId, resistance, variant) {
-  const slug = variant.toLowerCase().replace(/ /g,'_');
-  const variantId = `${exerciseId}__${resistance}__${slug}`;
+  const slug = slugPart(variant);
+  const variantId = `${exerciseId}__${slugPart(resistance)}__${slug}`;
   showExerciseAnalytics(variantId);
 }
 
@@ -11835,6 +11937,7 @@ init().catch(e => {
 
 // Persisted overrides stored in IndexedDB under 'admin_overrides'
 // Each record: { id: exerciseId, resistances: [...], variants: [...] }
+// "variants" is retained as the storage key, but represents setup selections.
 const adminOverrides = {}; // exerciseId -> { resistances: Set, variants: Set }
 
 async function loadAdminOverrides() {
@@ -11857,7 +11960,7 @@ function getAdminState(exerciseId) {
   if (!h) return null;
   return {
     resistances: new Set(h.resistances),
-    variants: new Set(h.variants)
+    variants: new Set(getLiftSetupOptions(h))
   };
 }
 
@@ -11881,7 +11984,7 @@ function adminToggleResistance(exerciseId, resistance) {
     const h = hierarchyMap[exerciseId];
     adminOverrides[exerciseId] = {
       resistances: new Set(h.resistances),
-      variants: new Set(h.variants)
+      variants: new Set(getLiftSetupOptions(h))
     };
   }
   const state = adminOverrides[exerciseId];
@@ -11900,7 +12003,7 @@ function adminToggleVariant(exerciseId, variant) {
     const h = hierarchyMap[exerciseId];
     adminOverrides[exerciseId] = {
       resistances: new Set(h.resistances),
-      variants: new Set(h.variants)
+      variants: new Set(getLiftSetupOptions(h))
     };
   }
   const state = adminOverrides[exerciseId];
@@ -11934,26 +12037,29 @@ function renderAdminCard(exerciseId) {
     </button>`;
   }).join('');
 
-  const varChips = VARIANT_TYPES.map(v => {
-    const on = state.variants.has(v);
-    return `<button class="admin-chip ${on ? 'on' : ''}" data-action="admin-toggle-variant" data-exercise-id="${exerciseId}" data-variant="${escHtml(v)}">
-      <span class="chip-dot"></span>${v}
-    </button>`;
+  const varChips = SETUP_OPTION_GROUPS.map(group => {
+    const chips = group.options.map(v => {
+      const on = state.variants.has(v);
+      return `<button class="admin-chip ${on ? 'on' : ''}" data-action="admin-toggle-variant" data-exercise-id="${exerciseId}" data-variant="${escHtml(v)}">
+        <span class="chip-dot"></span>${v}
+      </button>`;
+    }).join('');
+    return `<div class="admin-section-label" style="margin-top:8px">${escHtml(group.label)}</div><div class="admin-chip-grid">${chips}</div>`;
   }).join('');
 
   card.innerHTML = `
     <div class="admin-ex-header" data-action="admin-toggle-card" data-exercise-id="${exerciseId}">
       <div>
         <div class="admin-ex-title">${escHtml(h.name)}</div>
-        <div class="admin-ex-meta">${h.pattern} · ${state.resistances.size} resistance · ${state.variants.size} variant${state.variants.size !== 1 ? 's' : ''}</div>
+        <div class="admin-ex-meta">${h.pattern} · ${state.resistances.size} resistance · ${state.variants.size} setup option${state.variants.size !== 1 ? 's' : ''}</div>
       </div>
       <svg class="admin-ex-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="admin-ex-body">
       <div class="admin-section-label">Resistance Types</div>
       <div class="admin-chip-grid">${resChips}</div>
-      <div class="admin-section-label">Variant Toggles</div>
-      <div class="admin-chip-grid">${varChips}</div>
+      <div class="admin-section-label">Setup Roles</div>
+      ${varChips}
       ${state.resistances.has('Machine') ? '<div class="admin-inline-note">Machine is hidden from the normal picker but preserved in history and imports.</div>' : ''}
     </div>`;
 
