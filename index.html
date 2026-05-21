@@ -1433,7 +1433,8 @@ select option { background: var(--bg3); }
 .picker-option {
   padding: 12px 14px; background: var(--bg3); border: 1px solid var(--border);
   border-radius: var(--r); cursor: pointer; transition: all 0.15s;
-  display: flex; flex-direction: column; gap: 3px;
+  display: flex; flex-direction: column; gap: 3px; color: var(--text);
+  font: inherit; text-align: left; width: 100%;
 }
 .picker-option:active { background: var(--bg4); }
 .picker-option.selected { border-color: var(--accent); background: rgba(167,139,250,0.1); }
@@ -8290,39 +8291,50 @@ function pickerSelectResistance(r) {
   renderPickerStep();
 }
 
-function renderPickerVariant() {
+function renderPickerVariant(opts = {}) {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
+  const previousScroll = opts.preserveScroll ? list.scrollTop : 0;
   const variantOptions = Array.from(new Set(pickerShowAllVariants ? VARIANT_TYPES : getLiftSetupOptions(h)));
   const modeHint = pickerShowAllVariants ? 'Showing all setup roles' : `${h.name} setup options`;
   const optionGroups = groupSetupOptions(variantOptions);
   const selectedCount = pickerState.variants.length;
+  const selectedSummary = selectedCount
+    ? `<div class="picker-preview" style="margin-bottom:10px">
+        <div class="picker-preview-label">Selected setup</div>
+        <div style="font-size:12px;line-height:1.45;color:var(--text2)">${escHtml(getSetupSummary(pickerState.variants))}</div>
+      </div>`
+    : '';
 
   list.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
       <div class="picker-section-label" style="margin:0">Select Setup <span style="color:var(--text3);font-size:11px;font-weight:400">(optional, multi-select)</span></div>
       <button class="filter-pill ${pickerShowAllVariants ? 'active' : ''}" data-action="picker-toggle-all-variants" style="font-size:11px;padding:3px 9px;flex-shrink:0">${pickerShowAllVariants ? 'All Setup On' : 'All Setup Off'}</button>
     </div>
     <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">${escHtml(modeHint)}</div>
+    ${selectedSummary}
     ${optionGroups.map(group => `
       <div class="picker-section-label" style="padding:8px 0 4px">${escHtml(group.label)}</div>
       <div class="picker-grid">${group.options.map(v => `
-        <div class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}">
+        <button type="button" class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}" aria-pressed="${pickerState.variants.includes(v) ? 'true' : 'false'}">
           <div class="picker-option-name">${escHtml(v)}</div>
-        </div>`).join('')}
+        </button>`).join('')}
       </div>
     `).join('')}
     <div style="padding:12px 0;display:flex;gap:8px">
       <button class="btn btn-ghost" style="flex:0 0 auto" data-action="picker-variant-continue">Skip</button>
       <button class="btn btn-primary" style="flex:1" data-action="picker-variant-continue">Continue${selectedCount > 0 ? ' (' + selectedCount + ' selected)' : ''}</button>
     </div>`;
+  if (opts.preserveScroll) {
+    requestAnimationFrame(() => { list.scrollTop = previousScroll; });
+  }
 }
 
 function pickerToggleVariant(v) {
   const idx = pickerState.variants.indexOf(v);
   if (idx >= 0) pickerState.variants.splice(idx, 1);
   else pickerState.variants.push(v);
-  renderPickerVariant();
+  renderPickerVariant({ preserveScroll: true });
 }
 
 function pickerVariantContinue() {
