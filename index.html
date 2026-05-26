@@ -1455,6 +1455,55 @@ select option { background: var(--bg3); }
 .picker-option.selected .picker-option-check {
   background: var(--accent); border-color: var(--accent); color: #fff;
 }
+.picker-setup-section {
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  background: rgba(255,255,255,0.015);
+  overflow: hidden;
+}
+.picker-setup-section-header {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.picker-setup-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.picker-setup-section-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+.picker-setup-section-chevron {
+  color: var(--text3);
+  transition: transform 0.15s ease;
+}
+.picker-setup-section.collapsed .picker-setup-section-chevron {
+  transform: rotate(-90deg);
+}
+.picker-setup-section-body {
+  padding: 8px;
+}
+.picker-setup-section.collapsed .picker-setup-section-body {
+  display: none;
+}
+.picker-setup-section.collapsed .picker-setup-section-header {
+  border-bottom: 0;
+}
 
 .picker-section-label {
   font-size: 12px; font-weight: 600; color: var(--text2);
@@ -3604,7 +3653,7 @@ input:focus, textarea:focus, select:focus {
         Back
       </button>
       <!-- Main content area -->
-      <div id="pick-ex-list" style="display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow-y:auto"></div>
+      <div id="pick-ex-list" style="display:flex;flex-direction:column;gap:4px"></div>
     </div>
     <div id="pick-ex-footer" class="modal-footer" style="display:none">
       <button class="btn btn-primary" id="pick-ex-confirm" style="width:100%">Add Exercise</button>
@@ -7883,6 +7932,7 @@ function openExercisePicker(slotFilter) {
   pickerMuscleFilter = '';
   pickerSlotFilter = slotFilter || null;
   pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {other:''}, customName: '' };
+  pickerCollapsedSetupGroups = new Set();
   document.getElementById('pick-ex-search').value = '';
   document.getElementById('pick-ex-search').style.display = '';
   document.getElementById('pick-ex-filters').style.display = pickerSlotFilter ? 'none' : '';
@@ -7907,6 +7957,7 @@ function closeExercisePicker() {
 }
 
 let pickerState = { step: 'lift', liftId: null, resistance: null, variants: [], mods: {other:''}, customName: '' };
+let pickerCollapsedSetupGroups = new Set();
 
 function renderPickerFilters() {
   const container = document.getElementById('pick-ex-filters');
@@ -8289,6 +8340,7 @@ function pickerSelectLift(liftId) {
   pickerState.variants = [];
   pickerState.mods = {other:''};
   pickerState.customName = '';
+  pickerCollapsedSetupGroups = new Set();
 
   if (h.resistances.length === 1) {
     // Auto-select single resistance
@@ -8334,7 +8386,8 @@ function renderPickerVariant(opts = {}) {
   const h = hierarchyMap[pickerState.liftId];
   if (!h) return;
   const list = document.getElementById('pick-ex-list');
-  const previousScroll = opts.preserveScroll ? list.scrollTop : 0;
+  const scrollEl = list.closest('.modal-body') || list;
+  const previousScroll = opts.preserveScroll ? scrollEl.scrollTop : 0;
   const variantOptions = Array.from(new Set(pickerShowAllVariants ? VARIANT_TYPES : getLiftSetupOptions(h)));
   const modeHint = pickerShowAllVariants ? 'Showing all setup roles' : `${h.name} setup options`;
   const optionGroups = groupSetupOptions(variantOptions);
@@ -8352,22 +8405,41 @@ function renderPickerVariant(opts = {}) {
     </div>
     <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">${escHtml(modeHint)}</div>
     ${selectedSummary}
-    ${optionGroups.map(group => `
-      <div class="picker-section-label" style="padding:8px 0 4px">${escHtml(group.label)}</div>
-      <div class="picker-grid picker-setup-grid">${group.options.map(v => `
-        <button type="button" class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}" aria-pressed="${pickerState.variants.includes(v) ? 'true' : 'false'}">
-          <div class="picker-option-name">${escHtml(v)}</div>
-          <span class="picker-option-check" aria-hidden="true">✓</span>
-        </button>`).join('')}
-      </div>
-    `).join('')}
+    ${optionGroups.map(group => {
+      const selectedInGroup = group.options.filter(v => pickerState.variants.includes(v)).length;
+      const collapsed = pickerCollapsedSetupGroups.has(group.id);
+      return `<div class="picker-setup-section ${collapsed ? 'collapsed' : ''}">
+        <button type="button" class="picker-setup-section-header" data-action="picker-toggle-setup-group" data-group-id="${escHtml(group.id)}" aria-expanded="${collapsed ? 'false' : 'true'}">
+          <span>
+            <span class="picker-setup-section-title">${escHtml(group.label)}</span>
+            <span class="picker-setup-section-count">${selectedInGroup ? selectedInGroup + ' selected · ' : ''}${group.options.length} option${group.options.length !== 1 ? 's' : ''}</span>
+          </span>
+          <span class="picker-setup-section-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="picker-setup-section-body">
+          <div class="picker-grid picker-setup-grid">${group.options.map(v => `
+            <button type="button" class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}" aria-pressed="${pickerState.variants.includes(v) ? 'true' : 'false'}">
+              <div class="picker-option-name">${escHtml(v)}</div>
+              <span class="picker-option-check" aria-hidden="true">✓</span>
+            </button>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
     <div style="padding:12px 0;display:flex;gap:8px">
       <button class="btn btn-ghost" style="flex:0 0 auto" data-action="picker-variant-continue">Skip</button>
       <button class="btn btn-primary" style="flex:1" data-action="picker-variant-continue">Continue${selectedCount > 0 ? ' (' + selectedCount + ' selected)' : ''}</button>
     </div>`;
   if (opts.preserveScroll) {
-    requestAnimationFrame(() => { list.scrollTop = previousScroll; });
+    requestAnimationFrame(() => { scrollEl.scrollTop = previousScroll; });
   }
+}
+
+function pickerToggleSetupGroup(groupId) {
+  if (!groupId) return;
+  if (pickerCollapsedSetupGroups.has(groupId)) pickerCollapsedSetupGroups.delete(groupId);
+  else pickerCollapsedSetupGroups.add(groupId);
+  renderPickerVariant({ preserveScroll: true });
 }
 
 function pickerToggleVariant(v) {
@@ -9404,6 +9476,9 @@ document.addEventListener('click', (event) => {
       return;
     case 'picker-toggle-variant':
       pickerToggleVariant(actionEl.dataset.variant);
+      return;
+    case 'picker-toggle-setup-group':
+      pickerToggleSetupGroup(actionEl.dataset.groupId);
       return;
     case 'picker-variant-continue':
       pickerVariantContinue();
