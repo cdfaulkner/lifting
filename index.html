@@ -1427,19 +1427,34 @@ select option { background: var(--bg3); }
 
 .picker-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 6px; max-height: 55vh; overflow-y: auto;
+  gap: 6px;
+}
+.picker-grid.picker-setup-grid {
+  grid-template-columns: 1fr;
 }
 .picker-grid.single-col { grid-template-columns: 1fr; }
 .picker-option {
-  padding: 12px 14px; background: var(--bg3); border: 1px solid var(--border);
+  min-height: 46px; padding: 11px 14px; background: var(--bg3); border: 1px solid var(--border);
   border-radius: var(--r); cursor: pointer; transition: all 0.15s;
   display: flex; flex-direction: column; gap: 3px; color: var(--text);
   font: inherit; text-align: left; width: 100%;
 }
+.picker-setup-grid .picker-option {
+  flex-direction: row; align-items: center; justify-content: space-between;
+  gap: 10px;
+}
 .picker-option:active { background: var(--bg4); }
 .picker-option.selected { border-color: var(--accent); background: rgba(167,139,250,0.1); }
-.picker-option-name { font-size: 14px; font-weight: 500; }
+.picker-option-name { font-size: 14px; font-weight: 500; line-height: 1.25; overflow-wrap: anywhere; }
 .picker-option-sub { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+.picker-option-check {
+  width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto;
+  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+  color: transparent; font-size: 12px; font-weight: 700;
+}
+.picker-option.selected .picker-option-check {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
 
 .picker-section-label {
   font-size: 12px; font-weight: 600; color: var(--text2);
@@ -1946,6 +1961,24 @@ textarea { resize: none; }
   color: var(--accent-blue);
   background: rgba(96,165,250,0.08);
   border-color: rgba(96,165,250,0.18);
+}
+.mobility-date-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 8px;
+}
+.mobility-date-input {
+  min-width: 0;
+  flex: 1;
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 13px;
+  color-scheme: dark;
 }
 .mobility-day-pill {
   display: inline-flex;
@@ -2915,6 +2948,12 @@ input:focus, textarea:focus, select:focus {
         <div id="mobility-day-pills" style="display:flex;gap:6px"></div>
         <div style="flex:1"></div>
         <div id="mobility-progress-text" style="font-family:var(--mono);font-size:12px;color:var(--text3)"></div>
+      </div>
+      <div class="mobility-date-controls">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="mobility-date-prev" aria-label="Previous foundation date">‹</button>
+        <input id="mobility-date-input" class="mobility-date-input" type="date" data-change-action="set-mobility-date">
+        <button class="btn btn-ghost btn-sm btn-icon" data-action="mobility-date-next" aria-label="Next foundation date">›</button>
+        <button class="btn btn-ghost btn-sm" data-action="mobility-date-today">Today</button>
       </div>
       <div style="padding:0 16px 4px">
         <div style="height:4px;background:var(--bg3);border-radius:99px;overflow:hidden">
@@ -8315,9 +8354,10 @@ function renderPickerVariant(opts = {}) {
     ${selectedSummary}
     ${optionGroups.map(group => `
       <div class="picker-section-label" style="padding:8px 0 4px">${escHtml(group.label)}</div>
-      <div class="picker-grid">${group.options.map(v => `
+      <div class="picker-grid picker-setup-grid">${group.options.map(v => `
         <button type="button" class="picker-option ${pickerState.variants.includes(v) ? 'selected' : ''}" data-action="picker-toggle-variant" data-variant="${escHtml(v)}" aria-pressed="${pickerState.variants.includes(v) ? 'true' : 'false'}">
           <div class="picker-option-name">${escHtml(v)}</div>
+          <span class="picker-option-check" aria-hidden="true">✓</span>
         </button>`).join('')}
       </div>
     `).join('')}
@@ -9476,6 +9516,15 @@ document.addEventListener('click', (event) => {
     case 'set-mobility-day':
       setMobilityDay(actionEl.dataset.day);
       return;
+    case 'mobility-date-prev':
+      shiftMobilityLogDate(-1);
+      return;
+    case 'mobility-date-next':
+      if (!isMobilityToday()) shiftMobilityLogDate(1);
+      return;
+    case 'mobility-date-today':
+      setMobilityLogDate(todayStr());
+      return;
     case 'open-mobility-add':
       openMobilityAdd();
       return;
@@ -9553,6 +9602,9 @@ document.addEventListener('change', (event) => {
       return;
     case 'update-mob-target':
       updateMobTarget(actionEl.dataset.exId, actionEl.value);
+      return;
+    case 'set-mobility-date':
+      setMobilityLogDate(actionEl.value);
       return;
     default:
       return;
@@ -9635,6 +9687,7 @@ const MOBILITY_SECONDS_MIGRATION_NAME_RULES = {
 let mobilityExercises = [];
 // checks shape: { date, day, checks: { exId: { done, durationL, durationR, repsL, repsR, notes, ts } } }
 let mobilityChecks = {};
+let mobilityLogDate = appDateKey();
 let mobilityDay = 'all';
 let mobilityEditMode = false;
 let mobilityTimers = {}; // { exId_side: { interval, remaining, running, started, endsAt } }
@@ -9643,6 +9696,38 @@ let editingMobilityId = null;
 let mobilityAllHistoryFilters = { search: '', start: '', end: '' };
 
 function todayStr() { return appDateKey(); }
+
+function normalizeAppDateKey(dateKey) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || '')) ? dateKey : todayStr();
+}
+
+function getMobilityLogDate() {
+  mobilityLogDate = normalizeAppDateKey(mobilityLogDate);
+  return mobilityLogDate;
+}
+
+function isMobilityToday() {
+  return getMobilityLogDate() === todayStr();
+}
+
+function offsetAppDateKey(dateKey, days) {
+  const base = appDateFromKey(normalizeAppDateKey(dateKey));
+  base.setUTCDate(base.getUTCDate() + days);
+  return appDateKey(base.getTime());
+}
+
+function setMobilityLogDate(dateKey) {
+  const next = normalizeAppDateKey(dateKey);
+  const clamped = next > todayStr() ? todayStr() : next;
+  if (clamped === mobilityLogDate) return;
+  clearAllMobilityTimers();
+  mobilityLogDate = clamped;
+  renderMobility();
+}
+
+function shiftMobilityLogDate(days) {
+  setMobilityLogDate(offsetAppDateKey(getMobilityLogDate(), days));
+}
 
 function normalizeMobilityName(name) {
   return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
@@ -9803,7 +9888,7 @@ async function loadMobility() {
   }
   mobilityExercises = exList.sort((a,b) => (a.order||0) - (b.order||0));
   mobilityDay = 'all';
-  const checkData = await dbGet('mobility_checks', todayStr());
+  const checkData = await dbGet('mobility_checks', getMobilityLogDate());
   mobilityChecks = checkData ? (checkData.checks || {}) : {};
   let checksChanged = false;
   for (const ex of mobilityExercises) {
@@ -9818,10 +9903,11 @@ async function loadMobility() {
 }
 
 async function saveMobilityChecks() {
-  await dbPut('mobility_checks', { date: todayStr(), day: 'all', checks: mobilityChecks });
+  const date = getMobilityLogDate();
+  await dbPut('mobility_checks', { date, day: 'all', checks: mobilityChecks });
   // Keep legacy keys harmless for older app copies.
   localStorage.setItem('mobility_last_day', 'all');
-  localStorage.setItem('mobility_last_date', todayStr());
+  localStorage.setItem('mobility_last_date', date);
 }
 
 function getVisibleMobilityExercises() {
@@ -9890,7 +9976,7 @@ function formatMobilityLastDone(dateStr) {
 function getMobilityDaysSinceLastDone(ex) {
   const lastDone = mobilityLastCompletedByExId[ex.id];
   if (!lastDone) return Infinity;
-  const days = daysBetweenAppDateKeys(lastDone, todayStr());
+  const days = daysBetweenAppDateKeys(lastDone, getMobilityLogDate());
   return days === null ? Infinity : Math.max(days, 0);
 }
 
@@ -9907,8 +9993,16 @@ function formatMobilityDueText(ex) {
 async function renderMobility() {
   await loadMobility();
   await loadMobilityLastCompletedDates();
+  const activeDate = getMobilityLogDate();
+  const viewingToday = isMobilityToday();
   const subEl = document.getElementById('mobility-date-sub');
-  subEl.textContent = formatAppDate(Date.now(), {weekday:'long', month:'long', day:'numeric'});
+  subEl.textContent = `${formatAppDateKey(activeDate, {weekday:'long', month:'long', day:'numeric'})}${viewingToday ? '' : ' · backfill'}`;
+
+  const dateInput = document.getElementById('mobility-date-input');
+  if (dateInput) {
+    dateInput.value = activeDate;
+    dateInput.max = todayStr();
+  }
 
   const dayPills = document.getElementById('mobility-day-pills');
   dayPills.innerHTML = '';
@@ -9921,7 +10015,7 @@ async function renderMobility() {
   const allDone = total > 0 && completedCount === total;
 
   document.getElementById('mobility-progress-text').textContent =
-    allDone ? 'Foundation complete' : `${completedCount}/${total} done today`;
+    allDone ? 'Foundation complete' : `${completedCount}/${total} done ${viewingToday ? 'today' : 'that day'}`;
   document.getElementById('mobility-progress-bar').style.width =
     total ? `${(completedCount/total*100)}%` : '0%';
 
@@ -9930,6 +10024,7 @@ async function renderMobility() {
   const mobilityStatusClass = allDone ? 'good' : (completedCount > 0 ? 'soft' : '');
   funStrip.innerHTML = `
     <div class="mobility-chip ${mobilityStatusClass}">${mobilityStatusLabel}</div>
+    <div class="mobility-chip">${viewingToday ? 'Today' : formatAppDateKey(activeDate, { month: 'short', day: 'numeric' })}</div>
     <div class="mobility-chip">All foundation · ${total} moves</div>
     <div class="mobility-chip ${completedCount ? 'good' : ''}">${completedCount} finished</div>
     ${dueCount ? `<div class="mobility-chip" style="color:#fecaca;background:rgba(248,113,113,0.10);border-color:rgba(248,113,113,0.28)">${dueCount} due</div>` : ''}
@@ -9950,7 +10045,7 @@ async function renderMobility() {
     <div class="mobility-celebration">
       <div>
         <div style="font-size:14px;font-weight:700">Flow complete ✨</div>
-        <div class="mobility-celebration-sub">${total} foundation movements done today</div>
+        <div class="mobility-celebration-sub">${total} foundation movements done ${viewingToday ? 'today' : 'for this date'}</div>
       </div>
       <div style="font-size:22px" aria-hidden="true">🪩</div>
     </div>` : '';
@@ -10175,7 +10270,7 @@ async function completeMobSide(exId, side, value) {
     else c.durationR = parsedValue;
   }
   if (ex.bilateral) c.done = !!c.doneL && !!c.doneR;
-  c.ts = Date.now();
+  c.ts = isMobilityToday() ? Date.now() : appDateFromKey(getMobilityLogDate()).getTime();
   // Clear timer state
   clearMobilityTimer(`${exId}_${side}`);
   softHaptic(12);
@@ -10184,7 +10279,7 @@ async function completeMobSide(exId, side, value) {
   await saveMobilityChecks();
   if (allDoneNow) {
     softHaptic([12, 40, 12]);
-    showToast('Mobility complete ✨');
+    showToast(`Foundation complete${isMobilityToday() ? '' : ' for ' + formatAppDateKey(getMobilityLogDate(), { month: 'short', day: 'numeric' })} ✨`);
   }
   renderMobility();
 }
